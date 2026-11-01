@@ -2,6 +2,15 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.23.0 – 2026-11-02 – Alle CL-hold, højde og målmandens navn
+- Champions League: også de sidste 12 hold (Porto, Partizan, Nantes, Vardar, Zagreb, Celje, Szeged, Kristianstad, Montpellier, SAH, Kriens-Luzern, Kolstad) har startere ud fra de seneste kampe og EHF's spillerprofiler
+  - Rettede positioner: Lumbroso (playmaker), Bialiauski (playmaker), Llamazares og Jerome Müller (højre back)
+  - Tilføjet: Vasco Costa (Porto, venstre back), Fadhuile (Vardar, venstre fløj) og Biel Nielsen (Kristianstad, højre back)
+  - Spillere uden for kamptruppen er ikke længere startere eller nøglespillere (fx Odriozola, Pešić, Bánhidi, Johannessen, Milosavljević, Gunnarsson)
+- Niklas Landin starter i målet for Aalborg
+- Højde: spillere kan have en højde i truppen (`@196`). Høje forsvarere blokerer flere skud, høje skytter slipper bolden højere og kommer lettere over muren, og figuren er en anelse større eller mindre. Højden fra EHF's spillerprofiler er lagt ind for de spillere, hvor den kunne hentes (fx Jeppsson 205, Kulesh 206, Lærke 203, Lumbroso 172). Andre får en standardhøjde efter position
+- Målmandens navn og nummer står nu over ham ligesom over den spiller, du styrer
+
 ## v0.22.0 – 2026-11-01 – CL-hovedrunden, spillernes egne skud og holdstil
 - De 12 hold i Champions League-hovedrunden har fået startopstillinger ud fra de seneste gruppekampe og målstatistik fra EHF (history.eurohandball.com): Veszprém, PSG, Melsungen, Płock, Aalborg, Füchse Berlin, Barça, Sporting, Magdeburg, Kielce, GOG og Dinamo
   - Spillere, der ikke har været i kamptruppen i de seneste kampe (fx Lichtlein, Kastening, Moryto, Sićko, Saugstrup, L. Jørgensen), er ikke længere startere eller nøglespillere

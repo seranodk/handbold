@@ -1,4 +1,4 @@
-<title>Håndbold v0.22.0</title>
+<title>Håndbold v0.23.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -162,7 +162,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.22.0';
+const VERSION='0.23.0';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -276,51 +276,51 @@ const CL_TEAMS=[
  {c:'VES',n:'One Veszprém',tier:9,home:['#d6001c','#ffffff','#d6001c','#ffffff'],away:['#ffffff','#d6001c','#ffffff','#d6001c'],
   p:'G 12 E. Nielsen*^|G 1 Appelgren|LW 9 Descat*^|LW 66 Gáncs-Pető|RW 91 Imre|RW 32 Y. Lenne^|LB 15 Hesham^|LB 39 Y. Elderaa|LB 2 Thiagus Petrus|CB 25 Cindrić*|CB 29 Remili*^|RB 5 I. Martinović*^|RB 13 Barna|P 42 L. Jørgensen|P 46 Pechmalbec^|P 80 Mesilhy'},
  {c:'FÜC',n:'Füchse Berlin',tier:9,home:['#1f8f3a','#ffffff','#1f8f3a','#ffffff'],away:['#ffffff','#1f8f3a','#ffffff','#1f8f3a'],
-  p:'G 12 Palicka*^|G 1 L. Ludwig|LW 20 Freihöfer*^|LW 14 Ariño|RW 34 av Teigum*^|RW 6 Prantner|LB 25 Langhoff*^|LB 3 Wiede|LB 30 Zaepfel|CB 15 Grøndahl*^|CB 17 Lichtlein|RB 19 Gidsel*^|RB 9 Simak|P 93 Marsenić*^|P 5 Darj*'},
+  p:'G 12 Palicka*^|G 1 L. Ludwig|LW 20 Freihöfer*^|LW 14 Ariño|RW 34 av Teigum*^|RW 6 Prantner|LB 25 Langhoff*^|LB 3 Wiede|LB 30 Zaepfel|CB 15 Grøndahl*^|CB 17 Lichtlein|RB 19 Gidsel*^@190|RB 9 Simak|P 93 Marsenić*^|P 5 Darj*'},
  {c:'POR',n:'FC Porto',tier:7,home:['#1c4fa0','#ffffff','#1c4fa0','#ffffff'],away:['#ffffff','#1c4fa0','#1c4fa0','#1c4fa0'],
-  p:'G 17 Abrahamsson*|G 33 D. Marques|LW 21 L. Fernandes*|LW 71 P. C. Oliveira|RW 24 Llamazares*|RW 28 J. Ferreira|LB 5 Gunnarsson*|LB 3 J. Gomes|LB 96 G. Oliveira|CB 14 Rui Silva*|CB 7 Yañez|RB 37 L. Persson|RB 90 G. Duarte|P 15 Salina|P 86 Brandão'},
+  p:'G 17 Abrahamsson*^|G 33 D. Marques|LW 21 L. Fernandes*|LW 71 P. C. Oliveira^|RB 24 Llamazares*^|RW 28 J. Ferreira^|LB 5 Gunnarsson|LB 3 J. Gomes|LB 96 G. Oliveira|CB 14 Rui Silva*^|CB 7 Yañez|RB 37 L. Persson|RB 90 G. Duarte|P 15 Salina|P 86 Brandão^|LB 18 V. Costa*^@196'},
  {c:'PAR',n:'Partizan',tier:6,home:['#111111','#ffffff','#111111','#ffffff'],away:['#ffffff','#111111','#ffffff','#111111'],
-  p:'G 16 Trnavac*|G 12 Ćordalija|LW 7 Šotić|LW 2 Sánchez-Migallón|RW 71 Papović*|RW 13 Babić|LB 97 Kos*|LB 20 Abutović|LB 19 Kulesh|CB 93 Damjanović|CB 14 S. Ivanov|RB 5 Crnoglavac|RB 66 Lumbroso|P 55 Wagner*|P 22 Mičić'},
+  p:'G 16 Trnavac*^|G 12 Ćordalija|LW 7 Šotić|LW 2 Sánchez-Migallón^|RW 71 Papović*^|RW 13 Babić|LB 97 Kos*|LB 20 Abutović|LB 19 Kulesh^@206|CB 93 Damjanović|CB 14 S. Ivanov|RB 5 Crnoglavac^|CB 66 Lumbroso^@172|P 55 Wagner*^|P 22 Mičić'},
  {c:'NAN',n:'HBC Nantes',tier:8,home:['#5b2a86','#ffffff','#5b2a86','#ffffff'],away:['#ffffff','#5b2a86','#ffffff','#5b2a86'],
-  p:'G 1 Pešić*|G 16 Bonde|LW 17 Leopold|LW 24 Peyrabout|RW 19 Odriozola*|RW 13 Perić|LB 7 Turchenko*|LB 2 Lagarde|LB 3 Briet|CB 9 Tarrafeta*|CB 6 Norlyk|CB 10 Ovniček|RB 14 Garciandia|RB 18 Abdi|P 11 Tournat*|P 15 Gaber'},
+  p:'G 1 Pešić|G 16 Bonde^|LW 17 Leopold^@186|LW 24 Peyrabout|RW 19 Odriozola|RW 13 Perić^|LB 7 Turchenko*|LB 2 Lagarde|LB 3 Briet^|CB 9 Tarrafeta*^|CB 6 Norlyk|CB 10 Ovniček|RB 14 Garciandia^|RB 18 Abdi|P 11 Tournat*^|P 15 Gaber'},
  {c:'MTM',n:'MT Melsungen',tier:8,home:['#d71920','#111111','#111111','#ffffff'],away:['#ffffff','#d71920','#ffffff','#d71920'],
   p:'G 32 Palasics*^|G 16 Simić|LW 7 D. Mandić|LW 11 Ignatow^|RW 73 Kastening|RW 31 D. García^|LB 24 D. Dujshebaev|LB 19 Stefánsson|LB 33 Mensing^|CB 28 Sigrist^|CB 25 Forsell Schefvert|RB 10 Krištopāns*^|RB 6 Balenciaga|P 14 Golla*^|P 2 Marchán'},
  {c:'PLO',n:'Orlen Wisła Płock',tier:7,home:['#1b5fae','#ffffff','#1b5fae','#ffffff'],away:['#ffffff','#1b5fae','#ffffff','#1b5fae'],
   p:'G 16 Vujović*^|G 32 Alilović|LW 66 F. Bjerre^|LW 34 Mihić|RW 9 Szyszko|RW 3 Daszek^|LB 99 Kosorotov*^|LB 49 Szita|CB 8 M. Janc*^|CB 23 Zarabec|RB 22 Richardson*^|RB 43 Ilić*|P 17 Serdio*^|P 19 Šušnja|P 33 Dawydzik'},
  {c:'VAR',n:'Vardar 1961',tier:6,home:['#c8102e','#111111','#111111','#ffffff'],away:['#ffffff','#c8102e','#ffffff','#c8102e'],
-  p:'G 25 Wałach*|G 99 Gogov|LW 2 M. Stojanovski|LW 11 Popovski|RW 3 Vorkapić|RW 10 Keita|LB 15 Ljevar*|LB 77 Gjorcheski|CB 66 Malus*|CB 14 Nechovski|RB 13 Mitrović|RB 34 J. P. da Silva|P 78 W. Jankowski|P 18 Lazarevski'},
+  p:'G 25 Wałach*^|G 99 Gogov|LW 2 M. Stojanovski|LW 11 Popovski|RW 3 Vorkapić^|RW 10 Keita|LB 15 Ljevar*^|LB 77 Gjorcheski|CB 66 Malus*^@190|CB 14 Nechovski|RB 13 Mitrović|RB 34 J. P. da Silva^|P 78 W. Jankowski^|P 18 Lazarevski|LW 93 Fadhuile*^@185'},
  {c:'AAL',n:'Aalborg Håndbold',tier:9,home:['#d4141c','#ffffff','#d4141c','#ffffff'],away:['#ffffff','#d4141c','#ffffff','#d4141c'],
-  p:'G 12 Norsten*^|G 1 Landin*|LW 19 M. Landin*^|LW 17 Blonz|RW 18 T. Nielsen*^|RW 4 Wiesmach*|LB 7 Arnoldsen*^|LB 25 Munk*|LB 5 Sagosen*|LB 8 Rønningen|CB 21 Knorr*^|RB 14 Hoxer*^|RB 3 L. Nilsson|RB 9 Helland Anderson|P 11 Hald*^|P 20 F. Möller'},
+  p:'G 12 Norsten*|G 1 Landin*^|LW 19 M. Landin*^|LW 17 Blonz|RW 18 T. Nielsen*^|RW 4 Wiesmach*|LB 7 Arnoldsen*^|LB 25 Munk*|LB 5 Sagosen*|LB 8 Rønningen|CB 21 Knorr*^|RB 14 Hoxer*^|RB 3 L. Nilsson|RB 9 Helland Anderson|P 11 Hald*^|P 20 F. Möller'},
  {c:'PSG',n:'Paris Saint-Germain',tier:9,home:['#0b1f4b','#e30613','#0b1f4b','#ffffff'],away:['#ffffff','#0b1f4b','#ffffff','#e30613'],
   p:'G 1 Løvkvist*^|G 12 Corrales*|LW 4 Elísson*^|LW 9 Mellegård|RW 14 Solé*^|RW 10 S. Karlsson|LB 71 Prandi*^|LB 25 Lyse|LB 2 Maraš|CB 6 Steins*^|RB 5 Y. Omar*^|CB 66 Gaudin|RB 7 K. Konan|RB 15 Lafosse|P 21 Syprzak*^|P 22 L. Karabatić|P 26 Ladefoged'},
  {c:'ZAG',n:'HC Zagreb',tier:6,home:['#1d4f9c','#ffffff','#1d4f9c','#ffffff'],away:['#ffffff','#1d4f9c','#ffffff','#1d4f9c'],
-  p:'G 99 Kastelic*|G 26 Suljević|LW 17 Štrlek*|LW 78 Sadouski|RW 57 Glavaš|RW 81 Tufegdžić|LB 14 Mamić*|LB 8 Cesko|LB 47 Bialiauski|CB 18 Karačić*|CB 23 Pavlović|RB 33 J. Nikolić|RB 11 Tskhovrebadze|P 22 Raužan|P 7 Topić'},
+  p:'G 99 Kastelic*^|G 26 Suljević|LW 17 Štrlek*^|LW 78 Sadouski|RW 57 Glavaš^@183|RW 81 Tufegdžić|LB 14 Mamić*|LB 8 Cesko^|CB 47 Bialiauski^@192|CB 18 Karačić*|CB 23 Pavlović|RB 33 J. Nikolić|RB 11 Tskhovrebadze^@194|P 22 Raužan|P 7 Topić^'},
  {c:'CEL',n:'RK Celje',tier:5,home:['#f5c400','#0d3b8c','#0d3b8c','#0d3b8c'],away:['#0d3b8c','#f5c400','#0d3b8c','#ffffff'],
-  p:'G 16 Bevc|G 1 Cesek|LW 6 Mazej|LW 15 Ajšić|RW 30 G. Marguč|RW 11 Grabar|LB 24 Miličević|LB 55 Ž. Mlakar|CB 7 Ž. Kovač|CB 8 Anžič|RB 19 M. Marguč|RB 10 Uzunchev|P 89 Heiß|P 44 Hurtado'},
+  p:'G 16 Bevc|G 1 Cesek^|LW 6 Mazej^|LW 15 Ajšić|RW 30 G. Marguč|RW 11 Grabar^|LB 24 Miličević^|LB 55 Ž. Mlakar|CB 7 Ž. Kovač|CB 8 Anžič^@188|RB 19 M. Marguč|RB 10 Uzunchev^|P 89 Heiß^|P 44 Hurtado'},
  {c:'SCP',n:'Sporting CP',tier:8,home:['#00804a','#ffffff','#111111','#ffffff'],away:['#ffffff','#00804a','#ffffff','#00804a'],
   p:'G 92 Mohamed Aly*^|G 20 A. Kristensen|LW 17 Þorkelsson*^|LW 22 Branquinho|RW 5 C. Álvarez^|RW 19 Gassama|LB 13 Salvador*^|LB 8 Gurri|LB 7 Suárez|CB 79 Martim Costa*^|CB 26 F. Monteiro|RB 6 Francisco Costa*^|RB 23 Manojlović|P 44 Moga*^|P 93 Romero'},
  {c:'SZE',n:'OTP Bank-Pick Szeged',tier:8,home:['#0057a8','#ffffff','#0057a8','#ffffff'],away:['#ffffff','#0057a8','#ffffff','#0057a8'],
-  p:'G 80 Portner*|G 16 Mikler|LW 18 Jelinić*|LW 25 Frimmel|RW 24 Šoštarić*|RW 93 Szilágyi|LB 51 Mačkovšek*|LB 77 M. Rød*|LB 44 Horiha|CB 34 Kukić|CB 7 Lukács|RB 11 Sandell*|RB 97 Matić|P 27 Bánhidi*|P 45 Rosta|P 31 Toto'},
+  p:'G 80 Portner*^|G 16 Mikler|LW 18 Jelinić*^|LW 25 Frimmel|RW 24 Šoštarić*^|RW 93 Szilágyi|LB 51 Mačkovšek*|LB 77 M. Rød*^|LB 44 Horiha|CB 34 Kukić^|CB 7 Lukács|RB 11 Sandell*^|RB 97 Matić|P 27 Bánhidi|P 45 Rosta^|P 31 Toto'},
  {c:'GOG',n:'GOG',tier:7,home:['#f5c400','#13294b','#13294b','#13294b'],away:['#13294b','#f5c400','#13294b','#f5c400'],
   p:'G 1 K. Møller*^|G 12 F. Wolff|LW 17 Dalby|LW 21 Kildelund|RW 33 I. Persson*^|RW 34 Münster-Hansen|LB 78 Ó. Mittún*|LB 8 M. Zehnder*^|LB 7 Vilhelmsen|CB 29 H. Lykke*^|CB 3 N. Pedersen|RB 2 E. K. Bak|RB 24 E. Sørensen|P 4 Magaard*^|P 13 L. Balstad|RB 79 Tønnesen*'},
  {c:'KRI',n:'IFK Kristianstad',tier:5,home:['#0a4ea2','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#0a4ea2','#0a4ea2','#0a4ea2'],
-  p:'G 1 Skoog|G 12 Oredsson|LW 20 Frend Öfors*|LW 18 L. Kjellman|RW 14 Leyman|RW 51 Barnestam|LB 13 Ó. Guðmundsson*|LB 22 Aðalsteinsson|LB 6 Henningsson|CB 9 A. Hallbäck|CB 24 Bjarnason|RB 77 Erlingsson|RB 28 Ivarsson|P 17 Petrović|P 10 Höghielm'},
+  p:'G 1 Skoog^|G 12 Oredsson|LW 20 Frend Öfors*^|LW 18 L. Kjellman|RW 14 Leyman^|RW 51 Barnestam|LB 13 Ó. Guðmundsson*|LB 22 Aðalsteinsson^@192|LB 6 Henningsson|CB 9 A. Hallbäck^|CB 24 Bjarnason|RB 77 Erlingsson|RB 28 Ivarsson|P 17 Petrović|P 10 Höghielm^@186|RB 49 Biel Nielsen*^@185'},
  {c:'BAR',n:'Barça',tier:10,home:['#a50044','#004d98','#004d98','#f6c400'],away:['#f6c400','#a50044','#a50044','#a50044'],
   p:'G 23 Hernández*^|G 1 Hallgrímsson|LW 11 D. Fernández*^|LW 83 Barrufet|RW 20 Gómez*^|RW 25 Sola|LB 6 Carlsbogard*|LB 19 N\'Guessan^|LB 70 San Felipe|CB 88 P. Cikusa*^|CB 3 Smárason|CB 45 S. Elderaa|RB 9 Mem*^|RB 18 B. Janc|RB 10 Dj. Cikusa|P 72 Fabregas*^|P 82 Frade*'},
  {c:'MON',n:'Montpellier HB',tier:7,home:['#1b3f8f','#f28c00','#1b3f8f','#ffffff'],away:['#ffffff','#1b3f8f','#ffffff','#f28c00'],
-  p:'G 92 Desbonnet*|G 12 Bolzinger|LW 97 Paschal|LW 61 Diaz|RW 22 Richert|RW 34 Balaguer|LB 11 Srna*|LB 18 Casado*|CB 5 Villeminot*|CB 9 Valera|RB 15 Thurin|RB 28 Porte|P 19 A. Lenne|P 13 Moraes'},
+  p:'G 92 Desbonnet*^|G 12 Bolzinger|LW 97 Paschal^|LW 61 Diaz|RW 22 Richert^|RW 34 Balaguer|LB 11 Srna*|LB 18 Casado*^|CB 5 Villeminot*^@189|CB 9 Valera|RB 15 Thurin^|RB 28 Porte|P 19 A. Lenne^|P 13 Moraes'},
  {c:'DIN',n:'Dinamo București',tier:6,home:['#d50000','#ffffff','#d50000','#ffffff'],away:['#ffffff','#d50000','#ffffff','#d50000'],
   p:'G 1 Iancu*^|G 34 Bellahcene|LW 20 Dumitru|LW 23 Lenbroch^|RW 55 Akimenko^|RW 5 Nistor|LB 9 Pergel*|LB 94 Militaru|LB 7 Buzle^|CB 10 M. Martins*^|CB 22 Valdés|RB 2 B. Vujović^|RB 77 Dodica|P 4 Iturriza*^|P 6 Dedu'},
  {c:'SAH',n:'SAH Aarhus',tier:5,home:['#151515','#f2c200','#151515','#f2c200'],away:['#f2c200','#151515','#f2c200','#151515'],
-  p:'G 12 Brandbyge*|G 21 M. K. Petersen|LW 25 Cieslak|LW 5 A. Jensen|RW 29 J. V. Larsen*|LB 7 Dreyer|LB 13 G. Bruun|LB 15 Lærke|CB 20 M. B. Christensen*|CB 33 Søberg|CB 32 Olsson|RB 26 J. á Plógv Hansen*|RB 3 K. Ö. Kristjánsson*|RB 14 O. Hansen|P 34 J. Poulsen|P 17 A. S. Rasmussen'},
+  p:'G 12 Brandbyge*^|G 21 M. K. Petersen|LW 25 Cieslak^|LW 5 A. Jensen|RW 29 J. V. Larsen*|LB 7 Dreyer|LB 13 G. Bruun|LB 15 Lærke^@203|CB 20 M. B. Christensen*|CB 33 Søberg|CB 32 Olsson^|RB 26 J. á Plógv Hansen*^|RB 3 K. Ö. Kristjánsson*|RB 14 O. Hansen|P 34 J. Poulsen|P 17 A. S. Rasmussen^'},
  {c:'SCM',n:'SC Magdeburg',tier:10,home:['#0b8a3b','#d6001c','#0b8a3b','#ffffff'],away:['#ffffff','#0b8a3b','#ffffff','#d6001c'],
   p:'G 1 Kuzmanović*^|G 12 M. Mandić|LW 22 Mertens*^|LW 6 Musche|RW 11 Pettersson*|RW 9 O. Rasmussen^|LB 19 E. Ö. Jónsson*^|LB 20 Weber|LB 53 Kretzschmar|CB 10 G. Kristjánsson*^|CB 7 Claar*|CB 13 Brigzinsky|RB 14 Magnússon*^|RB 21 Lagergren*|P 23 Saugstrup|P 54 Bergendahl^'},
  {c:'KIE',n:'Industria Kielce',tier:8,home:['#f5c400','#0047ab','#0047ab','#0047ab'],away:['#0047ab','#f5c400','#0047ab','#ffffff'],
   p:'G 96 Milosavljev*^|G 1 Morawski|LW 99 Nahi*^|LW 98 P. Jarosiewicz|RW 23 Moryto|RW 11 Kounkoud*^|LB 9 Sićko|LB 37 M. Bakić|LB 71 Rabchynski^|CB 88 Vlah*^|CB 4 Jędraszczyk|RB 10 Klarica|RB 13 J. Bos^|P 50 Karalek*|P 97 Monar^'},
  {c:'KOL',n:'Kolstad Håndball',tier:7,home:['#0b3d91','#ffffff','#0b3d91','#ffffff'],away:['#ffffff','#0b3d91','#ffffff','#0b3d91'],
-  p:'G 16 Neupart*|G 1 Orheim|LW 7 Aalberg|LW 17 Stølefjell|RW 72 E. Johnsen|RW 18 E. M. S. Jakobsen|LB 22 Jeppsson*|LB 23 Johannessen*|LB 4 Eck Aga|CB 11 Ask|CB 96 Bore|RB 27 Hegle|RB 3 Berge|P 14 Gullerud*|P 24 Vestli'},
+  p:'G 16 Neupart*^|G 1 Orheim|LW 7 Aalberg^|LW 17 Stølefjell|RW 72 E. Johnsen|RW 18 E. M. S. Jakobsen^|LB 22 Jeppsson*^@205|LB 23 Johannessen|LB 4 Eck Aga|CB 11 Ask^|CB 96 Bore|RB 27 Hegle|RB 3 Berge^|P 14 Gullerud*^|P 24 Vestli'},
  {c:'KLU',n:'HC Kriens-Luzern',tier:5,home:['#151515','#f28c00','#151515','#f28c00'],away:['#f28c00','#151515','#f28c00','#151515'],
-  p:'G 1 Car|G 16 Wey|LW 21 Schlumpf|LW 4 W. Aellen|RW 13 Epp|RW 57 Idrizi|LB 53 Bilyk*|LB 9 Wolfisberg|LB 27 Jer. Müller|CB 14 M. Milosavljević*|CB 25 Schelker|RB 10 Fuchs|RB 15 Oertli|P 22 Šipić|P 24 Bader'}
+  p:'G 1 Car^|G 16 Wey|LW 21 Schlumpf^|LW 4 W. Aellen|RW 13 Epp^|RW 57 Idrizi|LB 53 Bilyk*^|LB 9 Wolfisberg|RB 27 Jer. Müller^@186|CB 14 M. Milosavljević|CB 25 Schelker^|RB 10 Fuchs|RB 15 Oertli|P 22 Šipić^@190|P 24 Bader'}
 ];
 
 // værdier ud fra position, holdstyrke og nøglespillere (*)
@@ -332,10 +332,10 @@ const KEYS={G:['reaktion','placering'],LW:['fart','vinkel','praecision'],RW:['fa
 function hashN(str){ let h=2166136261; for(const ch of str){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619); } return ((h>>>0)%1000)/1000; }
 function buildTeam(T){
   const roster=T.p.split('|').map(e=>{
-    const m=e.match(/^(\S+) (\d+) (.+?)([*^!~]*)$/), pos=m[1], star=m[4].includes('*'), name=m[3], tp=TPL[pos], r={}, adj=(T.tier-6)*0.4;
+    const m=e.match(/^(\S+) (\d+) (.+?)([*^!~]*)(?:@(\d{3}))?$/), pos=m[1], star=m[4].includes('*'), name=m[3], tp=TPL[pos], r={}, adj=(T.tier-6)*0.4;
     for(const k in tp){ let v=tp[k]+(k==='fart'?adj*0.5:adj)+(hashN(name+k)-0.5)*1.2; if(star) v+=KEYS[pos].includes(k)?1.6:0.6; r[k]=Math.round(Math.min(10,Math.max(1,v))); }
     const lefty=(pos==='RB'||pos==='RW')!==m[4].includes('!');                // RB/RW er normalt venstrehåndede, ! vender det
-    return {num:+m[2],name,pos:pos==='G'?'GK':pos==='P'?'PV':pos,r,star,start:m[4].includes('^'),pen:m[4].includes('~'),hand:lefty?'L':'R',key:KEYS[pos]};
+    return {num:+m[2],name,pos:pos==='G'?'GK':pos==='P'?'PV':pos,r,star,start:m[4].includes('^'),pen:m[4].includes('~'),h:m[5]?+m[5]:0,hand:lefty?'L':'R',key:KEYS[pos]};
   });
   return {name:T.n,short:T.c,roster,style:STYLE[T.c]||'balance'};
 }
@@ -368,6 +368,8 @@ function setupTeams(){
 }
 // omregning af værdier (5 = som før)
 const rv=(p,k)=>(p.r&&p.r[k])||5;
+const HDEF={GK:192,LW:183,RW:183,LB:195,RB:192,CB:188,PV:195}; // standardhøjde (cm), hvis truppen ikke har spillerens højde
+const hgt=p=>(p.rid&&p.rid.h)||HDEF[p.role]||190;
 const handSide=p=>(p.team===0?1:-1)*(handOf(p)==='R'?1:-1); // kastehåndens side på skærmen (+1 = højre)
 const handOf=p=>(p.rid&&p.rid.hand)||((p.role==='RB'||p.role==='RW')?'L':'R'); // kastehånd
 const speedOf=p=>(p.role==='GK'?4.6*(0.85+rv(p,'fart')*0.03):5.0+rv(p,'fart')*0.3)*(0.86+0.14*(p.sta??1)); // trætte spillere er langsommere
@@ -652,7 +654,7 @@ function launchShot(p){
   err*=(1.5-rv(p,'praecision')*0.1)*(1+(1-(p.sta??1))*0.35);    // præcision (og træthed)
   if(angled) err+=(10-rv(p,'vinkel'))*0.04;                      // fløjskud og spidse vinkler: fløjene er bedst
   const tx=10+ax*1.32+gauss()*err, tz=Math.max(0.15,zl+gauss()*err*0.7);
-  const rx=p.x+p.face*0.15, ry=p.y, rz=p.z+(p.shot.type==='fall'?1.45:p.shot.type==='under'?1.0:2.05);
+  const rx=p.x+p.face*0.15, ry=p.y, rz=p.z+(p.shot.type==='fall'?1.45:p.shot.type==='under'?1.0:2.05)+(hgt(p)-190)/100; // høje skytter slipper bolden højere
   const speed=lob?7.2+rnd()*1.2:(p.shot.sig==='kraft'?1.1:1)*sp.spd*(0.85+rv(p,'skud')*0.03)*(0.93+rnd()*0.12)*(sd>12?Math.max(0.78,1-(sd-12)*0.02):1);
   const dd=Math.hypot(tx-rx,gy-ry), tt=dd/speed;
   b.mode='shot'; b.holder=null; b.x=rx; b.y=ry; b.z=rz;
@@ -1178,8 +1180,8 @@ function updBall(dt){
       if(k.plan.save){ k.plan.hit={x:b.x,y:b.y,z:b.z,t:time}; const c=(k.plan.cz>0.4&&k.plan.cz<1.5&&rnd()<0.45)||(k.plan.walk&&rnd()<0.88); saveBall(k,c); return; } }
     for(const q of players){ if(q.team===b.lastTeam||q.role==='GK'||b.checked.has(q)) continue;
       if(Math.abs(b.y-q.y)<0.4&&Math.abs(b.x-q.x)<(q.block>0?0.7:0.35)){ b.checked.add(q);
-        const top=q.z+(q.block>0?2.5:1.9);
-        if(b.z<top&&b.z>0.3&&rnd()<(q.block>0?0.2:0.06)*(0.6+rv(q,'forsvar')*0.08)){ b.mode='loose'; b.vy*=-0.25; b.vx=(rnd()-0.5)*6; b.vz=2.5; b.lastTeam=q.team; k.plan=null; msg('Blokeret!'); return; } } }
+        const hq=hgt(q), top=q.z+(q.block>0?2.5:1.9)+(hq-190)/100;           // høje forsvarere dækker mere
+        if(b.z<top&&b.z>0.3&&rnd()<(q.block>0?0.2:0.06)*(0.6+rv(q,'forsvar')*0.08)*clamp(1+(hq-190)/60,0.75,1.3)){ b.mode='loose'; b.vy*=-0.25; b.vx=(rnd()-0.5)*6; b.vz=2.5; b.lastTeam=q.team; k.plan=null; msg('Blokeret!'); return; } } }
   }
   if(b.mode==='pass'&&b.passTo){ // præcision: bolden følger modtagerens løb
     const q=b.passTo, hs=Math.hypot(b.vx,b.vy), rd=Math.hypot(q.x-b.x,q.y-b.y);
@@ -1548,7 +1550,7 @@ function gkPose(p,pl,f){
 function drawPlayer(p){
   const px=flip?20-p.x:p.x, py=flip?40-p.y:p.y, f=flip?-p.face:p.face;
   const T=p.ref?REFKIT:TEAMS[p.team], gk=p.role==='GK';
-  const ds=1+clamp((py-camY)*0.004,-0.04,0.04);                         // svag dybde: lidt større tæt på kameraet
+  const ds=(1+clamp((py-camY)*0.004,-0.04,0.04))*(p.ref?1:1+clamp((hgt(p)-190)/400,-0.03,0.04)); // dybde og spillerens højde                         // svag dybde: lidt større tæt på kameraet
   const shirt=gk?T.gk:T.shirt, trim=gk?T.gkTrim:T.trim, shorts=gk?T.gkTrim:T.shorts;
   // skygge
   ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(px,py+0.03,Math.max(0.18,0.38-p.z*0.12)*ds,0.13*ds,0,0,7); ctx.fill();
@@ -1649,6 +1651,7 @@ function drawPlayer(p){
   limb(sr,frontArm,0.1,p.skin); limb(sr,[sr[0]+(frontArm[0]-sr[0])*0.3,sr[1]+(frontArm[1]-sr[1])*0.3],0.13,shirt);
   if(bl&&!far) drawBallAt(bl[0],bl[1],0.13);
   ctx.restore();
+  if(gk&&p!==ctrl){ ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='700 0.36px "Barlow Condensed",Arial,sans-serif'; ctx.textAlign='center'; ctx.fillText(p.num+(p.name?' '+p.name.toUpperCase():''),px,py-lift*ZF-2.05); } // målmandens navn
   if(p===ctrl){ ctx.fillStyle='#f5b83d'; ctx.font='700 0.42px "Barlow Condensed",Arial,sans-serif'; ctx.textAlign='center'; ctx.fillText(p.num+(p.name?' '+p.name.toUpperCase():''),px,py-lift*ZF-2.05);
     const st=p.sta??1; ctx.fillStyle='rgba(6,11,19,.6)'; ctx.fillRect(px-0.5,py+0.22,1.0,0.1); ctx.fillStyle=st>0.6?'#5fd17a':st>0.4?'#f5b83d':'#e0503a'; ctx.fillRect(px-0.5,py+0.22,1.0*st,0.1); }
 }

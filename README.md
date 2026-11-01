@@ -19,7 +19,7 @@ Håndboldspil til browser og mobil i top-down-stil, i samme familie som Sensible
 - Når din målmand har bolden: Skud = langt udkast til en fløj (styr til siden for at vælge), Aflever = kort udkast
 
 ## Hold og spillere
-Landsholdene fra EM 2026 ligger i `EM_TEAMS` og klubberne fra EHF Champions League 2026/27 i `CL_TEAMS` i scriptet i `index.html`. Hvert hold har landekode, navn, styrke (`tier`, 1-10), hjemme- og udetrøje (`[trøje, kant, shorts, nummer]`) og en trup i formatet `POS NR Navn*`, fx `RB 19 Gidsel*`. Positioner: `G`, `LW`, `LB`, `CB`, `RB`, `RW`, `P`. Stjerne markerer en nøglespiller, `^` en fast starter, `~` en fast straffekaster, og `!` vender kastehånden (højre back og højre fløj er ellers venstrehåndede, resten højrehåndede).
+Landsholdene fra EM 2026 ligger i `EM_TEAMS` og klubberne fra EHF Champions League 2026/27 i `CL_TEAMS` i scriptet i `index.html`. Hvert hold har landekode, navn, styrke (`tier`, 1-10), hjemme- og udetrøje (`[trøje, kant, shorts, nummer]`) og en trup i formatet `POS NR Navn*`, fx `RB 19 Gidsel*`. Positioner: `G`, `LW`, `LB`, `CB`, `RB`, `RW`, `P`. Stjerne markerer en nøglespiller, `^` en fast starter, `~` en fast straffekaster, `!` vender kastehånden, og `@196` angiver højden i cm (højre back og højre fløj er ellers venstrehåndede, resten højrehåndede).
 
 Spillernes værdier beregnes ud fra position, holdets styrke og stjerne og har værdier fra 1 til 10:
 
