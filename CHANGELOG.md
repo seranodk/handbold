@@ -2,6 +2,9 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.20.2 – 2026-11-01 – Naturligt opgiverkast
+- Efter et mål tager målmanden bolden i målet og kaster den hurtigt op til stregspilleren, som griber den i løbet og løber det sidste stykke ind på midten og kaster op. Før dukkede stregspilleren op på midten med bolden. Det tager ca. 1,3 sekunder fra målmanden har bolden, til der kastes op
+
 ## v0.20.1 – 2026-11-01 – Landsholdenes startere og fløjene i kontra
 - Startopstillinger gennemgået for EM-holdene: faste startere (`^`) på Spanien, Portugal, Frankrig, Sverige, Kroatien, Slovenien, Ungarn, Island og Norge, og nøglespillere som startere på Østrig (Frimmel på venstre fløj), Schweiz (Manuel Zehnder på venstre back), Holland, Serbien, Færøerne og Polen
 - Fri fløj i kontra løber helt ind til ca. 6 m, før han hopper og skyder

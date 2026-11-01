@@ -1,4 +1,4 @@
-<title>Håndbold v0.20.1</title>
+<title>Håndbold v0.20.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -162,7 +162,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.20.1';
+const VERSION='0.20.2';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -430,7 +430,7 @@ try{ const f=localStorage.getItem('hb_floor'); if(f&&FLOORS[f]) floorKey=f; cons
 let players=[], ball=null, score=[0,0], clock=0, phase='menu', phaseT=0, time=0, ctrl=null, poss=0, passCount=0;
 let passive=null, atkT=0; // passivt spil
 let trans=null, celebTeam=-1, celebBy=null, autoHome=false, fetch=null;
-let fadeA=0, fadeOut=false, foulAnim=null, shotPend=null, shotLock=0, possT=null, msgs=[], camY=20, shake=0, kickoffTeam=null, lastAtt=0, started=false, paused=true, restartFn=null;
+let koPend=null, fadeA=0, fadeOut=false, foulAnim=null, shotPend=null, shotLock=0, possT=null, msgs=[], camY=20, shake=0, kickoffTeam=null, lastAtt=0, started=false, paused=true, restartFn=null;
 const goals=[{shake:0,bulge:null},{shake:0,bulge:null}];
 const stepper=[null,null], chaser=[null,null], helper=[null,null], wave=[1,1]; // wave: afleveringsretning i positionsangrebet (+1 mod højre fløj)
 const LINE=['LW','LB','CB','RB','RW'];
@@ -442,7 +442,7 @@ function mkPlayer(t,role,num,i){
     inAreaOk:false,aiT:0,plan:null,lastFrom:null,skin:SKIN[(i*3+t*2)%SKIN.length],hair:HAIR[(i*5+t)%HAIR.length]};
 }
 
-function newMatch(){
+function newMatch(){ koPend=null;
   setupTeams(); updateTeamsUI();
   players=[];
   for(const t of [0,1]) ROLES.forEach((r,i)=>players.push(mkPlayer(t,r,0,i)));
@@ -512,6 +512,15 @@ function frontDef(p){ // afstand til nærmeste forsvarer mellem spiller og mål
 function defendersAhead(p){ const l=L(p.team,p.x,p.y); let n=0; for(const o of players){ if(o.team===p.team||o.role==='GK') continue; if(L(p.team,o.x,o.y).d<l.d-0.3) n++; } return n; }
 
 /* ================= RESTART ================= */
+// efter mål: målmanden tager bolden i målet og kaster den hurtigt op til stregspilleren på midten
+function keeperToCenter(t){
+  const k=gkOf(t), w=W(t,10,38.9), b=ball;
+  for(const q of players){ q.tack=null; q.offer=null; q.shot=null; q.down=0; q.z=0; }
+  k.x=w.x; k.y=w.y; k.vx=k.vy=0; k.plan=null;
+  b.holder=k; b.mode='held'; b.passTo=null; b.shooter=null; b.lastTeam=t; poss=t; passive=null; atkT=0; trans=null;
+  kickoffTeam=t; koPend={t,k,timer:0,passed:false}; celebTeam=-1; celebBy=null;
+  phase='dead'; phaseT=99;
+}
 function restart(kind,team,x,y,text,who){
   const b=ball; let p;
   if(kind==='goalthrow'){ p=gkOf(team); }
@@ -547,7 +556,7 @@ function scoreGoal(team,text,x,z,gy){
   const sc=b.shooter&&b.shooter.team===team?` ${b.shooter.name||'#'+b.shooter.num}`:'';
   msg(text+sc,true);
   if(team===0) autoHome=true; // du har scoret: din spiller løber selv hjem
-  phase='goal'; phaseT=0.7; celebTeam=team; celebBy=b.shooter&&b.shooter.team===team?b.shooter:null; restartFn=()=>restart('kickoff',1-team,10,20,'Opgiverkast');
+  phase='goal'; phaseT=0.7; celebTeam=team; celebBy=b.shooter&&b.shooter.team===team?b.shooter:null; restartFn=()=>keeperToCenter(1-team);
   updateHud(true);
 }
 
@@ -1222,7 +1231,12 @@ function step(dt){
     if(phaseT<=0){ const c=fa.c; c.fallT=null; c.z=0; fa.f.foulPose=null; foulAnim=null; fadeOut=true; const tk=penaltyTaker(c.team);
       restart('seven',c.team,0,0,tk.name?`Straffekaster: ${tk.name}`:'7-meter',tk); }
     return; }
-  if(kickoffTeam!==null&&!(ball.holder&&ball.holder.kick)){ kickoffTeam=null; for(const q of players) q.kick=false; }
+  if(koPend){ const kp=koPend, pv=players.find(q=>q.team===kp.t&&q.role==='PV'); kp.timer+=dt;
+    if(!kp.passed&&ball.holder===kp.k&&kp.timer>0.35&&(Math.hypot(pv.x-10,pv.y-20)<9||kp.timer>0.9)){ doPass(kp.k,pv); ball.safe=true; kp.passed=true; }
+    else if(kp.passed&&ball.holder===pv){ const dx=10-pv.x, dy=20-pv.y, d=Math.hypot(dx,dy), sp=speedOf(pv)*1.05;   // løber selv det sidste stykke ind på midten
+      if(d<0.35){ koPend=null; restart('kickoff',kp.t,10,20,'Opgiverkast'); } else { pv.vx=dx/d*Math.min(sp,d*6); pv.vy=dy/d*Math.min(sp,d*6); pv.x+=pv.vx*dt; pv.y+=pv.vy*dt; pv.run=Math.min(1,sp/6.5); pv.phase+=sp*dt*5.4; if(Math.abs(pv.vx)>0.3) pv.face=Math.sign(pv.vx); } }
+    else if(kp.passed&&ball.mode!=='pass'&&ball.holder!==pv){ koPend=null; restart('kickoff',kp.t,10,20,'Opgiverkast'); } } // sikkerhed: ellers opgiverkast som før
+  if(kickoffTeam!==null&&!koPend&&!(ball.holder&&ball.holder.kick)){ kickoffTeam=null; for(const q of players) q.kick=false; }
   if(phase==='fetch'&&fetch) updFetch(dt);
   // passivt spil: efter ca. 25 sek. uden skud kommer advarslen, og så må holdet højst lave 4 afleveringer
   if(phase==='play'&&ball.holder&&ball.holder.role!=='GK'&&!ball.holder.seven){ atkT+=dt;
@@ -1645,7 +1659,7 @@ function updateSubBan(){ const el=$('subBan'); if(!el) return; if(!subBan){ if(!
   el.innerHTML=`<span class="sw" style="background:${TEAMS[subBan.team].shirt}"></span><span>${teamSel[subBan.team]}</span><span class="in">IND ${subBan.inn}</span><span class="ud">UD ${subBan.ud}</span>`; }
 function updatePassive(){ const el=$('pas'); if(!el) return; if(passive){ el.hidden=false; el.textContent='PASSIV '+Math.max(0,4-passive.passes); } else el.hidden=true; }
 function updateButtons(){ /* knapperne hedder altid Skud og Aflever */ }
-function secondHalf(){
+function secondHalf(){ koPend=null;
   // spejl alt i verden samtidig med at visningen vendes, så intet hopper på skærmen
   flip=!flip; half=2; clock=matchLen; halftimeSubs();
   for(const p of players){ p.x=20-p.x; p.y=40-p.y; p.vx=-p.vx; p.vy=-p.vy; p.face=-p.face; p.plan=null; p.shot=null; p.tack=null; p.z=0; }
