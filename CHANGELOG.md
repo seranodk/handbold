@@ -2,6 +2,10 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.19.2 – 2026-11-01 – Fløjene hurtigt op efter opgiverkast
+- Fejlrettelse: angriberne joggede i hele angrebet, også på vej op ad banen efter opgiverkast, så fløjene kom sidst. De jogger nu først, når de er oppe ved ca. 13 m
+- Fløjene løber 10 % hurtigere op ad banen og er blandt de første oppe sammen med stregspilleren. Tid fra opgiverkast til begge fløje står i hjørnet: ca. 2,6 sekunder mod ca. 4,8 før
+
 ## v0.19.1 – 2026-11-01 – Fløjløb og målmandens udkast
 - Hængning er slået fra igen. Det var den, der gav de pludselig langsomme skud
 - Fløjene løber kontra igen: de sprinter ud langs sidelinjen et godt stykke foran bolden (langt op, når målmanden har den) i ca. 95 % af kontraerne. Før joggede de kun et par meter foran sig selv. Går kontraen i stå, stiller de sig i hjørnet

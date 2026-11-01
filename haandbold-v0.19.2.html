@@ -1,4 +1,4 @@
-<title>Håndbold v0.19.1</title>
+<title>Håndbold v0.19.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -162,7 +162,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.19.1';
+const VERSION='0.19.2';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -995,7 +995,9 @@ function updPlayer(p,dt,att){
     // hjemløb: spillere på vej tilbage i forsvar (og efter mål) løber ca. 15 % hurtigere for et bedre flow
     if(p.role!=='GK'&&ball.holder!==p&&(phase==='goal'||(att!==p.team&&L(1-p.team,p.x,p.y).d>13))) vmax*=1.15;
     if(phase==='fetch'&&fetch&&p.role==='GK'&&p.team===fetch.team) vmax=8.0; // løber hurtigt ud efter bolden
-    if(posAtt(p.team)&&att===p.team&&ball.holder!==p&&ball.passTo!==p&&p.role!=='GK'&&(p!==ctrl||AUTO)&&!(p.passT&&time-p.passT<0.9)) vmax*=0.6; // jogger i positionsspil, sprinter kun når det gælder
+    const ld=L(p.team,p.x,p.y).d;
+    if(phase==='play'&&ld<13&&posAtt(p.team)&&att===p.team&&ball.holder!==p&&ball.passTo!==p&&p.role!=='GK'&&(p!==ctrl||AUTO)&&!(p.passT&&time-p.passT<0.9)) vmax*=0.6; // jogger i positionsspillet (først når han er oppe ved 13 m)
+    if(isWing(p)&&att===p.team&&ld>11&&ball.holder!==p&&(p!==ctrl||AUTO)) vmax*=1.1;   // fløjene er blandt de første oppe, også efter opgiverkast
     if(ctrl&&ctrl.hold&&ctrl.hold.c===p) vmax*=1-(0.35+0.45*holdLevel(ctrl.hold))*(1.25-rv(p,'styrke')*0.05); // holdt fast: kan næsten ikke komme frem
     // i kontra jogger alle andre end de løbende fløje op i formation (anden bølge)
     if(trans&&!trans.early&&trans.team===p.team&&p.role!=='GK'&&ball.holder!==p&&!(isWing(p)&&trans[p.role])) vmax*=(p.role.endsWith('B')&&secondWave(p.team))?1.06:0.82; // bagspillerne sprinter op i anden bølge
