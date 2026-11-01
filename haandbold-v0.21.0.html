@@ -1,4 +1,4 @@
-<title>Håndbold v0.20.2</title>
+<title>Håndbold v0.21.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -162,7 +162,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.20.2';
+const VERSION='0.21.0';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -430,7 +430,7 @@ try{ const f=localStorage.getItem('hb_floor'); if(f&&FLOORS[f]) floorKey=f; cons
 let players=[], ball=null, score=[0,0], clock=0, phase='menu', phaseT=0, time=0, ctrl=null, poss=0, passCount=0;
 let passive=null, atkT=0; // passivt spil
 let trans=null, celebTeam=-1, celebBy=null, autoHome=false, fetch=null;
-let koPend=null, fadeA=0, fadeOut=false, foulAnim=null, shotPend=null, shotLock=0, possT=null, msgs=[], camY=20, shake=0, kickoffTeam=null, lastAtt=0, started=false, paused=true, restartFn=null;
+let refs=[], REFKIT={shirt:'#111111',trim:'#c9f23b',shorts:'#111111',sock:'#111111',num:'#111111'}, koPend=null, fadeA=0, fadeOut=false, foulAnim=null, shotPend=null, shotLock=0, possT=null, msgs=[], camY=20, shake=0, kickoffTeam=null, lastAtt=0, started=false, paused=true, restartFn=null;
 const goals=[{shake:0,bulge:null},{shake:0,bulge:null}];
 const stepper=[null,null], chaser=[null,null], helper=[null,null], wave=[1,1]; // wave: afleveringsretning i positionsangrebet (+1 mod højre fløj)
 const LINE=['LW','LB','CB','RB','RW'];
@@ -442,7 +442,7 @@ function mkPlayer(t,role,num,i){
     inAreaOk:false,aiT:0,plan:null,lastFrom:null,skin:SKIN[(i*3+t*2)%SKIN.length],hair:HAIR[(i*5+t)%HAIR.length]};
 }
 
-function newMatch(){ koPend=null;
+function newMatch(){ koPend=null; refs=[];
   setupTeams(); updateTeamsUI();
   players=[];
   for(const t of [0,1]) ROLES.forEach((r,i)=>players.push(mkPlayer(t,r,0,i)));
@@ -513,6 +513,25 @@ function defendersAhead(p){ const l=L(p.team,p.x,p.y); let n=0; for(const o of p
 
 /* ================= RESTART ================= */
 // efter mål: målmanden tager bolden i målet og kaster den hurtigt op til stregspilleren på midten
+// dommere: én bag angrebet, én på mållinjen i siden. De bytter roller, når spillet skifter retning
+function setupRefs(){
+  const opts=['#111111','#c9f23b','#ff4fa3','#2bc0e4','#f28c00'];
+  const best=opts.slice().sort((a,b)=>Math.min(colDist(b,TEAMS[0].shirt),colDist(b,TEAMS[1].shirt))-Math.min(colDist(a,TEAMS[0].shirt),colDist(a,TEAMS[1].shirt)))[0];
+  REFKIT={shirt:best,trim:best==='#111111'?'#c9f23b':'#111111',shorts:'#111111',sock:'#111111',num:'#111111'};
+  refs=[0,1].map(i=>({ref:true,role:'REF',num:0,name:'',team:-1,x:i?1.2:12,y:i?39.6:14,vx:0,vy:0,z:0,face:1,phase:0,run:0,gest:null,skin:SKIN[(i*5+2)%SKIN.length],hair:HAIR[(i*3+1)%HAIR.length],r:{}}));
+}
+function updRefs(dt){
+  if(!refs.length) return; const a=attTeam(), t=a===0||a===1?a:0, bl=L(t,ball.x,ball.y);
+  const court=W(t,15.8,clamp(bl.d+6,12.5,18)), goal=W(t,0.9,-0.6);
+  const d0=Math.hypot(refs[0].x-court.x,refs[0].y-court.y)+Math.hypot(refs[1].x-goal.x,refs[1].y-goal.y);
+  const d1=Math.hypot(refs[1].x-court.x,refs[1].y-court.y)+Math.hypot(refs[0].x-goal.x,refs[0].y-goal.y);
+  if(d1<d0-6) refs.reverse();
+  [court,goal].forEach((tg,i)=>{ const r=refs[i], dx=tg.x-r.x, dy=tg.y-r.y, d=Math.hypot(dx,dy), sp=Math.min(6.2,d*2.2);
+    const vx=d>0.05?dx/d*sp:0, vy=d>0.05?dy/d*sp:0; r.vx+=(vx-r.vx)*Math.min(1,dt*6); r.vy+=(vy-r.vy)*Math.min(1,dt*6);
+    r.x+=r.vx*dt; r.y+=r.vy*dt; const v=Math.hypot(r.vx,r.vy); r.run+=(clamp(v/6.5,0,1)-r.run)*Math.min(1,dt*10); r.phase+=v*dt*5.4;
+    if(Math.abs(r.vx)>0.4) r.face=Math.sign(r.vx); else { const fx=ball.x-r.x; if(Math.abs(fx)>0.6) r.face=Math.sign(fx); }
+    r.gest=phase==='foul'?'arm':(phase==='goal'&&i===0)?'point':(passive&&i===0)?'arm':null; });
+}
 function keeperToCenter(t){
   const k=gkOf(t), w=W(t,10,38.9), b=ball;
   for(const q of players){ q.tack=null; q.offer=null; q.shot=null; q.down=0; q.z=0; }
@@ -1223,6 +1242,8 @@ function step(dt){
   time+=dt;
   if(phase==='play'||phase==='dead'||phase==='fetch'){ clock-=dt/GAME_SPEED; } // spillet går langsommere, men en halvleg varer stadig det valgte antal minutter
   if(fadeOut&&phase!=='foul'){ fadeA=Math.max(0,fadeA-dt*2.8); if(fadeA<=0) fadeOut=false; } // og op igen ved 7-meter-opstillingen
+  if(!refs.length&&TEAMS) setupRefs(); updRefs(dt);
+  { const bv=ball.holder?(ball.holder.run||0)*4:Math.hypot(ball.vx,ball.vy); ballSpin+=bv*dt*(ball.mode==='loose'||ball.mode==='out'?1.2:2.2); }
   if(phase==='dead'){ phaseT-=dt; if(phaseT<=0){ phase='play'; } }
   if(phase==='foul'){ // forseelsen afspilles, så stilles der op til 7-meter
     phaseT-=dt; const fa=foulAnim; if(fa){ fa.t+=dt; fa.c.fallT=fa.t; fa.c.z=fa.z0*Math.max(0,1-fa.t/0.4); }
@@ -1397,13 +1418,24 @@ function drawFloor(){
   ctx.globalAlpha=0.16; ctx.lineWidth=0.12; ctx.beginPath(); ctx.arc(10,20,1.6,0,7); ctx.stroke(); ctx.globalAlpha=1;
   // bander
   const [c1,c2]=F.board;
-  for(let y=-2.4;y<42.4;y+=4){ ctx.fillStyle=((y/4|0)%2)?c1:c2; ctx.fillRect(-1.75,y,0.3,3.9); ctx.fillRect(21.45,y,0.3,3.9); }
-  for(let x=-1.6;x<21.6;x+=4){ ctx.fillStyle=((x/4|0)%2)?c2:c1; ctx.fillRect(x,-2.75,3.9,0.3); ctx.fillRect(x,42.45,3.9,0.3); }
+  const SP=['KASTEKRAFT','STREGEN','BLOKHUSET','HALVLEG','NORDVIND','SKUDSIKKER']; // fiktive sponsorer
+  ctx.font='700 0.24px "Barlow Condensed",Arial,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  let si=0;
+  for(let y=-2.4;y<42.4;y+=4){ const cA=((y/4|0)%2)?c1:c2, cB=cA===c1?c2:c1; ctx.fillStyle=cA; ctx.fillRect(-1.75,y,0.3,3.9); ctx.fillRect(21.45,y,0.3,3.9);
+    ctx.fillStyle=cB; for(const bx of [-1.6,21.6]){ ctx.save(); ctx.translate(bx,y+1.95); ctx.rotate(bx<0?-Math.PI/2:Math.PI/2); ctx.fillText(SP[si%SP.length],0,0.01); ctx.restore(); } si++; }
+  for(let x=-1.6;x<21.6;x+=4){ const cA=((x/4|0)%2)?c2:c1, cB=cA===c1?c2:c1; ctx.fillStyle=cA; ctx.fillRect(x,-2.75,3.9,0.3); ctx.fillRect(x,42.45,3.9,0.3);
+    ctx.fillStyle=cB; ctx.fillText(SP[si%SP.length],x+1.95,-2.6); ctx.fillText(SP[(si+3)%SP.length],x+1.95,42.6); si++; }
   // bænke
   for(const t of [0,1]){ const y0=flip?40-benchY(t)-4:benchY(t); ctx.fillStyle='#2b3140'; ctx.fillRect(20.55,y0,0.9,4.2);
     ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=0.05; ctx.setLineDash([0.2,0.15]); ctx.strokeRect(19.0,y0,1.0,4.2); ctx.setLineDash([]); // udskiftningszone
     const n=Math.min(8,BENCH[t]?BENCH[t].length:5);
-    for(let i=0;i<n;i++){ const yy=y0+0.3+i*0.5; ctx.fillStyle=TEAMS[t].shirt; ctx.fillRect(20.68,yy,0.6,0.36); ctx.fillStyle='#e8b48c'; ctx.beginPath(); ctx.arc(20.98,yy-0.04,0.12,0,7); ctx.fill(); } }
+    const cheer=(phase==='goal'&&celebTeam===t)||(phase==='over'&&score[t]>score[1-t]);
+    for(let i=0;i<n;i++){ const yy=y0+0.3+i*0.5, hop=cheer?Math.abs(Math.sin(time*9+i*1.3))*0.22:Math.sin(time*1.3+i*2.1)*0.02, hx=cheer?-0.25:0;
+      ctx.fillStyle=TEAMS[t].shirt; ctx.fillRect(20.68+hx,yy-hop,0.6,0.36); ctx.fillStyle='#e8b48c'; ctx.beginPath(); ctx.arc(20.98+hx,yy-0.04-hop,0.12,0,7); ctx.fill();
+      if(cheer){ ctx.strokeStyle='#e8b48c'; ctx.lineWidth=0.07; ctx.beginPath(); ctx.moveTo(20.78+hx,yy-hop); ctx.lineTo(20.7+hx,yy-0.42-hop); ctx.moveTo(21.18+hx,yy-hop); ctx.lineTo(21.26+hx,yy-0.42-hop); ctx.stroke(); } } } // udskifterne rejser sig og jubler ved mål
+  // dommerbord ved midterlinjen
+  ctx.fillStyle='#1b2230'; ctx.fillRect(20.5,18.8,1.1,2.4); ctx.fillStyle='#3a4458'; ctx.fillRect(20.5,18.8,0.12,2.4);
+  for(const yy of [19.3,20.6]){ ctx.fillStyle='#8a93a6'; ctx.fillRect(20.8,yy,0.55,0.36); ctx.fillStyle='#e8b48c'; ctx.beginPath(); ctx.arc(21.07,yy-0.04,0.12,0,7); ctx.fill(); }
 }
 const P=(x,y,z)=>[x,y-z*ZF];
 function drawGoal(gi){ // gi = mål i visningen (0 = øverst)
@@ -1419,7 +1451,8 @@ function drawGoal(gi){ // gi = mål i visningen (0 = øverst)
     poly([P(8.5,gy,2),P(11.5,gy,2),P(11.5,by,bh),P(8.5,by,bh)]);
     ctx.beginPath(); for(let i=1;i<10;i++){ const x=8.5+i*0.3; ctx.moveTo(...P(x,by,0)); ctx.lineTo(...P(x,by,bh)); ctx.lineTo(...P(x,gy,2)); }
     for(let j=1;j<4;j++){ const z=bh*j/4; ctx.moveTo(...P(8.5,by,z)); ctx.lineTo(...P(11.5,by,z)); } ctx.stroke();
-    if(g.bulge){ const [bx,byy]=P(flip?20-g.bulge.x:g.bulge.x,by+dir*0.25,g.bulge.z*0.55); ctx.fillStyle=`rgba(255,255,255,${0.5*g.bulge.t/0.6})`; ctx.beginPath(); ctx.ellipse(bx,byy,0.55,0.35,0,0,7); ctx.fill(); }
+    if(g.bulge){ const [bx,byy]=P(flip?20-g.bulge.x:g.bulge.x,by+dir*0.25,g.bulge.z*0.55), a=g.bulge.t/0.6; ctx.fillStyle=`rgba(255,255,255,${0.5*a})`; ctx.beginPath(); ctx.ellipse(bx,byy,0.55,0.35,0,0,7); ctx.fill();
+      ctx.strokeStyle=`rgba(255,255,255,${0.55*a})`; ctx.lineWidth=0.03; for(let i=1;i<=2;i++){ const w=(1-a)*1.1+i*0.25; ctx.beginPath(); ctx.ellipse(bx,byy,0.55+w,0.35+w*0.55,0,0,7); ctx.stroke(); } } // nettet bølger ud
   };
   const frame=()=>{
     ctx.lineCap='butt'; ctx.lineWidth=0.13;
@@ -1434,10 +1467,13 @@ function limb(a,b,w,col){ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath();
 function drawTrail(){ const tr=ball.trail; if(!tr||tr.length<2) return; ctx.lineCap='round';
   for(let i=1;i<tr.length;i++){ const a=tr[i-1], c=tr[i], A=P(flip?20-a[0]:a[0],flip?40-a[1]:a[1],a[2]), B=P(flip?20-c[0]:c[0],flip?40-c[1]:c[1],c[2]);
     ctx.strokeStyle=`rgba(255,240,200,${0.5*i/tr.length})`; ctx.lineWidth=0.06+0.08*i/tr.length; ctx.beginPath(); ctx.moveTo(...A); ctx.lineTo(...B); ctx.stroke(); } }
+let ballSpin=0;
 function drawBallAt(x,y,r=0.14){
   ctx.fillStyle='#f6f2e4'; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ballSpin); ctx.translate(-x,-y);  // bolden roterer
   ctx.strokeStyle='#2a5fa8'; ctx.lineWidth=r*0.32; ctx.beginPath(); ctx.arc(x-r*0.4,y,r*0.75,-0.9,0.9); ctx.stroke();
   ctx.strokeStyle='#d8322f'; ctx.beginPath(); ctx.arc(x+r*0.5,y,r*0.7,2.3,4.0); ctx.stroke();
+  ctx.restore();
   ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=0.025; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.stroke();
 }
 /* ---------- målmandsredninger: refleks som udgangspunkt, dyk af og til ----------
@@ -1492,10 +1528,11 @@ function gkPose(p,pl,f){
 }
 function drawPlayer(p){
   const px=flip?20-p.x:p.x, py=flip?40-p.y:p.y, f=flip?-p.face:p.face;
-  const T=TEAMS[p.team], gk=p.role==='GK';
+  const T=p.ref?REFKIT:TEAMS[p.team], gk=p.role==='GK';
+  const ds=1+clamp((py-camY)*0.004,-0.04,0.04);                         // svag dybde: lidt større tæt på kameraet
   const shirt=gk?T.gk:T.shirt, trim=gk?T.gkTrim:T.trim, shorts=gk?T.gkTrim:T.shorts;
   // skygge
-  ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(px,py+0.03,Math.max(0.18,0.38-p.z*0.12),0.13,0,0,7); ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(px,py+0.03,Math.max(0.18,0.38-p.z*0.12)*ds,0.13*ds,0,0,7); ctx.fill();
   if(p===ctrl){ ctx.strokeStyle='#f5b83d'; ctx.lineWidth=0.07; ctx.beginPath(); ctx.ellipse(px,py+0.03,0.55,0.22,0,0,7); ctx.stroke(); }
   let rot=0, lift=p.z, ox=0, oy=0;
   const s=Math.sin(p.phase), c=Math.cos(p.phase), run=p.run;
@@ -1559,7 +1596,8 @@ function drawPlayer(p){
     else if(fk==='arm'){ rh=[0.3+0.25*u,-2.05+1.0*u]; lh=[-0.3,-0.95]; rot=f*0.12*u; }
     else { lh=[0.62,-1.3]; rh=[0.68,-1.36]; rot=f*0.18*u; lf=[-0.35,0]; rf=[0.2,-0.05]; }
   }
-  ctx.save(); ctx.translate(px+ox,py-lift*ZF+oy); ctx.rotate(rot); ctx.scale(f,1);
+  if(p.ref){ if(p.gest==='arm') rh=[0.12,-2.28]; else if(p.gest==='point') rh=[0.78,-1.36]; }   // dommertegn
+  ctx.save(); ctx.translate(px+ox,py-lift*ZF+oy); ctx.rotate(rot); ctx.scale(f*ds,ds);
   ctx.lineCap='round';
   const sh=[-0.23,-1.3], sr=[0.23,-1.3];
   // kastehånd: rh er boldarmen. Set fra siden er den forreste arm højre hånd, når spilleren vender mod højre på skærmen.
@@ -1579,8 +1617,10 @@ function drawPlayer(p){
   ctx.fillStyle=shorts; ctx.fillRect(-0.2,-0.95,0.4,0.24);
   ctx.fillStyle=shirt; ctx.beginPath(); ctx.roundRect?ctx.roundRect(-0.22,-1.4,0.44,0.52,0.08):ctx.rect(-0.22,-1.4,0.44,0.52); ctx.fill();
   if(T.check&&!gk){ ctx.fillStyle=T.trim; for(let ix=0;ix<4;ix++) for(let iy=0;iy<4;iy++) if((ix+iy)%2) ctx.fillRect(-0.22+ix*0.11,-1.33+iy*0.11,0.11,0.11); }
+  ctx.fillStyle='rgba(0,0,0,.13)'; ctx.fillRect(-0.22,-1.33,0.13,0.45); ctx.fillRect(-0.2,-0.91,0.12,0.2); // skyggeside på trøje og shorts
+  ctx.fillStyle='rgba(255,255,255,.1)'; ctx.fillRect(0.08,-1.32,0.1,0.38);
   ctx.fillStyle=trim; ctx.fillRect(-0.22,-1.4,0.44,0.07); ctx.fillRect(-0.22,-0.95,0.44,0.04);
-  ctx.save(); ctx.scale(f,1); ctx.fillStyle=gk?'#ffffff':T.num; ctx.font='700 0.28px "Barlow Condensed",Arial,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(String(p.num),0,-1.1); ctx.restore();
+  if(!p.ref){ ctx.save(); ctx.scale(f,1); ctx.fillStyle=gk?'#ffffff':T.num; ctx.font='700 0.28px "Barlow Condensed",Arial,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(String(p.num),0,-1.1); ctx.restore(); }
   // hoved
   ctx.fillStyle=p.skin; ctx.beginPath(); ctx.arc(0.01,-1.56,0.155,0,7); ctx.fill();
   ctx.fillStyle=p.hair; ctx.beginPath(); ctx.arc(0.0,-1.6,0.16,Math.PI*1.05,Math.PI*2.05); ctx.fill();
@@ -1607,11 +1647,14 @@ function render(){
   // boldskygge
   const bx=flip?20-ball.x:ball.x, by=flip?40-ball.y:ball.y;
   if(ball.mode!=='held'){ ctx.fillStyle='rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(bx,by,0.14,0.07,0,0,7); ctx.fill(); }
-  const ents=players.map(p=>({y:flip?40-p.y:p.y,f:()=>drawPlayer(p)}));
+  const ents=players.concat(refs).map(p=>({y:flip?40-p.y:p.y,f:()=>drawPlayer(p)}));
   ents.push({y:-0.001,f:()=>drawGoal(0)},{y:40.001,f:()=>drawGoal(1)});
   // det nederste mål er nærmest kameraet: bolden foran mållinjen skal tegnes oven på nettet, bolden inde i nettet bagved
   const bKey=by>38&&by<40?40.002:by>40&&by<41.5?39.999:by;
-  if(ball.mode!=='held') ents.push({y:bKey,f:()=>{ drawTrail(); drawBallAt(bx,by-ball.z*ZF,0.14); }});
+  if(ball.mode!=='held') ents.push({y:bKey,f:()=>{ drawTrail();
+    const bsp=Math.hypot(ball.vx,ball.vy); if(bsp>13&&(ball.mode==='shot'||ball.mode==='pass')){ const ux=(flip?-ball.vx:ball.vx)/bsp, uy=(flip?-ball.vy:ball.vy)/bsp, k=Math.min(1,(bsp-13)/10); // fartslør ved hårde skud
+      for(let i=3;i>=1;i--){ ctx.fillStyle=`rgba(246,242,228,${0.16*k*(4-i)/3})`; ctx.beginPath(); ctx.arc(bx-ux*i*0.13,by-uy*i*0.13-(ball.z-ball.vz*i*0.006)*ZF,0.13,0,7); ctx.fill(); } }
+    drawBallAt(bx,by-ball.z*ZF,0.14); }});
   ents.sort((a,b)=>a.y-b.y); for(const e of ents) e.f();
   // redningseffekt
   for(const p of players){ const h=p.plan&&p.plan.hit; if(!h) continue; const a=(time-h.t)/0.3; if(a<0||a>1) continue;

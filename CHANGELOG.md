@@ -2,6 +2,13 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.21.0 – 2026-11-01 – Mere realistisk grafik
+- Dommere på banen: én dommer løber bag angrebet i siden, den anden står på mållinjen. De bytter roller, når spillet skifter retning. De løfter armen ved 7-meter og passivt spil og peger mod midten efter mål. Dommerdragten får en farve, der skiller sig ud fra begge hold
+- Dybde: spillerne er en anelse større tæt på kameraet og mindre længere væk (højst ±4 %), og trøje og shorts har en lys og en skyggefuld side
+- Bolden roterer i flugten og ved dribling, og hårde skud og afleveringer får et let fartslør
+- Nettet bølger ud ved mål
+- Omkring banen: udskifterne rejser sig og jubler ved mål, der står et dommerbord med to officials ved midterlinjen, og banderne har fiktive sponsorer
+
 ## v0.20.2 – 2026-11-01 – Naturligt opgiverkast
 - Efter et mål tager målmanden bolden i målet og kaster den hurtigt op til stregspilleren, som griber den i løbet og løber det sidste stykke ind på midten og kaster op. Før dukkede stregspilleren op på midten med bolden. Det tager ca. 1,3 sekunder fra målmanden har bolden, til der kastes op
 
