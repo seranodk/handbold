@@ -2,6 +2,17 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.22.0 – 2026-11-01 – CL-hovedrunden, spillernes egne skud og holdstil
+- De 12 hold i Champions League-hovedrunden har fået startopstillinger ud fra de seneste gruppekampe og målstatistik fra EHF (history.eurohandball.com): Veszprém, PSG, Melsungen, Płock, Aalborg, Füchse Berlin, Barça, Sporting, Magdeburg, Kielce, GOG og Dinamo
+  - Spillere, der ikke har været i kamptruppen i de seneste kampe (fx Lichtlein, Kastening, Moryto, Sićko, Saugstrup, L. Jørgensen), er ikke længere startere eller nøglespillere
+  - Rettelser: Yahia Omar spiller højre back for PSG, "Baszek" hos Płock hedder Daszek, og Kent Robin Tønnesen er med hos GOG
+- Spillernes egne skud: hver spiller har et foretrukket skud efter position (langt hjørne, mellem benene, oppe i hjørnet, ved hoften eller kanonskud). Nøglespillerne bruger det oftere og lidt mere præcist, og det vises af og til, fx "Gidsel: kanonskud"
+- Holdstil: hvert hold har en stil, som vises i menuen
+  - Kontra (fx Danmark, Sverige, Aalborg, GOG, Füchse): fløjene løber altid, anden bølge varer længere, og målmanden kaster oftere langt
+  - Højt tempo (fx Norge, Island, Magdeburg, Sporting): bolden spilles hurtigere videre
+  - Taktisk (fx Frankrig, Spanien, Barça, PSG, Veszprém): flere afleveringer før skud, forsvaret træder længere ud
+  - Fysisk (fx Tyskland, Ungarn, Kielce, Płock): mere stregspil, forsvaret træder længere ud og laver flere forseelser
+
 ## v0.21.0 – 2026-11-01 – Mere realistisk grafik
 - Dommere på banen: én dommer løber bag angrebet i siden, den anden står på mållinjen. De bytter roller, når spillet skifter retning. De løfter armen ved 7-meter og passivt spil og peger mod midten efter mål. Dommerdragten får en farve, der skiller sig ud fra begge hold
 - Dybde: spillerne er en anelse større tæt på kameraet og mindre længere væk (højst ±4 %), og trøje og shorts har en lys og en skyggefuld side

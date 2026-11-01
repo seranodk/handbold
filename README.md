@@ -36,6 +36,8 @@ Spillernes værdier beregnes ud fra position, holdets styrke og stjerne og har v
 
 5 svarer til en gennemsnitlig spiller.
 
+Holdstil sættes i `STYLE` (kontra, tempo, taktisk, fysisk). Hver spiller får et signaturskud ud fra position og navn.
+
 ## Demoer
 Mappen `demo/` indeholder testvideoer og demosider af idéer, før de blev indført (redninger, grafik, angrebsspil).
 

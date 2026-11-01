@@ -1,4 +1,4 @@
-<title>Håndbold v0.21.0</title>
+<title>Håndbold v0.22.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -162,7 +162,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.21.0';
+const VERSION='0.22.0';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -274,9 +274,9 @@ const EM_TEAMS=[
    kendte spillere. Værdier (1-10) er skøn. Trøjer: [trøje, kant, shorts, nummer] i klubbens farver (tilnærmet). */
 const CL_TEAMS=[
  {c:'VES',n:'One Veszprém',tier:9,home:['#d6001c','#ffffff','#d6001c','#ffffff'],away:['#ffffff','#d6001c','#ffffff','#d6001c'],
-  p:'G 12 E. Nielsen*|G 1 Appelgren|LW 9 Descat*|LW 66 Gáncs-Pető|RW 91 Imre*|RW 32 Y. Lenne|LB 15 Hesham|LB 39 Y. Elderaa|LB 2 Thiagus Petrus|CB 25 Cindrić*|CB 29 Remili*|RB 5 I. Martinović*|RB 13 Barna|P 42 L. Jørgensen*|P 46 Pechmalbec|P 80 Mesilhy'},
+  p:'G 12 E. Nielsen*^|G 1 Appelgren|LW 9 Descat*^|LW 66 Gáncs-Pető|RW 91 Imre|RW 32 Y. Lenne^|LB 15 Hesham^|LB 39 Y. Elderaa|LB 2 Thiagus Petrus|CB 25 Cindrić*|CB 29 Remili*^|RB 5 I. Martinović*^|RB 13 Barna|P 42 L. Jørgensen|P 46 Pechmalbec^|P 80 Mesilhy'},
  {c:'FÜC',n:'Füchse Berlin',tier:9,home:['#1f8f3a','#ffffff','#1f8f3a','#ffffff'],away:['#ffffff','#1f8f3a','#ffffff','#1f8f3a'],
-  p:'G 12 Palicka*|G 1 L. Ludwig|LW 20 Freihöfer*|LW 14 Ariño|RW 34 av Teigum*|RW 6 Prantner|LB 25 Langhoff*|LB 3 Wiede|LB 30 Zaepfel|CB 15 Grøndahl*|CB 17 Lichtlein*|RB 19 Gidsel*|RB 9 Simak|P 93 Marsenić*|P 5 Darj*'},
+  p:'G 12 Palicka*^|G 1 L. Ludwig|LW 20 Freihöfer*^|LW 14 Ariño|RW 34 av Teigum*^|RW 6 Prantner|LB 25 Langhoff*^|LB 3 Wiede|LB 30 Zaepfel|CB 15 Grøndahl*^|CB 17 Lichtlein|RB 19 Gidsel*^|RB 9 Simak|P 93 Marsenić*^|P 5 Darj*'},
  {c:'POR',n:'FC Porto',tier:7,home:['#1c4fa0','#ffffff','#1c4fa0','#ffffff'],away:['#ffffff','#1c4fa0','#1c4fa0','#1c4fa0'],
   p:'G 17 Abrahamsson*|G 33 D. Marques|LW 21 L. Fernandes*|LW 71 P. C. Oliveira|RW 24 Llamazares*|RW 28 J. Ferreira|LB 5 Gunnarsson*|LB 3 J. Gomes|LB 96 G. Oliveira|CB 14 Rui Silva*|CB 7 Yañez|RB 37 L. Persson|RB 90 G. Duarte|P 15 Salina|P 86 Brandão'},
  {c:'PAR',n:'Partizan',tier:6,home:['#111111','#ffffff','#111111','#ffffff'],away:['#ffffff','#111111','#ffffff','#111111'],
@@ -284,39 +284,39 @@ const CL_TEAMS=[
  {c:'NAN',n:'HBC Nantes',tier:8,home:['#5b2a86','#ffffff','#5b2a86','#ffffff'],away:['#ffffff','#5b2a86','#ffffff','#5b2a86'],
   p:'G 1 Pešić*|G 16 Bonde|LW 17 Leopold|LW 24 Peyrabout|RW 19 Odriozola*|RW 13 Perić|LB 7 Turchenko*|LB 2 Lagarde|LB 3 Briet|CB 9 Tarrafeta*|CB 6 Norlyk|CB 10 Ovniček|RB 14 Garciandia|RB 18 Abdi|P 11 Tournat*|P 15 Gaber'},
  {c:'MTM',n:'MT Melsungen',tier:8,home:['#d71920','#111111','#111111','#ffffff'],away:['#ffffff','#d71920','#ffffff','#d71920'],
-  p:'G 32 Palasics*|G 16 Simić|LW 7 D. Mandić|LW 11 Ignatow|RW 73 Kastening*|RW 31 D. García|LB 24 D. Dujshebaev*|LB 19 Stefánsson|LB 33 Mensing|CB 28 Sigrist|CB 25 Forsell Schefvert|RB 10 Krištopāns*|RB 6 Balenciaga|P 14 Golla*|P 2 Marchán'},
+  p:'G 32 Palasics*^|G 16 Simić|LW 7 D. Mandić|LW 11 Ignatow^|RW 73 Kastening|RW 31 D. García^|LB 24 D. Dujshebaev|LB 19 Stefánsson|LB 33 Mensing^|CB 28 Sigrist^|CB 25 Forsell Schefvert|RB 10 Krištopāns*^|RB 6 Balenciaga|P 14 Golla*^|P 2 Marchán'},
  {c:'PLO',n:'Orlen Wisła Płock',tier:7,home:['#1b5fae','#ffffff','#1b5fae','#ffffff'],away:['#ffffff','#1b5fae','#ffffff','#1b5fae'],
-  p:'G 16 Vujović*|G 32 Alilović|LW 66 F. Bjerre|LW 34 Mihić|RW 9 Szyszko|RW 3 Baszek|LB 99 Kosorotov*|LB 49 Szita|CB 8 M. Janc*|CB 23 Zarabec|RB 22 Richardson*|RB 43 Ilić*|P 17 Serdio*|P 19 Šušnja|P 33 Dawydzik'},
+  p:'G 16 Vujović*^|G 32 Alilović|LW 66 F. Bjerre^|LW 34 Mihić|RW 9 Szyszko|RW 3 Daszek^|LB 99 Kosorotov*^|LB 49 Szita|CB 8 M. Janc*^|CB 23 Zarabec|RB 22 Richardson*^|RB 43 Ilić*|P 17 Serdio*^|P 19 Šušnja|P 33 Dawydzik'},
  {c:'VAR',n:'Vardar 1961',tier:6,home:['#c8102e','#111111','#111111','#ffffff'],away:['#ffffff','#c8102e','#ffffff','#c8102e'],
   p:'G 25 Wałach*|G 99 Gogov|LW 2 M. Stojanovski|LW 11 Popovski|RW 3 Vorkapić|RW 10 Keita|LB 15 Ljevar*|LB 77 Gjorcheski|CB 66 Malus*|CB 14 Nechovski|RB 13 Mitrović|RB 34 J. P. da Silva|P 78 W. Jankowski|P 18 Lazarevski'},
  {c:'AAL',n:'Aalborg Håndbold',tier:9,home:['#d4141c','#ffffff','#d4141c','#ffffff'],away:['#ffffff','#d4141c','#ffffff','#d4141c'],
   p:'G 12 Norsten*^|G 1 Landin*|LW 19 M. Landin*^|LW 17 Blonz|RW 18 T. Nielsen*^|RW 4 Wiesmach*|LB 7 Arnoldsen*^|LB 25 Munk*|LB 5 Sagosen*|LB 8 Rønningen|CB 21 Knorr*^|RB 14 Hoxer*^|RB 3 L. Nilsson|RB 9 Helland Anderson|P 11 Hald*^|P 20 F. Möller'},
  {c:'PSG',n:'Paris Saint-Germain',tier:9,home:['#0b1f4b','#e30613','#0b1f4b','#ffffff'],away:['#ffffff','#0b1f4b','#ffffff','#e30613'],
-  p:'G 1 Løvkvist*|G 12 Corrales*|LW 4 Elísson*|LW 9 Mellegård|RW 14 Solé*|RW 10 S. Karlsson|LB 71 Prandi*|LB 25 Lyse|LB 2 Maraš|CB 6 Steins*|CB 5 Y. Omar*|CB 66 Gaudin|RB 7 K. Konan|RB 15 Lafosse|P 21 Syprzak*|P 22 L. Karabatić|P 26 Ladefoged'},
+  p:'G 1 Løvkvist*^|G 12 Corrales*|LW 4 Elísson*^|LW 9 Mellegård|RW 14 Solé*^|RW 10 S. Karlsson|LB 71 Prandi*^|LB 25 Lyse|LB 2 Maraš|CB 6 Steins*^|RB 5 Y. Omar*^|CB 66 Gaudin|RB 7 K. Konan|RB 15 Lafosse|P 21 Syprzak*^|P 22 L. Karabatić|P 26 Ladefoged'},
  {c:'ZAG',n:'HC Zagreb',tier:6,home:['#1d4f9c','#ffffff','#1d4f9c','#ffffff'],away:['#ffffff','#1d4f9c','#ffffff','#1d4f9c'],
   p:'G 99 Kastelic*|G 26 Suljević|LW 17 Štrlek*|LW 78 Sadouski|RW 57 Glavaš|RW 81 Tufegdžić|LB 14 Mamić*|LB 8 Cesko|LB 47 Bialiauski|CB 18 Karačić*|CB 23 Pavlović|RB 33 J. Nikolić|RB 11 Tskhovrebadze|P 22 Raužan|P 7 Topić'},
  {c:'CEL',n:'RK Celje',tier:5,home:['#f5c400','#0d3b8c','#0d3b8c','#0d3b8c'],away:['#0d3b8c','#f5c400','#0d3b8c','#ffffff'],
   p:'G 16 Bevc|G 1 Cesek|LW 6 Mazej|LW 15 Ajšić|RW 30 G. Marguč|RW 11 Grabar|LB 24 Miličević|LB 55 Ž. Mlakar|CB 7 Ž. Kovač|CB 8 Anžič|RB 19 M. Marguč|RB 10 Uzunchev|P 89 Heiß|P 44 Hurtado'},
  {c:'SCP',n:'Sporting CP',tier:8,home:['#00804a','#ffffff','#111111','#ffffff'],away:['#ffffff','#00804a','#ffffff','#00804a'],
-  p:'G 92 Mohamed Aly*|G 20 A. Kristensen|LW 17 Þorkelsson*|LW 22 Branquinho|RW 5 C. Álvarez|RW 19 Gassama|LB 13 Salvador*|LB 8 Gurri|LB 7 Suárez|CB 79 Martim Costa*|CB 26 F. Monteiro|RB 6 Francisco Costa*|RB 23 Manojlović|P 44 Moga*|P 93 Romero'},
+  p:'G 92 Mohamed Aly*^|G 20 A. Kristensen|LW 17 Þorkelsson*^|LW 22 Branquinho|RW 5 C. Álvarez^|RW 19 Gassama|LB 13 Salvador*^|LB 8 Gurri|LB 7 Suárez|CB 79 Martim Costa*^|CB 26 F. Monteiro|RB 6 Francisco Costa*^|RB 23 Manojlović|P 44 Moga*^|P 93 Romero'},
  {c:'SZE',n:'OTP Bank-Pick Szeged',tier:8,home:['#0057a8','#ffffff','#0057a8','#ffffff'],away:['#ffffff','#0057a8','#ffffff','#0057a8'],
   p:'G 80 Portner*|G 16 Mikler|LW 18 Jelinić*|LW 25 Frimmel|RW 24 Šoštarić*|RW 93 Szilágyi|LB 51 Mačkovšek*|LB 77 M. Rød*|LB 44 Horiha|CB 34 Kukić|CB 7 Lukács|RB 11 Sandell*|RB 97 Matić|P 27 Bánhidi*|P 45 Rosta|P 31 Toto'},
  {c:'GOG',n:'GOG',tier:7,home:['#f5c400','#13294b','#13294b','#13294b'],away:['#13294b','#f5c400','#13294b','#f5c400'],
-  p:'G 1 K. Møller*|G 12 F. Wolff|LW 17 Dalby|LW 21 Kildelund|RW 33 I. Persson*|RW 34 Münster-Hansen|LB 78 Ó. Mittún*|LB 8 M. Zehnder*|LB 7 Vilhelmsen|CB 29 H. Lykke*|CB 3 N. Pedersen|RB 2 E. K. Bak|RB 24 E. Sørensen|P 4 Magaard*|P 13 L. Balstad'},
+  p:'G 1 K. Møller*^|G 12 F. Wolff|LW 17 Dalby|LW 21 Kildelund|RW 33 I. Persson*^|RW 34 Münster-Hansen|LB 78 Ó. Mittún*|LB 8 M. Zehnder*^|LB 7 Vilhelmsen|CB 29 H. Lykke*^|CB 3 N. Pedersen|RB 2 E. K. Bak|RB 24 E. Sørensen|P 4 Magaard*^|P 13 L. Balstad|RB 79 Tønnesen*'},
  {c:'KRI',n:'IFK Kristianstad',tier:5,home:['#0a4ea2','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#0a4ea2','#0a4ea2','#0a4ea2'],
   p:'G 1 Skoog|G 12 Oredsson|LW 20 Frend Öfors*|LW 18 L. Kjellman|RW 14 Leyman|RW 51 Barnestam|LB 13 Ó. Guðmundsson*|LB 22 Aðalsteinsson|LB 6 Henningsson|CB 9 A. Hallbäck|CB 24 Bjarnason|RB 77 Erlingsson|RB 28 Ivarsson|P 17 Petrović|P 10 Höghielm'},
  {c:'BAR',n:'Barça',tier:10,home:['#a50044','#004d98','#004d98','#f6c400'],away:['#f6c400','#a50044','#a50044','#a50044'],
-  p:'G 23 Hernández*|G 1 Hallgrímsson|LW 11 D. Fernández*|LW 83 Barrufet|RW 20 Gómez*|RW 25 Sola|LB 6 Carlsbogard*|LB 19 N\'Guessan|LB 70 San Felipe|CB 88 P. Cikusa*|CB 3 Smárason|CB 45 S. Elderaa|RB 9 Mem*|RB 18 B. Janc|RB 10 Dj. Cikusa|P 72 Fabregas*|P 82 Frade*'},
+  p:'G 23 Hernández*^|G 1 Hallgrímsson|LW 11 D. Fernández*^|LW 83 Barrufet|RW 20 Gómez*^|RW 25 Sola|LB 6 Carlsbogard*|LB 19 N\'Guessan^|LB 70 San Felipe|CB 88 P. Cikusa*^|CB 3 Smárason|CB 45 S. Elderaa|RB 9 Mem*^|RB 18 B. Janc|RB 10 Dj. Cikusa|P 72 Fabregas*^|P 82 Frade*'},
  {c:'MON',n:'Montpellier HB',tier:7,home:['#1b3f8f','#f28c00','#1b3f8f','#ffffff'],away:['#ffffff','#1b3f8f','#ffffff','#f28c00'],
   p:'G 92 Desbonnet*|G 12 Bolzinger|LW 97 Paschal|LW 61 Diaz|RW 22 Richert|RW 34 Balaguer|LB 11 Srna*|LB 18 Casado*|CB 5 Villeminot*|CB 9 Valera|RB 15 Thurin|RB 28 Porte|P 19 A. Lenne|P 13 Moraes'},
  {c:'DIN',n:'Dinamo București',tier:6,home:['#d50000','#ffffff','#d50000','#ffffff'],away:['#ffffff','#d50000','#ffffff','#d50000'],
-  p:'G 1 Iancu*|G 34 Bellahcene|LW 20 Dumitru|LW 23 Lenbroch|RW 55 Akimenko|RW 5 Nistor|LB 9 Pergel*|LB 94 Militaru|LB 7 Buzle|CB 10 M. Martins*|CB 22 Valdés|RB 2 B. Vujović|RB 77 Dodica|P 4 Iturriza*|P 6 Dedu'},
+  p:'G 1 Iancu*^|G 34 Bellahcene|LW 20 Dumitru|LW 23 Lenbroch^|RW 55 Akimenko^|RW 5 Nistor|LB 9 Pergel*|LB 94 Militaru|LB 7 Buzle^|CB 10 M. Martins*^|CB 22 Valdés|RB 2 B. Vujović^|RB 77 Dodica|P 4 Iturriza*^|P 6 Dedu'},
  {c:'SAH',n:'SAH Aarhus',tier:5,home:['#151515','#f2c200','#151515','#f2c200'],away:['#f2c200','#151515','#f2c200','#151515'],
   p:'G 12 Brandbyge*|G 21 M. K. Petersen|LW 25 Cieslak|LW 5 A. Jensen|RW 29 J. V. Larsen*|LB 7 Dreyer|LB 13 G. Bruun|LB 15 Lærke|CB 20 M. B. Christensen*|CB 33 Søberg|CB 32 Olsson|RB 26 J. á Plógv Hansen*|RB 3 K. Ö. Kristjánsson*|RB 14 O. Hansen|P 34 J. Poulsen|P 17 A. S. Rasmussen'},
  {c:'SCM',n:'SC Magdeburg',tier:10,home:['#0b8a3b','#d6001c','#0b8a3b','#ffffff'],away:['#ffffff','#0b8a3b','#ffffff','#d6001c'],
-  p:'G 1 Kuzmanović*|G 12 M. Mandić|LW 22 Mertens*|LW 6 Musche|RW 11 Pettersson*|RW 9 O. Rasmussen|LB 19 E. Ö. Jónsson*|LB 20 Weber|LB 53 Kretzschmar|CB 10 G. Kristjánsson*|CB 7 Claar*|CB 13 Brigzinsky|RB 14 Magnússon*|RB 21 Lagergren*|P 23 Saugstrup*|P 54 Bergendahl'},
+  p:'G 1 Kuzmanović*^|G 12 M. Mandić|LW 22 Mertens*^|LW 6 Musche|RW 11 Pettersson*|RW 9 O. Rasmussen^|LB 19 E. Ö. Jónsson*^|LB 20 Weber|LB 53 Kretzschmar|CB 10 G. Kristjánsson*^|CB 7 Claar*|CB 13 Brigzinsky|RB 14 Magnússon*^|RB 21 Lagergren*|P 23 Saugstrup|P 54 Bergendahl^'},
  {c:'KIE',n:'Industria Kielce',tier:8,home:['#f5c400','#0047ab','#0047ab','#0047ab'],away:['#0047ab','#f5c400','#0047ab','#ffffff'],
-  p:'G 96 Milosavljev*|G 1 Morawski|LW 99 Nahi*|LW 98 P. Jarosiewicz|RW 23 Moryto*|RW 11 Kounkoud*|LB 9 Sićko*|LB 37 M. Bakić|LB 71 Rabchynski|CB 88 Vlah*|CB 4 Jędraszczyk|RB 10 Klarica|RB 13 J. Bos|P 50 Karalek*|P 97 Monar'},
+  p:'G 96 Milosavljev*^|G 1 Morawski|LW 99 Nahi*^|LW 98 P. Jarosiewicz|RW 23 Moryto|RW 11 Kounkoud*^|LB 9 Sićko|LB 37 M. Bakić|LB 71 Rabchynski^|CB 88 Vlah*^|CB 4 Jędraszczyk|RB 10 Klarica|RB 13 J. Bos^|P 50 Karalek*|P 97 Monar^'},
  {c:'KOL',n:'Kolstad Håndball',tier:7,home:['#0b3d91','#ffffff','#0b3d91','#ffffff'],away:['#ffffff','#0b3d91','#ffffff','#0b3d91'],
   p:'G 16 Neupart*|G 1 Orheim|LW 7 Aalberg|LW 17 Stølefjell|RW 72 E. Johnsen|RW 18 E. M. S. Jakobsen|LB 22 Jeppsson*|LB 23 Johannessen*|LB 4 Eck Aga|CB 11 Ask|CB 96 Bore|RB 27 Hegle|RB 3 Berge|P 14 Gullerud*|P 24 Vestli'},
  {c:'KLU',n:'HC Kriens-Luzern',tier:5,home:['#151515','#f28c00','#151515','#f28c00'],away:['#f28c00','#151515','#f28c00','#151515'],
@@ -337,8 +337,13 @@ function buildTeam(T){
     const lefty=(pos==='RB'||pos==='RW')!==m[4].includes('!');                // RB/RW er normalt venstrehåndede, ! vender det
     return {num:+m[2],name,pos:pos==='G'?'GK':pos==='P'?'PV':pos,r,star,start:m[4].includes('^'),pen:m[4].includes('~'),hand:lefty?'L':'R',key:KEYS[pos]};
   });
-  return {name:T.n,short:T.c,roster};
+  return {name:T.n,short:T.c,roster,style:STYLE[T.c]||'balance'};
 }
+// holdstil: kontra (hurtige fløje og anden bølge), tempo (bolden kører hurtigt), taktisk (tålmodigt angreb, aggressivt forsvar), fysisk (stregspil og hårdt forsvar)
+const STYLE={DEN:'kontra',SWE:'kontra',NOR:'tempo',ISL:'tempo',SLO:'tempo',POR:'tempo',FRA:'taktisk',ESP:'taktisk',CRO:'taktisk',GER:'fysisk',HUN:'fysisk',MKD:'fysisk',SRB:'fysisk',MNE:'fysisk',POL:'fysisk',AUT:'fysisk',
+  AAL:'kontra',GOG:'kontra',SAH:'kontra','FÜC':'kontra',KRI:'kontra',BAR:'taktisk',PSG:'taktisk',VES:'taktisk',MON:'taktisk',NAN:'tempo',SCM:'tempo',SCP:'tempo',KOL:'tempo',KIE:'fysisk',PLO:'fysisk',MTM:'fysisk',SZE:'fysisk',VAR:'fysisk',ZAG:'fysisk',PAR:'fysisk',DIN:'fysisk',CEL:'tempo',KLU:'tempo'};
+const STYLE_NAME={kontra:'Kontra',tempo:'Højt tempo',taktisk:'Taktisk',fysisk:'Fysisk',balance:'Balanceret'};
+const sty=t=>(TEAMDATA&&TEAMDATA[t]&&TEAMDATA[t].style)||'balance';
 const lineupScore=d=>(d.start?1000:0)+(d.star?100:0)+d.key.reduce((a,k)=>a+d.r[k],0);
 const hexRgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
 const colDist=(a,b)=>{ const A=hexRgb(a),B=hexRgb(b); return Math.hypot(A[0]-B[0],A[1]-B[1],A[2]-B[2]); };
@@ -407,7 +412,7 @@ const SHOT={
 };
 const ATT={LW:[1.0,2.4],LB:[5.3,10.2],CB:[10,10.8],RB:[14.7,10.2],RW:[19,2.4],PV:[10,6.5]};
 const isWing=p=>p.role==='LW'||p.role==='RW';
-const newTrans=(t,early)=>({team:t,t:0,early:!!early,LW:rnd()<0.95,RW:rnd()<0.95}); // fløjene løber kontra i ca. 95 % af tilfældene
+const newTrans=(t,early)=>{ const pr=sty(t)==='kontra'?1:sty(t)==='taktisk'?0.88:0.95; return {team:t,t:0,early:!!early,LW:rnd()<pr,RW:rnd()<pr}; }; // kontrahold løber altid // fløjene løber kontra i ca. 95 % af tilfældene
 const DSLOT={LW:0,LB:1,CB:2,PV:3,RB:4,RW:5}, SLOTS=[1.7,4.7,8.0,12.0,15.3,18.3];
 
 /* ================= HJÆLPERE ================= */
@@ -480,13 +485,14 @@ function give(q){
   q.aiT=q.role==='GK'?(fast?0.35:0.9):(fast?0.25+rnd()*0.2:0.55+rnd()*0.7);
   if(!fast&&q.role.endsWith('B')&&posAtt(q.team)) q.aiT=0.38+rnd()*0.22;  // bagspiller: kort stød frem mod forsvaret, så afgør
   if(!fast&&isWing(q)&&posAtt(q.team)) q.aiT=0.3+rnd()*0.2;
-  q.holdT=0; if(q.role==='GK') q.longPlan=rnd()<0.16;                      // målmanden: 20 % langt udkast til fløjen, ellers kort
+  { const st=sty(q.team); if(!fast&&q.role!=='GK') q.aiT*=st==='tempo'?0.8:st==='taktisk'?1.2:1; } // tempohold spiller hurtigere, taktiske hold er tålmodige
+  q.holdT=0; if(q.role==='GK') q.longPlan=rnd()<(sty(q.team)==='kontra'?0.26:0.16);                      // målmanden: 20 % langt udkast til fløjen, ellers kort
   for(const p of players) if(p.role==='GK'&&!(p===q&&p.plan)) p.plan=null;
 }
 // positionsangreb: ikke kontra, eller forsvaret er kommet på plads (mindst 4 forsvarere inden for 9,5 m)
 function posAtt(t){ if(!(trans&&trans.team===t)) return true; let n=0; for(const o of players) if(o.team!==t&&o.role!=='GK'&&L(t,o.x,o.y).d<9.5) n++; return n>=4; }
 // anden bølge: kontra uden fri fløj, før forsvaret er på plads – bagspillerne kommer i fuld fart
-function secondWave(t){ if(!(trans&&trans.team===t&&!trans.early&&trans.t<5)) return false; let n=0; for(const o of players) if(o.team!==t&&o.role!=='GK'&&L(t,o.x,o.y).d<8.2) n++; return n<5; }
+function secondWave(t){ if(!(trans&&trans.team===t&&!trans.early&&trans.t<(sty(t)==='kontra'?6:sty(t)==='taktisk'?3.5:5))) return false; let n=0; for(const o of players) if(o.team!==t&&o.role!=='GK'&&L(t,o.x,o.y).d<8.2) n++; return n<5; }
 function attTeam(){ if(phase==='fetch'&&fetch) return fetch.team; if(phase==='goal'&&celebTeam>=0) return 1-celebTeam; if(ball.holder) return ball.holder.team; if(ball.mode==='loose') return poss; return ball.lastTeam; }
 function gkOf(t){ return players.find(p=>p.team===t&&p.role==='GK'); }
 function nearest(team,x,y,fieldOnly=true,excl=null){
@@ -580,6 +586,11 @@ function scoreGoal(team,text,x,z,gy){
 }
 
 /* ================= SKUD ================= */
+// signaturskud: hver spiller har et foretrukket skud ud fra position og profil; stjerner bruger det oftere og lidt mere præcist
+const SIGS={wing:['langt','ben','top'],back:['hofte','top','kraft','langt'],PV:['ben','top','langt']};
+const SIG_NAME={langt:'i det lange hjørne',ben:'mellem benene',top:'oppe i hjørnet',hofte:'ved hoften',kraft:'kanonskud'};
+function sigOf(p){ if(!p.rid) return null; const L0=isWing(p)?SIGS.wing:p.role==='PV'?SIGS.PV:p.role==='GK'?null:SIGS.back; if(!L0) return null;
+  if(p.rid.sig===undefined) p.rid.sig=L0[Math.floor(hashN(p.name+'sig')*L0.length)]; return p.rid.sig; }
 function angled0(p){ const l=L(p.team,p.x,p.y); return Math.abs(l.lx-10)>5&&l.d<8.5; }
 function chooseShot(p){
   const l=L(p.team,p.x,p.y);
@@ -616,7 +627,14 @@ function launchShot(p){
     ax=(k.x<10?1:-1)*(0.5+rnd()*0.45); if(t===1) ax=(k.x<10?1:-1)*(0.5+rnd()*0.45);
     if(rnd()<0.25) ax=-ax; const hr=rnd(); zl=hr<0.45?0.35:hr<0.9?1.65:1.0;
     if(p.role.endsWith('B')&&p.shot.type!=='fall') zl=frontDef(p)<1.6?1.75:0.4; // tæt forsvarer: over blokken, ellers lavt forbi ham ved hoften
-    if(isWing(p)&&angled0(p)){ const r=rnd(), far=Math.sign(10-p.x)||1;     // fløjskud: langt hjørne, nærmeste hjørne højt eller mellem benene
+    const sg=sigOf(p);
+    if(sg&&!p.wasSeven&&rnd()<(p.rid.star?0.55:0.3)){ const far=Math.sign(10-p.x)||1; p.shot.sig=sg;   // spillerens eget skud
+      if(sg==='langt'){ ax=far*(0.75+rnd()*0.2); zl=rnd()<0.5?0.4:1.6; }
+      else if(sg==='ben'){ ax=(k.x-10)/1.32; zl=0.22; p.shot.legs=true; }
+      else if(sg==='top'){ ax=(rnd()<0.5?-1:1)*(0.75+rnd()*0.2); zl=1.8; }
+      else if(sg==='hofte'){ ax=-Math.sign(k.x-10||1)*(0.7+rnd()*0.2); zl=0.55; }
+      else { ax=(rnd()<0.5?-1:1)*(0.55+rnd()*0.35); zl=rnd()<0.5?0.5:1.6; } }
+    else if(isWing(p)&&angled0(p)){ const r=rnd(), far=Math.sign(10-p.x)||1;     // fløjskud: langt hjørne, nærmeste hjørne højt eller mellem benene
       if(r<0.55){ ax=far*(0.72+rnd()*0.22); zl=rnd()<0.6?0.4:1.6; }
       else if(r<0.78){ ax=-far*(0.7+rnd()*0.2); zl=1.75; }
       else { ax=(k.x-10)/1.32; zl=0.22; p.shot.legs=true; } }
@@ -629,19 +647,19 @@ function launchShot(p){
   const lob=false; // hængning er slået fra (v0.19.1)
   if(lob){ ax=clamp((k.x-10)/1.32*0.4+(rnd()-0.5)*0.6,-0.8,0.8); zl=1.55; p.shot.lob=true; p.shot.legs=false; }
   const lp=L(t,p.x,p.y), angled=p.shot.type==='wing'||(Math.abs(lp.lx-10)>6&&lp.d<7);
-  let err=(lob?0.6:1)*(p.wasSeven?0.9:1)*sp.err+(frontDef(p)<1.2?0.22:0)+(Math.abs(lp.lx-10)>7?0.06:0)
+  let err=(lob?0.6:1)*(p.wasSeven?0.9:1)*(p.shot.sig?0.88:1)*sp.err+(frontDef(p)<1.2?0.22:0)+(Math.abs(lp.lx-10)>7?0.06:0)
     +Math.max(0,sd-9.5)*0.07*(1.6-rv(p,'skud')*0.12);           // langskud: kun gode skytter rammer langt fra
   err*=(1.5-rv(p,'praecision')*0.1)*(1+(1-(p.sta??1))*0.35);    // præcision (og træthed)
   if(angled) err+=(10-rv(p,'vinkel'))*0.04;                      // fløjskud og spidse vinkler: fløjene er bedst
   const tx=10+ax*1.32+gauss()*err, tz=Math.max(0.15,zl+gauss()*err*0.7);
   const rx=p.x+p.face*0.15, ry=p.y, rz=p.z+(p.shot.type==='fall'?1.45:p.shot.type==='under'?1.0:2.05);
-  const speed=lob?7.2+rnd()*1.2:sp.spd*(0.85+rv(p,'skud')*0.03)*(0.93+rnd()*0.12)*(sd>12?Math.max(0.78,1-(sd-12)*0.02):1);
+  const speed=lob?7.2+rnd()*1.2:(p.shot.sig==='kraft'?1.1:1)*sp.spd*(0.85+rv(p,'skud')*0.03)*(0.93+rnd()*0.12)*(sd>12?Math.max(0.78,1-(sd-12)*0.02):1);
   const dd=Math.hypot(tx-rx,gy-ry), tt=dd/speed;
   b.mode='shot'; b.holder=null; b.x=rx; b.y=ry; b.z=rz;
   b.vx=(tx-rx)/tt; b.vy=(gy-ry)/tt; b.vz=(tz-rz+0.5*G*tt*tt)/tt;
   b.lastTeam=t; b.shooter=p; b.passer=null; b.age=0; b.checked=new Set([p]);
   b.curve=null; b.trail=null; b.frame=null;
-  if(lob) msg('Hængning!'); else if(p.shot.legs) msg('Mellem benene!');
+  if(lob) msg('Hængning!'); else if(p.shot.sig&&p.rid&&p.rid.star&&rnd()<0.5) msg(`${p.name}: ${SIG_NAME[p.shot.sig]}`); else if(p.shot.legs) msg('Mellem benene!');
   if(!lob&&!p.shot.legs&&p.shot.type==='wing'&&rv(p,'vinkel')>=7&&rnd()<0.14){ // skrueskud: bolden starter udad og drejer ind mod målet
     const sp=Math.hypot(b.vx,b.vy), nx=-b.vy/sp, ny=b.vx/sp, s0=Math.sign(nx*(10-p.x))||1, D=0.5, a=2*D/(tt*tt);
     const ax2=tx-s0*D*nx, ay2=gy-s0*D*ny; b.vx=(ax2-rx)/tt; b.vy=(ay2-ry)/tt;
@@ -860,7 +878,7 @@ function bestTarget(p){
     if(p.role==='GK'&&(d>16||isWing(q))) s-=8;                                    // målmanden kaster oftest kort
     if(trans&&trans.team===p.team&&(q.role==='LW'||q.role==='RW')&&defendersAhead(q)===0) s+=p.role==='GK'?0:6;
     else if(isWing(q)&&p.role!=='GK'&&L(p.team,p.x,p.y).d>11) s-=6;             // opspil: bagspillerne driver bolden op, fløjene står i hjørnet
-    if(q.role==='PV'&&!laneBlocked(p,q)&&openness(q)>1.0&&d<9) s+=1.3+rv(p,'aflevering')*0.15; // indspil til stregen
+    if(q.role==='PV'&&!laneBlocked(p,q)&&openness(q)>1.0&&d<9) s+=1.3+rv(p,'aflevering')*0.15+(sty(p.team)==='fysisk'?1.2:0); // indspil til stregen (fysiske hold mere)
     if(secondWave(p.team)&&q.role.endsWith('B')&&openness(q)>2.4&&L(q.team,q.x,q.y).d<L(p.team,p.x,p.y).d) s+=2.2; // anden bølge: spil den frie bagspiller i fart
     if(!opts&&p.role!=='GK'&&posAtt(p.team)){ const i=LINE.indexOf(p.role), j=LINE.indexOf(q.role); // positionsangreb: bolden kører videre til næste mand
       if(i>=0&&j>=0){ const st=j-i; if(st===wave[p.team]) s+=2.0; else if(Math.abs(st)===1) s+=0.8; else s-=2.6*(Math.abs(st)-1);                  // lange tværafleveringer er sjældne
@@ -903,6 +921,7 @@ function aiCarrier(p,dt){
   else if(p.role==='PV') shoot=l.d<8.5&&r<0.7;
   else if(l.d<10.8) shoot=nd>1.8?r<0.6:nd>1.1?r<0.3:r<0.1;                 // mødt af forsvareren: oftest videre                          // mødt af forsvareren: spil bolden videre
   if(secondWave(p.team)&&p.role.endsWith('B')&&l.d<11.5){ shoot=nd>1.5?r<0.7:r<0.2; if(shoot) msg('Anden bølge'); } // afslut før forsvaret står
+  if(shoot&&!wing&&sty(p.team)==='taktisk'&&passCount<4&&nd<2.5&&rnd()<0.35) shoot=false;        // taktisk hold: flere afleveringer før skud
   if(passCount>9&&l.d<10.5) shoot=true;
   if(passive&&passive.passes>=2&&l.d<12) shoot=true; // advarsel: computeren afslutter
   if(l.d>9.6+rv(p,'skud')*0.18||p.throwIn) shoot=false;
@@ -961,7 +980,7 @@ function defenseTarget(p){
   const t=p.team, o=1-t, bl=L(o,ball.x,ball.y);
   const f=stepper[t]===p?focusFor(t):null;
   if(f){ const fl=L(o,f.x,f.y); const dx=10-fl.lx, dy=0.5-fl.d, n=Math.hypot(dx,dy)||1;
-    let lx=fl.lx+dx/n*1.05, d=fl.d+dy/n*1.05; d=clamp(d,sixLine(lx)+0.35,9.0); return W(o,lx,d); } // træder ud, men ikke længere end ca. 9 m
+    let lx=fl.lx+dx/n*1.05, d=fl.d+dy/n*1.05; d=clamp(d,sixLine(lx)+0.35,(sty(t)==='taktisk'||sty(t)==='fysisk')?9.8:9.0); return W(o,lx,d); } // aggressive forsvar træder længere ud // træder ud, men ikke længere end ca. 9 m
   const far=bl.d>14, shift=far?0:clamp((bl.lx-10)*0.3,-2.4,2.4);
   // pladserne regnes i angriberens koordinater, så de spejles: en spiller forsvarer på samme side af banen, som han angriber på
   let lx=SLOTS[5-DSLOT[p.role]]; lx=10+(lx-10)*(far?0.8:1)+shift;
@@ -1278,7 +1297,7 @@ function step(dt){
   if(phase==='play'&&ball.holder&&ball.holder.role!=='GK'){ const c=ball.holder;
     if(!c.throwIn&&!c.seven&&!c.kick&&!c.gt&&L(c.team,c.x,c.y).d<9.5) for(const o of players){
       if(o.team===c.team||o.role==='GK'||(o===ctrl&&!AUTO)||o.down>0||o.tack||dist(o,c)>1.15) continue;
-      if(rnd()<(c.shot?0.4:0.14)*dt&&clearChance(c,o)){ foul(c,o,c.shot?(c.z>0.05?'Frikast':'Frikast – arm'):(rnd()<0.55?'Frikast – holdt fast':'Frikast – takling bagfra')); break; } } }
+      if(rnd()<(c.shot?0.4:0.14)*(sty(o.team)==='fysisk'?1.4:1)*dt&&clearChance(c,o)){ foul(c,o,c.shot?(c.z>0.05?'Frikast':'Frikast – arm'):(rnd()<0.55?'Frikast – holdt fast':'Frikast – takling bagfra')); break; } } }
   // stepper & chasers
   for(const t of [0,1]){
     const f=focusFor(t); stepper[t]=null; helper[t]=null;
@@ -1857,7 +1876,7 @@ function updateTeamsUI(){
   $('nA').textContent=teamSel[0]; $('nB').textContent=teamSel[1];
   $('subTxt').textContent=(league==='cl'?'EHF Champions League 2026/27.':'EM 2026, herrer.')+' Du angriber opad. Hallgulv, kamptid og styring finder du under Indstillinger.';
   const show=(T,sel)=>{ const bt=buildTeam(T), xi=['GK','LW','LB','CB','RB','RW','PV'].map(r=>bt.roster.filter(x=>x.pos===r).sort((a,b)=>lineupScore(b)-lineupScore(a))[0]).filter(Boolean);
-    return `<div><span class="kit" style="background:${T.home[0]}"></span><b>${T.n}</b><br>${xi.map(x=>`${x.pos.replace('PV','ST')} ${x.num} ${x.name}`).join('<br>')}</div>`; };
+    return `<div><span class="kit" style="background:${T.home[0]}"></span><b>${T.n}</b><br><span style="opacity:.7">Stil: ${STYLE_NAME[STYLE[T.c]||'balance']}</span><br>${xi.map(x=>`${x.pos.replace('PV','ST')} ${x.num} ${x.name}`).join('<br>')}</div>`; };
   $('lineup').innerHTML=show(A)+((typeof gameMode!=='undefined'&&gameMode==='tour')?'':show(B));
 }
 function fillSelects(){
