@@ -2,6 +2,12 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.19.1 – 2026-11-01 – Fløjløb og målmandens udkast
+- Hængning er slået fra igen. Det var den, der gav de pludselig langsomme skud
+- Fløjene løber kontra igen: de sprinter ud langs sidelinjen et godt stykke foran bolden (langt op, når målmanden har den) i ca. 95 % af kontraerne. Før joggede de kun et par meter foran sig selv. Går kontraen i stå, stiller de sig i hjørnet
+- Målmandens udkast: ca. 80 % korte til en nærliggende medspiller og ca. 20 % lange, hårde udkast til en fri fløj. Det gælder begge hold
+- Når din målmand har bolden: Skud = langt, hårdt udkast til en fløj (styr til siden for at vælge fløj, ellers den mest frie), Aflever = kort udkast
+
 ## v0.19.0 – 2026-11-01 – Anden bølge og fløjskud
 - Anden bølge: er der ingen fri fløj i kontra, og er forsvaret ikke på plads, sprinter bagspillerne op i deres baner. Boldholderen går mod 9 m og afslutter, eller spiller den frie bagspiller i fart, før forsvaret står
 - Målmandens placering:

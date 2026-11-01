@@ -1,4 +1,4 @@
-<title>Håndbold v0.19.0</title>
+<title>Håndbold v0.19.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -162,7 +162,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.19.0';
+const VERSION='0.19.1';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -406,7 +406,7 @@ const SHOT={
 };
 const ATT={LW:[1.0,2.4],LB:[5.3,10.2],CB:[10,10.8],RB:[14.7,10.2],RW:[19,2.4],PV:[10,6.5]};
 const isWing=p=>p.role==='LW'||p.role==='RW';
-const newTrans=(t,early)=>({team:t,t:0,early:!!early,LW:rnd()<0.88,RW:rnd()<0.88}); // fløjene løber i ca. 88 % af tilfældene
+const newTrans=(t,early)=>({team:t,t:0,early:!!early,LW:rnd()<0.95,RW:rnd()<0.95}); // fløjene løber kontra i ca. 95 % af tilfældene
 const DSLOT={LW:0,LB:1,CB:2,PV:3,RB:4,RW:5}, SLOTS=[1.7,4.7,8.0,12.0,15.3,18.3];
 
 /* ================= HJÆLPERE ================= */
@@ -479,7 +479,7 @@ function give(q){
   q.aiT=q.role==='GK'?(fast?0.35:0.9):(fast?0.25+rnd()*0.2:0.55+rnd()*0.7);
   if(!fast&&q.role.endsWith('B')&&posAtt(q.team)) q.aiT=0.38+rnd()*0.22;  // bagspiller: kort stød frem mod forsvaret, så afgør
   if(!fast&&isWing(q)&&posAtt(q.team)) q.aiT=0.3+rnd()*0.2;
-  q.holdT=0;
+  q.holdT=0; if(q.role==='GK') q.longPlan=rnd()<0.16;                      // målmanden: 20 % langt udkast til fløjen, ellers kort
   for(const p of players) if(p.role==='GK'&&!(p===q&&p.plan)) p.plan=null;
 }
 // positionsangreb: ikke kontra, eller forsvaret er kommet på plads (mindst 4 forsvarere inden for 9,5 m)
@@ -597,7 +597,7 @@ function launchShot(p){
   const sd=Math.hypot(p.x-10,p.y-gy); p.shot.dist=sd;
   const kOut=Math.abs(k.y-gy), human=!(p.shot.ai||p!==ctrl||AUTO);
   // hængning: målmanden er gået ud – bolden løftes over ham (computeren selv, du ved at sigte højt)
-  const lob=kOut>1.0&&sd<11&&p.shot.type!=='under'&&(human?joy.y<-0.35:(isWing(p)?rnd()<0.65:rnd()<0.4));
+  const lob=false; // hængning er slået fra (v0.19.1)
   if(lob){ ax=clamp((k.x-10)/1.32*0.4+(rnd()-0.5)*0.6,-0.8,0.8); zl=1.55; p.shot.lob=true; p.shot.legs=false; }
   const lp=L(t,p.x,p.y), angled=p.shot.type==='wing'||(Math.abs(lp.lx-10)>6&&lp.d<7);
   let err=(lob?0.6:1)*sp.err+(frontDef(p)<1.2?0.22:0)+(Math.abs(lp.lx-10)>7?0.06:0)
@@ -781,14 +781,15 @@ function resolveTackle(p,c){
 }
 
 /* ================= AFLEVERING ================= */
+function longThrow(k,q){ k.hardThrow=true; doPass(k,q); k.hardThrow=false; msg('Langt udkast'); }
 function doPass(p,q){
   const pvLow=q.role==='PV'&&posAtt(p.team)&&p.role!=='GK'&&!p.kick;          // lav stødaflevering til stregen
   const b=ball, rz=1.45, d0=dist(p,q), tz=pvLow?0.55:1.35;
-  const lob=d0>16&&rnd()<(p.role==='GK'?0.45:0.18);               // lang aflevering går af og til højt
+  const lob=!p.hardThrow&&d0>16&&(p.role==='GK'?laneBlocked(p,q)&&rnd()<0.6:rnd()<0.18); // lang aflevering går af og til højt (målmanden kaster fladt, når banen er fri)
   let tx=q.x, ty=q.y, tt=0.3;
   for(let i=0;i<3;i++){ // løs for hvor modtageren er, når bolden når frem
     const d=Math.hypot(tx-p.x,ty-p.y);
-    const sp=clamp(16+d*0.52,16,d>18?25:23)*(lob?0.62:1)*(0.9+rv(p,'aflevering')*0.02)*(posAtt(p.team)&&d<9?1.15:1); // korte afleveringer i positionsspil er hurtigere
+    const sp=clamp(16+d*0.52,16,d>18?25:23)*(lob?0.62:1)*(0.9+rv(p,'aflevering')*0.02)*(posAtt(p.team)&&d<9?1.15:1)*(p.hardThrow?1.2:1); // langt udkast er hårdt // korte afleveringer i positionsspil er hurtigere
     tt=Math.max(0.1,d/sp);
     tx=clamp(q.x+q.vx*tt,0.8,19.2); ty=clamp(q.y+q.vy*tt,0.8,39.2);
   }
@@ -800,13 +801,16 @@ function doPass(p,q){
 }
 // ved opgiverkast spiller stregspilleren kun til en af de tre nærmeste medspillere
 function kickOptions(p){ return players.filter(q=>q.team===p.team&&q!==p&&q.role!=='GK').sort((a,b)=>dist(a,p)-dist(b,p)).slice(0,3); }
+// fri til langt udkast: god afstand til nærmeste modstander og fri bane fra målmanden
+function wingOpen(k,q){ return openness(q)>3.5&&!laneBlocked(k,q)&&dist(k,q)>12; }
 function bestTarget(p){
   let best=null,bs=-1e9; const opts=p.kick?kickOptions(p):null;
   if(opts) return opts[Math.floor(rnd()*opts.length)];
   for(const q of players){ if(q.team!==p.team||q===p||q.role==='GK') continue;
     const d=dist(p,q); let s=openness(q)+rnd()*1.5-(q===p.lastFrom?2:0)-Math.abs(d-7)*0.12-(laneBlocked(p,q)?4:0);
     if(d>18&&!(p.role==='GK'&&trans)) s-=3;
-    if(trans&&trans.team===p.team&&(q.role==='LW'||q.role==='RW')&&defendersAhead(q)===0) s+=6;
+    if(p.role==='GK'&&(d>16||isWing(q))) s-=8;                                    // målmanden kaster oftest kort
+    if(trans&&trans.team===p.team&&(q.role==='LW'||q.role==='RW')&&defendersAhead(q)===0) s+=p.role==='GK'?0:6;
     else if(isWing(q)&&p.role!=='GK'&&L(p.team,p.x,p.y).d>11) s-=6;             // opspil: bagspillerne driver bolden op, fløjene står i hjørnet
     if(q.role==='PV'&&!laneBlocked(p,q)&&openness(q)>1.0&&d<9) s+=1.3+rv(p,'aflevering')*0.15; // indspil til stregen
     if(secondWave(p.team)&&q.role.endsWith('B')&&openness(q)>2.4&&L(q.team,q.x,q.y).d<L(p.team,p.x,p.y).d) s+=2.2; // anden bølge: spil den frie bagspiller i fart
@@ -834,6 +838,12 @@ function aiCarrier(p,dt){
   if(p.feint) return;
   if(p.role!=='GK'&&!p.throwIn&&defendersAhead(p)===0&&l.d<8.8){ startShot(p,true); return; }
   p.holdT=(p.holdT||0)+dt;
+  if(p.role==='GK'&&p.longPlan&&p.holdT>0.25&&!p.throwIn){ // langt udkast: vent på, at en fløj er fri
+    const w=players.filter(q=>q.team===p.team&&isWing(q)&&wingOpen(p,q)).sort((a,b)=>L(a.team,a.x,a.y).d-L(b.team,b.x,b.y).d)[0];
+    if(w){ longThrow(p,w); return; }
+    if(p.holdT<2.4) return;
+    p.longPlan=false;
+  }
   p.aiT-=dt; if(p.aiT>0) return;
   if(p.role==='GK'){ const q=bestTarget(p); if(q) doPass(p,q); return; }
   const r=rnd(), nd=frontDef(p);
@@ -863,9 +873,10 @@ function attackTarget(p){
   if(trans&&trans.team===t&&ball.holder!==p){
     if(wing&&trans[p.role]){
       const pl=L(t,p.x,p.y), side=lx<10?-1:1;
-      const wd=Math.max(4.6,Math.min(pl.d-1,bl.d-10)); let wlx=10+side*8.5;  // løb ude ved sidelinjen, foran bolden
+      const gkHas=ball.holder&&ball.holder.role==='GK'&&ball.holder.team===t;
+      const wd=Math.max(4.6,bl.d-(gkHas?26:11)); let wlx=10+side*8.5;  // sprint ude ved sidelinjen, et godt stykke foran bolden (langt, når målmanden har den)
       if(pl.d<15&&defendersAhead(p)===0) wlx=10+side*3.5;                     // fri bane: skær ind mod midten
-      else if(defendersAhead(p)>0&&(pl.d<16||trans.t>2.2)) return W(t,10+side*9,2.4); // ingen fri kontra: ned og stil dig i hjørnet
+      else if(defendersAhead(p)>0&&trans.t>3.5&&pl.d<9) return W(t,10+side*9,2.4); // kontraen er gået i stå: stil dig i hjørnet
       return W(t,wlx,wd);
     }
   }
@@ -1211,6 +1222,13 @@ function step(dt){
     if(ctrl&&h.team===ctrl.team&&!AUTO&&possT!==null&&possT!==h.team&&L(h.team,h.x,h.y).d>20){ shotLock=0.6; shotPend=null; }
     possT=h.team; }
   if(shotLock>0&&ball.holder===ctrl) btn.shotEdge=false;
+  const gkB=ball.holder&&ball.holder.team===0&&ball.holder.role==='GK'?ball.holder:null;
+  if(gkB&&!AUTO&&phase==='play'&&!gkB.plan&&gkB.holdT>0.15){            // din målmand har bolden: Skud = langt udkast til fløjen, Aflever = kort
+    if(btn.shotEdge){ const jx=joy.x*FS(), ws=players.filter(q=>q.team===0&&isWing(q));
+      const w=Math.abs(jx)>0.3?ws.find(q=>Math.sign(q.x-10)===Math.sign(jx)):ws.sort((a,b)=>openness(b)-openness(a))[0];
+      if(w){ longThrow(gkB,w); btn.shotEdge=false; } }
+    if(btn.passEdge&&ball.holder===gkB){ const q=humanPassTarget(gkB); if(q){ doPass(gkB,q); } btn.passEdge=false; }
+  }
   if(ctrl&&!AUTO&&(phase==='play')){
     if(btn.shotEdge){
       if(ball.holder===ctrl&&ctrl.shot&&ctrl.shot.manual&&!ctrl.shot.released){ ctrl.shot.released=true; launchShot(ctrl); }
