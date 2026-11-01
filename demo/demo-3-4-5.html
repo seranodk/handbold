@@ -1,0 +1,1806 @@
+<title>Håndbold – demo 3, 4 og 5</title>
+<style>#controls,#pauseBtn{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
+<style>
+/* Arena-look: mørk hal, kampur-gul accent, rød hjemmehold. Single dark theme by design. */
+:root{
+  --hall:#0b1422; --panel:#121f33; --panel-2:#1a2b45; --line:rgba(255,255,255,.12);
+  --text:#eef2f7; --muted:#9fb0c6; --clock:#f5b83d; --home:#d8322f; --go:#2f8f4e;
+  --f-display:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
+  --f-body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;background:var(--hall);color:var(--text);overflow:hidden;font-family:var(--f-body);
+  touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+[hidden]{display:none!important}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+#hud{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:0;right:0;display:flex;justify-content:center;pointer-events:none;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.board{display:flex;align-items:center;gap:10px;background:rgba(10,18,30,.82);border:1px solid var(--line);border-radius:8px;padding:5px 12px;
+  font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.board .tm{display:flex;align-items:center;gap:6px}
+.board .sw{width:12px;height:12px;border-radius:3px}
+.board .clk{color:var(--clock);min-width:52px;text-align:center}
+.board .pas{font-size:14px;color:#1a1206;background:#ffb347;border-radius:4px;padding:1px 6px;letter-spacing:.06em}
+.board .hv{font-size:14px;color:var(--muted);letter-spacing:.08em}
+#pauseBtn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);right:max(12px,env(safe-area-inset-right,0px));pointer-events:auto;
+  width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:rgba(10,18,30,.82);color:var(--text);font-size:18px;cursor:pointer}
+#controls{position:fixed;left:0;right:0;bottom:0;height:230px;pointer-events:none}
+#stickZone{position:absolute;left:0;bottom:0;width:55%;height:100%;pointer-events:auto}
+#stickBase{position:absolute;width:112px;height:112px;margin:-56px 0 0 -56px;border-radius:50%;border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06)}
+#stickKnob{position:absolute;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:rgba(255,255,255,.35);border:2px solid rgba(255,255,255,.5)}
+.abtn{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:auto;
+  font-family:var(--f-display);font-weight:700;font-size:19px;letter-spacing:.03em;color:#fff;border:2px solid rgba(255,255,255,.35)}
+.abtn.on{transform:scale(.94);filter:brightness(1.25)}
+#btnShot{width:86px;height:86px;right:calc(max(16px,env(safe-area-inset-right,0px)) + 8px);bottom:calc(env(safe-area-inset-bottom,0px) + 116px);background:#b8302d}
+#btnFake{width:58px;height:58px;font-size:16px;right:calc(max(16px,env(safe-area-inset-right,0px)) + 102px);bottom:calc(env(safe-area-inset-bottom,0px) + 37px);background:#6a4bc4}
+#btnPass{width:72px;height:72px;right:calc(max(16px,env(safe-area-inset-right,0px)) + 15px);bottom:calc(env(safe-area-inset-bottom,0px) + 30px);background:#2c7a45}
+#menu{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(6,11,19,.78);overflow:auto;
+  padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));touch-action:pan-y}
+.card{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 20px;display:flex;flex-direction:column;gap:14px;max-height:100%;overflow:auto}
+.brand{font-family:var(--f-display);font-weight:700;font-size:44px;line-height:1;letter-spacing:.02em;display:flex;align-items:baseline;gap:10px;text-wrap:balance}
+.brand .ver{font-size:16px;color:var(--clock);letter-spacing:.06em}
+.sub{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+.lbl{font-family:var(--f-display);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:2px 0 -4px}
+.floors{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+.fl{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font:600 14px var(--f-body);cursor:pointer;text-align:left}
+.fl .chip{width:26px;height:26px;border-radius:5px;flex:none;position:relative;overflow:hidden}
+.fl .chip i{position:absolute;left:-6px;bottom:-14px;width:26px;height:26px;border-radius:50%}
+.fl[aria-pressed="true"]{border-color:var(--clock);box-shadow:0 0 0 1px var(--clock) inset}
+.seg{display:flex;gap:8px}
+.seg button{flex:1;padding:9px 0;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font:700 16px var(--f-display);letter-spacing:.04em;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--clock);color:var(--clock)}
+.go{padding:13px;border-radius:10px;border:0;background:var(--home);color:#fff;font:700 22px var(--f-display);letter-spacing:.06em;cursor:pointer}
+.ghost{padding:10px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font:600 15px var(--f-body);cursor:pointer}
+button:focus-visible{outline:2px solid var(--clock);outline-offset:2px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.teams{display:flex;align-items:flex-end;gap:8px}.teams .vs{padding-bottom:10px;color:var(--muted);font-family:var(--f-display);letter-spacing:.06em}
+.tsel{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+.tsel select{appearance:none;width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font:600 15px var(--f-body)}
+.lineup{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;color:var(--muted);line-height:1.45}
+.lineup b{color:var(--text);font-weight:600}.lineup .kit{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;border:1px solid var(--line)}
+.actions{position:sticky;bottom:-22px;margin:auto -20px -22px;padding:12px 20px calc(18px + env(safe-area-inset-bottom,0px));background:var(--panel);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.go{min-height:56px}
+@media (max-width:600px),(pointer:coarse){#menu{align-items:flex-end;padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}}
+.help{font-size:13px;color:var(--muted);line-height:1.55;padding-top:8px}
+.set{display:flex;flex-direction:column;gap:12px;padding-top:12px}
+.sub-d{border-top:1px solid var(--line)}
+.help b{color:var(--text);font-weight:600}
+details{border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+#hud{flex-direction:column;align-items:center;gap:6px}
+.subban{display:flex;align-items:center;gap:8px;background:rgba(10,18,30,.88);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font:600 13px var(--f-body);color:var(--text)}
+.subban .in{color:#5fd17a}.subban .ud{color:#e98b7a}.subban .sw{width:10px;height:10px;border-radius:2px}
+#tour{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(6,11,19,.86);overflow:auto;z-index:5;
+  padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));touch-action:pan-y}
+@media (max-width:600px),(pointer:coarse){#tour{align-items:flex-end;padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}}
+.tcard{max-width:460px}.tbrand{font-size:30px}.tstage{font-family:var(--f-display);font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:var(--clock)}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.tbl th{font:600 11px var(--f-body);color:var(--muted);text-align:right;padding:4px 4px;border-bottom:1px solid var(--line)}
+.tbl th:nth-child(2),.tbl td:nth-child(2){text-align:left}
+.tbl td{padding:5px 4px;text-align:right;border-bottom:1px solid var(--line)}
+.tbl tr.me td{color:var(--clock);font-weight:600}.tbl tr.q td:first-child{box-shadow:inset 3px 0 0 #5fd17a}
+.tsec{font-family:var(--f-display);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+.tres{font-size:13px;line-height:1.7;color:var(--text)}.tres .me{color:var(--clock)}.tres small{color:var(--muted)}
+.tnext{display:flex;justify-content:space-between;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:700 18px var(--f-display);letter-spacing:.03em}
+.tbig{font:700 28px var(--f-display);color:var(--clock);text-align:center}
+#result{font-family:var(--f-display);font-weight:700;font-size:26px;text-align:center;color:var(--clock)}
+</style>
+
+<div id="tour" hidden><div class="card tcard">
+  <div class="brand tbrand"><span id="tTitle">Turnering</span></div>
+  <div class="tstage" id="tStage"></div>
+  <div id="tBody"></div>
+  <div class="actions">
+    <div class="row"><button class="ghost" id="tMenu">Menu</button><button class="ghost" id="tNew">Ny turnering</button></div>
+    <button class="go" id="tPlay">Spil kamp</button>
+  </div>
+</div></div>
+<canvas id="cv"></canvas>
+<div id="hud"><div class="board">
+  <span class="tm"><span class="sw" id="swA"></span><span id="nA">A</span> <span id="sA">0</span></span>
+  <span class="hv" id="hv">1. HV</span><span class="pas" id="pas" hidden></span><span class="clk" id="clk">0:00</span>
+  <span class="tm"><span id="sB">0</span> <span id="nB">B</span><span class="sw" id="swB"></span></span>
+</div><div class="subban" id="subBan" hidden></div></div>
+<button id="pauseBtn" aria-label="Pause">II</button>
+<div id="controls">
+  <div id="stickZone"><div id="stickBase"></div><div id="stickKnob"></div></div>
+  <div class="abtn" id="btnPass">Aflever</div>
+  <div class="abtn" id="btnShot">Skud</div>
+  <div class="abtn" id="btnFake">Finte</div>
+</div>
+
+<div id="menu">
+  <div class="card">
+    <div class="brand">HÅNDBOLD <span class="ver" id="verTag"></span></div>
+    <div class="seg" id="modeSeg"><button data-m="friendly">Venskabskamp</button><button data-m="tour">Turnering</button></div>
+    <div class="seg" id="leagueSeg"><button data-l="em">Landshold</button><button data-l="cl">Klubhold</button></div>
+    <p class="sub" id="subTxt">Vælg hold. Du angriber opad. Hallgulv, kamptid og styring finder du under Indstillinger.</p>
+    <div class="teams">
+      <label class="tsel"><span class="lbl">Dit hold</span><select id="selA"></select></label>
+      <span class="vs" id="vsTxt">mod</span>
+      <label class="tsel" id="selBWrap"><span class="lbl">Modstander</span><select id="selB"></select></label>
+    </div>
+    <div class="lineup" id="lineup"></div>
+    <div id="result" hidden></div>
+    <details id="settings"><summary>Indstillinger</summary>
+      <div class="set">
+        <div class="lbl">Hallgulv</div>
+        <div class="floors" id="floors"></div>
+        <div class="lbl">Kamptid</div>
+        <div class="seg" id="lenSeg">
+          <button data-len="180" aria-pressed="true">2 × 3 min</button><button data-len="300">2 × 5 min</button><button data-len="600">2 × 10 min</button>
+        </div>
+        <details class="sub-d"><summary>Sådan spiller du</summary>
+          <div class="help">
+            <b>Mobil:</b> venstre tommel styrer, <b>Skud</b> og <b>Aflever</b> til højre.<br>
+            <b>Tastatur:</b> piletaster/WASD, <b>Mellemrum</b> = skud/blok, <b>X</b> eller <b>J</b> = aflever/skift, <b>P</b> = pause.<br>
+            <b>Sigte:</b> hold retning mens du skyder. Venstre/højre vælger hjørne, frem = højt, tilbage = lavt.<br>
+            <b>Aflevering:</b> peg mod en medspiller og tryk Aflever. Uden retning vælges den mest frie.<br>
+            Skudtypen vælges ud fra situationen: fløjskud ude på fløjen, hopskud når forsvaret står foran eller i kontra, stående skud når der er plads, faldskud tæt på 6 meter.<br>
+            <b>Forsvar:</b> tryk <b>Skud</b> tæt på boldholderen for at tage fat i ham. Hold knappen inde for at holde fastere, så han bremses mere (måleren over din spiller fylder op). Holder du helt fast, bliver det frikast hver gang. Bolden kan kun sjældent snuppes. Er du længere væk, eller skyder han allerede, hopper du op og blokerer. <b>Aflever</b> skifter til den spiller, der er tættest på bolden.<br>
+            <b>Kontra:</b> efter en redning, et målkast eller en erobring sprinter fløjene (som oftest) ude langs siden og skærer ind mod midten, hvis der er plads. Resten af holdet følger i formation. Får fløjene ikke bolden, trækker de ud i hjørnet igen.<br>
+            <b>Fløjspil:</b> løber du med en fløjspiller fra hjørnet ind mod feltet, hopper han automatisk ind over feltet og åbner skudvinklen. Tryk Skud i luften for at skyde eller Aflever for at spille videre. Gør du ingenting, taber han bolden i feltet, og det bliver målkast.<br>
+            <b>7-meter:</b> holder forsvaret fast i en spiller med en fri chance inden for 9 m, bliver det 7-meter. Skytten står på 7-meter-stregen. Sigt og tryk Skud.<br>
+            <b>Passivt spil:</b> varer et angreb for længe, vises PASSIV ved uret med det antal afleveringer, der er tilbage. Afslut inden da, ellers går bolden til modstanderen.<br>
+            <b>Finte:</b> tryk <b>Finte</b> (tastatur: F). Styrer du samtidig til siden, laver du et sidestep forbi forsvareren. Ellers laver du en skudfinte, hvor målmand og forsvarere kan bide på. Samme finte mange gange i træk virker dårligere.<br>
+            <b>Turnering:</b> vælg Turnering i menuen og dit hold. Du spiller dit holds kampe gennem gruppe, mellemrunde/hovedrunde, semifinale og finale. De andre kampe spilles i baggrunden. Turneringen gemmes, så du kan fortsætte senere.<br>
+            <b>Udskiftning:</b> trætte spillere skiftes, når de løber forbi deres bænk på vej tilbage i forsvar, og i pausen. Bjælken under din spiller viser, hvor frisk han er.<br>
+            <b>Indkast:</b> spilleren står låst på sidelinjen, og 2-3 medspillere tilbyder sig. Peg og tryk Aflever.
+          </div>
+        </details>
+      </div>
+    </details>
+    <div class="actions">
+      <div class="row"><button class="ghost" id="fsBtn">Fuld skærm</button><button class="ghost" id="resumeBtn" hidden>Fortsæt</button><button class="ghost" id="newTourBtn" hidden>Ny turnering</button></div>
+      <button class="go" id="startBtn">Start kamp</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+/* ================= VERSION ================= */
+const VERSION='0.17.1';
+// Releaselog: se CHANGELOG.md
+
+/* ================= KONSTANTER ================= */
+const G=9.8, ZF=0.9, STEP=1/120;
+const AUTO=location.hash==='#auto';
+const FLOORS={
+  landskamp:{name:'Landskamp',field:'#2f78c9',area:'#e0632f',out:'#0f1d33',runoff:'#245a99',line:'#ffffff',plank:null,board:['#b8282a','#f1efe8']},
+  trae:{name:'Trægulv',field:'#d39147',area:'#2a69b8',out:'#2a1d13',runoff:'#b97b3a',line:'#ffffff',plank:'rgba(110,62,18,.30)',board:['#1f4f8f','#f5b83d']},
+  groen:{name:'Grøn hal',field:'#2f8a55',area:'#22683f',out:'#122019',runoff:'#2a7a4b',line:'#f4f4ee',plank:null,board:['#e8b02a','#1a1a1a']},
+  klub:{name:'Klubhal',field:'#8b9099',area:'#c23a33',out:'#1c1e23',runoff:'#767b84',line:'#ffffff',plank:null,board:['#2c6fb0','#ffffff']},
+  cl:{name:'Champions League',field:'#245fb3',area:'#c8161d',out:'#0a1530',runoff:'#16336b',line:'#ffffff',plank:null,board:['#c8161d','#ffffff']},
+  pokal:{name:'Pokalfinale',field:'#4b3a8f',area:'#e8b02a',out:'#120e24',runoff:'#3f3079',line:'#ffffff',plank:null,board:['#e0632f','#f1efe8']}
+};
+let TEAMS=[
+  {shirt:'#d8322f',trim:'#ffffff',shorts:'#ffffff',num:'#ffffff',gk:'#7a6fd6',gkTrim:'#2a2470',sock:'#d8322f'},
+  {shirt:'#f1efe8',trim:'#2a5fa8',shorts:'#16335e',num:'#16335e',gk:'#2e9c62',gkTrim:'#134d2f',sock:'#16335e'}
+];
+const ROLES=['GK','LW','LB','CB','RB','RW','PV'];
+/* ================= HOLD OG SPILLERE =================
+   Hver spiller har værdier fra 1 til 10:
+   fart       løbehastighed
+   skud       skudkraft og evne til at score langt fra (9-11 m)
+   praecision hvor præcist skuddet rammer, hvor der sigtes
+   vinkel     fløjskud og skud fra spidse vinkler
+   aflevering hurtigere og mere præcise afleveringer, sværere at opsnappe
+   forsvar    blokering, takling, at holde fast og opsnappe afleveringer
+   styrke     svær at holde fast i og at tackle
+   Målmænd:   reaktion (reaktionstid) og placering (rækkevidde, læser skuddet)
+   Formatet er klar til landshold: navn, farver og en trup med position og nummer. */
+const R=(fart,skud,praecision,vinkel,aflevering,forsvar,styrke)=>({fart,skud,praecision,vinkel,aflevering,forsvar,styrke});
+const RG=(fart,reaktion,placering,aflevering)=>({fart,reaktion,placering,aflevering,skud:3,praecision:4,vinkel:2,forsvar:3,styrke:6});
+let TEAMDATA=[
+  {name:'Hold A',short:'A',roster:[
+    {num:1, name:'Lund',     pos:'GK',r:RG(4,8,7,6)},
+    {num:9, name:'Bjerre',   pos:'LW',r:R(9,5,7,9,6,5,4)},
+    {num:4, name:'Kragh',    pos:'LB',r:R(6,9,7,4,7,6,7)},
+    {num:7, name:'Toft',     pos:'CB',r:R(7,7,8,4,9,6,5)},
+    {num:11,name:'Vinther',  pos:'RB',r:R(6,8,7,5,6,6,6)},
+    {num:23,name:'Dahl',     pos:'RW',r:R(9,5,8,9,6,5,4)},
+    {num:18,name:'Brandt',   pos:'PV',r:R(4,6,7,3,5,8,9)}]},
+  {name:'Hold B',short:'B',roster:[
+    {num:12,name:'Ström',    pos:'GK',r:RG(5,7,8,5)},
+    {num:3, name:'Berg',     pos:'LW',r:R(8,5,8,8,6,5,4)},
+    {num:10,name:'Lindqvist',pos:'LB',r:R(6,8,6,4,7,7,8)},
+    {num:8, name:'Ek',       pos:'CB',r:R(8,6,7,5,8,5,5)},
+    {num:14,name:'Holmgren', pos:'RB',r:R(6,9,6,4,6,6,7)},
+    {num:21,name:'Sand',     pos:'RW',r:R(9,4,7,8,5,6,4)},
+    {num:6, name:'Nyberg',   pos:'PV',r:R(5,5,8,3,6,7,8)}]}
+];
+/* ================= EM 2026 (HERRER) =================
+   Spillere: EHF's officielle trupliste til Men's EHF EURO 2026 (positioner som på listen).
+   16-17 spillere pr. hold udvalgt fra listen. Værdier (1-10) er beregnet ud fra position,
+   holdets styrke og kendte nøglespillere (*) – de er skøn, ikke officielle tal.
+   Trøjer: [trøje, kant, shorts, nummer]. */
+const EM_TEAMS=[
+ {c:'GER',n:'Tyskland',tier:9,home:['#f4f4f2','#111111','#111111','#111111'],away:['#151515','#d4202a','#151515','#f2c200'],
+  p:'G 33 Wolff*|G 1 Späth|LW 20 Mertens*|LW 3 Dahmke|RW 12 Kastening*|RW 8 Groetzki|LB 16 Köster*|LB 11 Heymann|LB 17 Langhoff|CB 14 Knorr*|CB 18 Lichtlein|CB 70 Tissier|RB 23 Uscins*|RB 9 Häfner|P 6 Golla*|P 15 Kohlbacher'},
+ {c:'ESP',n:'Spanien',tier:8,home:['#c8102e','#f6c400','#14275e','#f6c400'],away:['#14275e','#c8102e','#14275e','#ffffff'],
+  p:'G 25 Hernández*|G 12 Corrales|LW 70 Fernández|LW 13 Guijarro|RW 28 Gómez*|RW 14 Solé|LB 24 D. Dujshebaev*|LB 8 Casado|LB 7 Gurri|CB 9 Tarrafeta*|CB 15 P. Cikusa|RB 10 A. Dujshebaev*|RB 77 Urdangarin|P 20 Serdio*|P 23 Bazán'},
+ {c:'AUT',n:'Østrig',tier:6,home:['#e3141b','#ffffff','#e3141b','#ffffff'],away:['#ffffff','#e3141b','#ffffff','#e3141b'],
+  p:'G 98 C. Möstl*|G 16 Kaiper|LW 24 Sager|LW 20 Frimmel|RW 9 Muck|RW 38 Sgonc|LB 53 Bilyk*|LB 32 Cl. Möstl|LB 6 Mahr|CB 72 Hutecek*|CB 66 E. Kofler|RB 7 Božović*|RB 30 Živković|P 55 Wagner*|P 26 Herburger'},
+ {c:'SRB',n:'Serbien',tier:6,home:['#c6363c','#0c4076','#0c4076','#ffffff'],away:['#ffffff','#c6363c','#0c4076','#c6363c'],
+  p:'G 1 Cupara*|G 77 Krivokapić|LW 21 V. Ilić|LW 19 N. Ilić|RW 15 Kojadinović|RW 3 Vorkapić|LB 20 Pušica*|LB 11 Abutović|LB 29 Tasić|CB 24 Kukić*|CB 8 Antonijević|RB 30 Nikolić|RB 51 Crnoglavac|P 93 Marsenić*|P 4 Jevtić'},
+ {c:'DEN',n:'Danmark',tier:10,home:['#d0021b','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#d0021b','#d0021b','#d0021b'],
+  p:'G 1 Landin*|G 12 E. Nielsen*|LW 4 M. Landin*|LW 7 Jakobsen|RW 26 J. Hansen*|RW 31 O. Rasmussen|LB 28 Andersson|LB 64 L. Møller|LB 66 Munk|CB 43 Pytlick*|CB 11 Lauge*|CB 22 Mensah|RB 19 Gidsel*|RB 3 Kirkeløkke|RB 39 J. Lassen|P 34 Hald*|P 15 Saugstrup*'},
+ {c:'POR',n:'Portugal',tier:8,home:['#c8102e','#046a38','#046a38','#ffffff'],away:['#ffffff','#c8102e','#ffffff','#046a38'],
+  p:'G 41 Capdeville*|G 16 Rêma|LW 23 Branquinho*|LW 21 L. Fernandes|RW 25 Areia*|RW 11 J. Monteiro|LB 13 Salvador*|LB 20 M. Neves|LB 24 A. Cavalcanti|CB 79 Martim Costa*|CB 14 Rui Silva|RB 26 Francisco Costa*|RB 33 D. Silva|P 8 Iturriza*|P 82 Frade'},
+ {c:'MKD',n:'Nordmakedonien',tier:5,home:['#d20000','#ffe600','#d20000','#ffe600'],away:['#ffe600','#d20000','#ffe600','#d20000'],
+  p:'G 1 Mitrevski*|G 12 Tomovski|LW 5 Dimitrioski|LW 55 Pe. Atanasijević|RW 19 Ne. Kosteski|RW 26 Ni. Kosteski|LB 38 Djonov|LB 6 Mladenović|LB 23 Gjorgovski|CB 18 Kuzmanovski*|CB 9 Gjorgiev|RB 30 Nikolov|RB 4 Velkovski|P 33 Peshevski|P 17 Markoski'},
+ {c:'ROU',n:'Rumænien',tier:4,home:['#fcd116','#002b7f','#002b7f','#002b7f'],away:['#002b7f','#ce1126','#002b7f','#fcd116'],
+  p:'G 1 Iancu*|G 16 Popescu|LW 7 Andrei|LW 15 Ghivil|RW 9 Grigore|RW 4 R. Ștefan|LB 17 Racoțea*|LB 8 Militaru|LB 3 Ilie|CB 10 Cumpănici|CB 21 Caba|RB 13 Ghiță|RB 77 Dodica|P 20 Szász|P 31 Dumitrana'},
+ {c:'FRA',n:'Frankrig',tier:9,home:['#1d3c8f','#e1000f','#1d3c8f','#ffffff'],away:['#ffffff','#1d3c8f','#ffffff','#1d3c8f'],
+  p:'G 92 Desbonnet*|G 16 Bolzinger|LW 25 Descat*|LW 31 Nahi|RW 29 Kounkoud*|RW 2 Y. Lenne|LB 8 Prandi*|LB 37 Zaepfel|LB 7 Lagarde|CB 4 Minne*|CB 41 Fadhuile|CB 19 Gaudin|RB 10 Mem*|RB 9 Richardson*|P 23 Fabregas*|P 11 Tournat'},
+ {c:'NOR',n:'Norge',tier:8,home:['#ba0c2f','#ffffff','#00205b','#ffffff'],away:['#ffffff','#00205b','#ffffff','#ba0c2f'],
+  p:'G 30 Bergerud*|G 1 Haug|LW 40 A. Pedersen*|LW 6 Barthold|RW 19 Bjørnsen*|RW 44 Gulliksen|LB 5 Sagosen*|LB 10 Rønningen|LB 18 Aar|CB 22 Grøndahl*|CB 24 O\'Sullivan|RB 45 Schønningsen|RB 15 Haugstvedt|P 21 Gullerud*|P 9 H. Jakobsen'},
+ {c:'CZE',n:'Tjekkiet',tier:6,home:['#d7141a','#11457e','#ffffff','#ffffff'],away:['#ffffff','#11457e','#11457e','#d7141a'],
+  p:'G 1 Mrkva*|G 24 Mokroš|LW 3 Široký|LW 9 Beneš|RW 14 Šterba|RW 29 Harabiš|LB 31 Klíma*|LB 34 Solák|LB 23 Josef|CB 21 Palát|CB 43 Douda|RB 7 Piroch|RB 87 Tůma|P 37 Uzek|P 33 Nantl'},
+ {c:'UKR',n:'Ukraine',tier:4,home:['#ffd500','#005bbb','#005bbb','#005bbb'],away:['#005bbb','#ffd500','#005bbb','#ffd500'],
+  p:'G 1 Terekhov|G 51 Novikov|LW 13 Artemenko*|LW 11 Denysov|RW 5 Akimenko|RW 7 Blyzniuk|LB 17 Turchenko*|LB 88 Kovalenko|LB 35 Minotskyi|CB 21 Kasai|CB 15 Tilte|RB 53 Cherkashchenko|RB 22 Dontsov|P 10 Tiutiunnyk|P 6 Tsymbaliuk'},
+ {c:'SLO',n:'Slovenien',tier:7,home:['#ffffff','#00a650','#005da4','#005da4'],away:['#005da4','#00a650','#005da4','#ffffff'],
+  p:'G 26 Ferlin*|G 16 Vujović|LW 20 Kodrin*|LW 24 A. Makuc|RW 8 B. Janc*|RW 13 Marguč|LB 51 Mačkovšek*|LB 5 Henigman|LB 15 Guček|CB 35 D. Makuc*|CB 23 Zarabec|RB 17 Cehte*|RB 18 Kljun|P 3 Blagotinšek*|P 92 Drobež'},
+ {c:'FRO',n:'Færøerne',tier:6,home:['#ffffff','#005eb8','#005eb8','#ef3340'],away:['#005eb8','#ef3340','#005eb8','#ffffff'],
+  p:'G 12 Guttesen*|G 1 P. Jacobsen|LW 9 R. B. Hansen|LW 6 Mortensen|RW 17 West av Teigum*|RW 7 Norðberg|LB 78 Ó. Mittún*|LB 4 í Selvindi|LB 30 Mikkelsen|CB 71 Ellefsen á Skipagøtu*|CB 31 Hávardsson|RB 10 Johansen|RB 5 P. H. Rasmussen|P 79 T. H. Rasmussen|P 8 Mikkjalsson'},
+ {c:'MNE',n:'Montenegro',tier:5,home:['#c40308','#d4af37','#c40308','#d4af37'],away:['#ffffff','#c40308','#ffffff','#c40308'],
+  p:'G 16 Simić*|G 1 Matović|LW 6 Mi. Vujović|LW 2 F. Vujović|RW 35 Lončar|RW 13 M. Radović|LB 87 Borozan*|LB 37 M. Bakić|LB 24 Božović|CB 9 Čepić|CB 14 Barjaktarović|RB 7 Čavor*|RB 21 Radoičić|P 8 Lazović|P 36 Pelidija'},
+ {c:'SUI',n:'Schweiz',tier:6,home:['#d52b1e','#ffffff','#d52b1e','#ffffff'],away:['#ffffff','#d52b1e','#ffffff','#d52b1e'],
+  p:'G 16 Portner*|G 12 Grazioli|LW 29 S. Zehnder|LW 24 Schlumpf|RW 41 Epp|RW 21 Steenaerts|LB 8 M. Zehnder*|LB 4 Rubin*|LB 20 Maros|CB 11 Aellen*|CB 22 Schelker|RB 13 Kusio|RB 18 Küttel|P 17 Röthlisberger*|P 3 Meister'},
+ {c:'SWE',n:'Sverige',tier:8,home:['#fecc02','#006aa7','#006aa7','#006aa7'],away:['#006aa7','#fecc02','#006aa7','#fecc02'],
+  p:'G 12 Palicka*|G 16 Thulin|LW 15 Wanne*|LW 43 Montebovi|RW 11 Pettersson*|RW 3 Persson|LB 42 E. Johansson|LB 17 Jeppsson|LB 49 Wallinius|CB 24 Gottfridsson*|CB 19 Claar*|RB 23 Lagergren*|RB 33 Sandell|P 5 Darj*|P 6 F. Möller'},
+ {c:'CRO',n:'Kroatien',tier:8,home:['#e30a17','#ffffff','#ffffff','#171796'],away:['#171796','#e30a17','#171796','#ffffff'],check:true,
+  p:'G 1 Kuzmanović*|G 12 M. Mandić|LW 62 Jelinić*|LW 2 Mihić|RW 6 Šoštarić*|RW 57 Glavaš|LB 11 Srna*|LB 30 Mamić|LB 15 Ljevar|CB 33 Cindrić*|CB 41 Lučin|RB 51 I. Martinović*|RB 9 Klarica|P 93 Načinović*|P 40 Grahovac'},
+ {c:'NED',n:'Holland',tier:6,home:['#f36c21','#ffffff','#f36c21','#ffffff'],away:['#1c3f94','#f36c21','#1c3f94','#ffffff'],
+  p:'G 30 A. Versteijnen*|G 18 Dijkstra|LW 5 ten Velde*|LW 17 Geenen|RW 14 Schagen*|RW 27 Smit|LB 77 Baijens*|LB 23 R. Jansen|LB 32 van der Ban|CB 22 Steins*|CB 9 Hoogland|RB 31 Smits*|RB 29 Skwarczynski|P 24 Manders|P 21 M. Kleijkers'},
+ {c:'GEO',n:'Georgien',tier:4,home:['#ffffff','#e8112d','#ffffff','#e8112d'],away:['#e8112d','#ffffff','#e8112d','#ffffff'],
+  p:'G 1 Rukhadze|G 20 I. Dikhaminjia|LW 36 J. Imnadze|LW 5 V. Khelisupali|RW 71 G. Dikhaminjia*|RW 35 L. Imnadze|LB 28 D. Grishikashvili|LB 13 Zarnadze|LB 34 Gavashelishvili|CB 9 Areshidze|CB 6 Patashuri|RB 11 Tskhovrebadze*|RB 24 Gogava|P 3 Lapiashvili|P 31 G. Grishikashvili'},
+ {c:'HUN',n:'Ungarn',tier:7,home:['#ce2939','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#477050','#ce2939','#ce2939'],
+  p:'G 32 Palasics*|G 1 Andó|LW 7 Bóka*|LW 4 Hári|RW 91 Imre*|RW 26 Rodríguez|LB 39 Bodó*|LB 17 B. Nagy|LB 9 Pergel|CB 15 M. Győri*|CB 77 Hanusz|RB 43 Ilić*|RB 23 Máthé|P 27 Bánhidi*|P 45 Rosta'},
+ {c:'ISL',n:'Island',tier:8,home:['#02529c','#dc1e35','#02529c','#ffffff'],away:['#ffffff','#02529c','#ffffff','#02529c'],
+  p:'G 1 Gústavsson*|G 16 Hallgrímsson|LW 19 Þorkelsson*|LW 8 Elísson|RW 2 Ríkharðsson*|LB 9 E. Ö. Jónsson*|LB 15 Gunnarsson|LB 6 Ásgeirsson|CB 10 G. Kristjánsson*|CB 3 Smárason|CB 25 Þrastarson|RB 14 Magnússon*|RB 7 V. Kristjánsson*|P 18 Viðarsson*|P 21 Arnarsson'},
+ {c:'POL',n:'Polen',tier:6,home:['#ffffff','#dc143c','#dc143c','#dc143c'],away:['#dc143c','#ffffff','#dc143c','#ffffff'],
+  p:'G 13 Wałach*|G 75 Jastrzębski|LW 25 Jarosiewicz|LW 19 Czuwara|RW 23 Moryto*|RW 3 Daszek*|LB 48 T. Gębala*|LB 2 Przytuła|LB 12 Pietrasik|CB 4 Jędraszczyk|CB 5 Olejniczak|RB 17 Widomski|RB 30 Tomczak|P 28 M. Gębala*|P 7 Walczak'},
+ {c:'ITA',n:'Italien',tier:4,home:['#0064aa','#ffffff','#0064aa','#ffffff'],away:['#ffffff','#0064aa','#ffffff','#0064aa'],
+  p:'G 1 Ebner*|G 90 Pavani|LW 40 Sirot|LW 4 De Angelis|RW 2 Prantner*|RW 56 Wierer|LB 15 S. Mengon*|LB 24 Helmersson|LB 23 Manojlović|CB 10 M. Mengon|CB 8 Savini|RB 44 Cuello|RB 3 Zanon|P 18 Martini|P 33 Aldini'}
+];
+
+/* ================= EHF CHAMPIONS LEAGUE 2026/27 (HERRER) =================
+   Spillere: holdenes trupper fra gruppespillet i efteråret 2026 (sportschau.de-kampsider og kampprogrammer).
+   15-17 spillere pr. hold. Kilderne skelner kun mellem bagspiller/fløj/streg, så venstre/højre er sat ud fra
+   kendte spillere. Værdier (1-10) er skøn. Trøjer: [trøje, kant, shorts, nummer] i klubbens farver (tilnærmet). */
+const CL_TEAMS=[
+ {c:'VES',n:'One Veszprém',tier:9,home:['#d6001c','#ffffff','#d6001c','#ffffff'],away:['#ffffff','#d6001c','#ffffff','#d6001c'],
+  p:'G 12 E. Nielsen*|G 1 Appelgren|LW 9 Descat*|LW 66 Gáncs-Pető|RW 91 Imre*|RW 32 Y. Lenne|LB 15 Hesham|LB 39 Y. Elderaa|LB 2 Thiagus Petrus|CB 25 Cindrić*|CB 29 Remili*|RB 5 I. Martinović*|RB 13 Barna|P 42 L. Jørgensen*|P 46 Pechmalbec|P 80 Mesilhy'},
+ {c:'FÜC',n:'Füchse Berlin',tier:9,home:['#1f8f3a','#ffffff','#1f8f3a','#ffffff'],away:['#ffffff','#1f8f3a','#ffffff','#1f8f3a'],
+  p:'G 12 Palicka*|G 1 L. Ludwig|LW 20 Freihöfer*|LW 14 Ariño|RW 34 av Teigum*|RW 6 Prantner|LB 25 Langhoff*|LB 3 Wiede|LB 30 Zaepfel|CB 15 Grøndahl*|CB 17 Lichtlein*|RB 19 Gidsel*|RB 9 Simak|P 93 Marsenić*|P 5 Darj*'},
+ {c:'POR',n:'FC Porto',tier:7,home:['#1c4fa0','#ffffff','#1c4fa0','#ffffff'],away:['#ffffff','#1c4fa0','#1c4fa0','#1c4fa0'],
+  p:'G 17 Abrahamsson*|G 33 D. Marques|LW 21 L. Fernandes*|LW 71 P. C. Oliveira|RW 24 Llamazares*|RW 28 J. Ferreira|LB 5 Gunnarsson*|LB 3 J. Gomes|LB 96 G. Oliveira|CB 14 Rui Silva*|CB 7 Yañez|RB 37 L. Persson|RB 90 G. Duarte|P 15 Salina|P 86 Brandão'},
+ {c:'PAR',n:'Partizan',tier:6,home:['#111111','#ffffff','#111111','#ffffff'],away:['#ffffff','#111111','#ffffff','#111111'],
+  p:'G 16 Trnavac*|G 12 Ćordalija|LW 7 Šotić|LW 2 Sánchez-Migallón|RW 71 Papović*|RW 13 Babić|LB 97 Kos*|LB 20 Abutović|LB 19 Kulesh|CB 93 Damjanović|CB 14 S. Ivanov|RB 5 Crnoglavac|RB 66 Lumbroso|P 55 Wagner*|P 22 Mičić'},
+ {c:'NAN',n:'HBC Nantes',tier:8,home:['#5b2a86','#ffffff','#5b2a86','#ffffff'],away:['#ffffff','#5b2a86','#ffffff','#5b2a86'],
+  p:'G 1 Pešić*|G 16 Bonde|LW 17 Leopold|LW 24 Peyrabout|RW 19 Odriozola*|RW 13 Perić|LB 7 Turchenko*|LB 2 Lagarde|LB 3 Briet|CB 9 Tarrafeta*|CB 6 Norlyk|CB 10 Ovniček|RB 14 Garciandia|RB 18 Abdi|P 11 Tournat*|P 15 Gaber'},
+ {c:'MTM',n:'MT Melsungen',tier:8,home:['#d71920','#111111','#111111','#ffffff'],away:['#ffffff','#d71920','#ffffff','#d71920'],
+  p:'G 32 Palasics*|G 16 Simić|LW 7 D. Mandić|LW 11 Ignatow|RW 73 Kastening*|RW 31 D. García|LB 24 D. Dujshebaev*|LB 19 Stefánsson|LB 33 Mensing|CB 28 Sigrist|CB 25 Forsell Schefvert|RB 10 Krištopāns*|RB 6 Balenciaga|P 14 Golla*|P 2 Marchán'},
+ {c:'PLO',n:'Orlen Wisła Płock',tier:7,home:['#1b5fae','#ffffff','#1b5fae','#ffffff'],away:['#ffffff','#1b5fae','#ffffff','#1b5fae'],
+  p:'G 16 Vujović*|G 32 Alilović|LW 66 F. Bjerre|LW 34 Mihić|RW 9 Szyszko|RW 3 Baszek|LB 99 Kosorotov*|LB 49 Szita|CB 8 M. Janc*|CB 23 Zarabec|RB 22 Richardson*|RB 43 Ilić*|P 17 Serdio*|P 19 Šušnja|P 33 Dawydzik'},
+ {c:'VAR',n:'Vardar 1961',tier:6,home:['#c8102e','#111111','#111111','#ffffff'],away:['#ffffff','#c8102e','#ffffff','#c8102e'],
+  p:'G 25 Wałach*|G 99 Gogov|LW 2 M. Stojanovski|LW 11 Popovski|RW 3 Vorkapić|RW 10 Keita|LB 15 Ljevar*|LB 77 Gjorcheski|CB 66 Malus*|CB 14 Nechovski|RB 13 Mitrović|RB 34 J. P. da Silva|P 78 W. Jankowski|P 18 Lazarevski'},
+ {c:'AAL',n:'Aalborg Håndbold',tier:9,home:['#d4141c','#ffffff','#d4141c','#ffffff'],away:['#ffffff','#d4141c','#ffffff','#d4141c'],
+  p:'G 12 Norsten*^|G 1 Landin*|LW 19 M. Landin*^|LW 17 Blonz|RW 18 T. Nielsen*^|RW 4 Wiesmach*|LB 7 Arnoldsen*^|LB 25 Munk*|LB 5 Sagosen*|LB 8 Rønningen|CB 21 Knorr*^|RB 14 Hoxer*^|RB 3 L. Nilsson|RB 9 Helland Anderson|P 11 Hald*^|P 20 F. Möller'},
+ {c:'PSG',n:'Paris Saint-Germain',tier:9,home:['#0b1f4b','#e30613','#0b1f4b','#ffffff'],away:['#ffffff','#0b1f4b','#ffffff','#e30613'],
+  p:'G 1 Løvkvist*|G 12 Corrales*|LW 4 Elísson*|LW 9 Mellegård|RW 14 Solé*|RW 10 S. Karlsson|LB 71 Prandi*|LB 25 Lyse|LB 2 Maraš|CB 6 Steins*|CB 5 Y. Omar*|CB 66 Gaudin|RB 7 K. Konan|RB 15 Lafosse|P 21 Syprzak*|P 22 L. Karabatić|P 26 Ladefoged'},
+ {c:'ZAG',n:'HC Zagreb',tier:6,home:['#1d4f9c','#ffffff','#1d4f9c','#ffffff'],away:['#ffffff','#1d4f9c','#ffffff','#1d4f9c'],
+  p:'G 99 Kastelic*|G 26 Suljević|LW 17 Štrlek*|LW 78 Sadouski|RW 57 Glavaš|RW 81 Tufegdžić|LB 14 Mamić*|LB 8 Cesko|LB 47 Bialiauski|CB 18 Karačić*|CB 23 Pavlović|RB 33 J. Nikolić|RB 11 Tskhovrebadze|P 22 Raužan|P 7 Topić'},
+ {c:'CEL',n:'RK Celje',tier:5,home:['#f5c400','#0d3b8c','#0d3b8c','#0d3b8c'],away:['#0d3b8c','#f5c400','#0d3b8c','#ffffff'],
+  p:'G 16 Bevc|G 1 Cesek|LW 6 Mazej|LW 15 Ajšić|RW 30 G. Marguč|RW 11 Grabar|LB 24 Miličević|LB 55 Ž. Mlakar|CB 7 Ž. Kovač|CB 8 Anžič|RB 19 M. Marguč|RB 10 Uzunchev|P 89 Heiß|P 44 Hurtado'},
+ {c:'SCP',n:'Sporting CP',tier:8,home:['#00804a','#ffffff','#111111','#ffffff'],away:['#ffffff','#00804a','#ffffff','#00804a'],
+  p:'G 92 Mohamed Aly*|G 20 A. Kristensen|LW 17 Þorkelsson*|LW 22 Branquinho|RW 5 C. Álvarez|RW 19 Gassama|LB 13 Salvador*|LB 8 Gurri|LB 7 Suárez|CB 79 Martim Costa*|CB 26 F. Monteiro|RB 6 Francisco Costa*|RB 23 Manojlović|P 44 Moga*|P 93 Romero'},
+ {c:'SZE',n:'OTP Bank-Pick Szeged',tier:8,home:['#0057a8','#ffffff','#0057a8','#ffffff'],away:['#ffffff','#0057a8','#ffffff','#0057a8'],
+  p:'G 80 Portner*|G 16 Mikler|LW 18 Jelinić*|LW 25 Frimmel|RW 24 Šoštarić*|RW 93 Szilágyi|LB 51 Mačkovšek*|LB 77 M. Rød*|LB 44 Horiha|CB 34 Kukić|CB 7 Lukács|RB 11 Sandell*|RB 97 Matić|P 27 Bánhidi*|P 45 Rosta|P 31 Toto'},
+ {c:'GOG',n:'GOG',tier:7,home:['#f5c400','#13294b','#13294b','#13294b'],away:['#13294b','#f5c400','#13294b','#f5c400'],
+  p:'G 1 K. Møller*|G 12 F. Wolff|LW 17 Dalby|LW 21 Kildelund|RW 33 I. Persson*|RW 34 Münster-Hansen|LB 78 Ó. Mittún*|LB 8 M. Zehnder*|LB 7 Vilhelmsen|CB 29 H. Lykke*|CB 3 N. Pedersen|RB 2 E. K. Bak|RB 24 E. Sørensen|P 4 Magaard*|P 13 L. Balstad'},
+ {c:'KRI',n:'IFK Kristianstad',tier:5,home:['#0a4ea2','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#0a4ea2','#0a4ea2','#0a4ea2'],
+  p:'G 1 Skoog|G 12 Oredsson|LW 20 Frend Öfors*|LW 18 L. Kjellman|RW 14 Leyman|RW 51 Barnestam|LB 13 Ó. Guðmundsson*|LB 22 Aðalsteinsson|LB 6 Henningsson|CB 9 A. Hallbäck|CB 24 Bjarnason|RB 77 Erlingsson|RB 28 Ivarsson|P 17 Petrović|P 10 Höghielm'},
+ {c:'BAR',n:'Barça',tier:10,home:['#a50044','#004d98','#004d98','#f6c400'],away:['#f6c400','#a50044','#a50044','#a50044'],
+  p:'G 23 Hernández*|G 1 Hallgrímsson|LW 11 D. Fernández*|LW 83 Barrufet|RW 20 Gómez*|RW 25 Sola|LB 6 Carlsbogard*|LB 19 N\'Guessan|LB 70 San Felipe|CB 88 P. Cikusa*|CB 3 Smárason|CB 45 S. Elderaa|RB 9 Mem*|RB 18 B. Janc|RB 10 Dj. Cikusa|P 72 Fabregas*|P 82 Frade*'},
+ {c:'MON',n:'Montpellier HB',tier:7,home:['#1b3f8f','#f28c00','#1b3f8f','#ffffff'],away:['#ffffff','#1b3f8f','#ffffff','#f28c00'],
+  p:'G 92 Desbonnet*|G 12 Bolzinger|LW 97 Paschal|LW 61 Diaz|RW 22 Richert|RW 34 Balaguer|LB 11 Srna*|LB 18 Casado*|CB 5 Villeminot*|CB 9 Valera|RB 15 Thurin|RB 28 Porte|P 19 A. Lenne|P 13 Moraes'},
+ {c:'DIN',n:'Dinamo București',tier:6,home:['#d50000','#ffffff','#d50000','#ffffff'],away:['#ffffff','#d50000','#ffffff','#d50000'],
+  p:'G 1 Iancu*|G 34 Bellahcene|LW 20 Dumitru|LW 23 Lenbroch|RW 55 Akimenko|RW 5 Nistor|LB 9 Pergel*|LB 94 Militaru|LB 7 Buzle|CB 10 M. Martins*|CB 22 Valdés|RB 2 B. Vujović|RB 77 Dodica|P 4 Iturriza*|P 6 Dedu'},
+ {c:'SAH',n:'SAH Aarhus',tier:5,home:['#151515','#f2c200','#151515','#f2c200'],away:['#f2c200','#151515','#f2c200','#151515'],
+  p:'G 12 Brandbyge*|G 21 M. K. Petersen|LW 25 Cieslak|LW 5 A. Jensen|RW 29 J. V. Larsen*|LB 7 Dreyer|LB 13 G. Bruun|LB 15 Lærke|CB 20 M. B. Christensen*|CB 33 Søberg|CB 32 Olsson|RB 26 J. á Plógv Hansen*|RB 3 K. Ö. Kristjánsson*|RB 14 O. Hansen|P 34 J. Poulsen|P 17 A. S. Rasmussen'},
+ {c:'SCM',n:'SC Magdeburg',tier:10,home:['#0b8a3b','#d6001c','#0b8a3b','#ffffff'],away:['#ffffff','#0b8a3b','#ffffff','#d6001c'],
+  p:'G 1 Kuzmanović*|G 12 M. Mandić|LW 22 Mertens*|LW 6 Musche|RW 11 Pettersson*|RW 9 O. Rasmussen|LB 19 E. Ö. Jónsson*|LB 20 Weber|LB 53 Kretzschmar|CB 10 G. Kristjánsson*|CB 7 Claar*|CB 13 Brigzinsky|RB 14 Magnússon*|RB 21 Lagergren*|P 23 Saugstrup*|P 54 Bergendahl'},
+ {c:'KIE',n:'Industria Kielce',tier:8,home:['#f5c400','#0047ab','#0047ab','#0047ab'],away:['#0047ab','#f5c400','#0047ab','#ffffff'],
+  p:'G 96 Milosavljev*|G 1 Morawski|LW 99 Nahi*|LW 98 P. Jarosiewicz|RW 23 Moryto*|RW 11 Kounkoud*|LB 9 Sićko*|LB 37 M. Bakić|LB 71 Rabchynski|CB 88 Vlah*|CB 4 Jędraszczyk|RB 10 Klarica|RB 13 J. Bos|P 50 Karalek*|P 97 Monar'},
+ {c:'KOL',n:'Kolstad Håndball',tier:7,home:['#0b3d91','#ffffff','#0b3d91','#ffffff'],away:['#ffffff','#0b3d91','#ffffff','#0b3d91'],
+  p:'G 16 Neupart*|G 1 Orheim|LW 7 Aalberg|LW 17 Stølefjell|RW 72 E. Johnsen|RW 18 E. M. S. Jakobsen|LB 22 Jeppsson*|LB 23 Johannessen*|LB 4 Eck Aga|CB 11 Ask|CB 96 Bore|RB 27 Hegle|RB 3 Berge|P 14 Gullerud*|P 24 Vestli'},
+ {c:'KLU',n:'HC Kriens-Luzern',tier:5,home:['#151515','#f28c00','#151515','#f28c00'],away:['#f28c00','#151515','#f28c00','#151515'],
+  p:'G 1 Car|G 16 Wey|LW 21 Schlumpf|LW 4 W. Aellen|RW 13 Epp|RW 57 Idrizi|LB 53 Bilyk*|LB 9 Wolfisberg|LB 27 Jer. Müller|CB 14 M. Milosavljević*|CB 25 Schelker|RB 10 Fuchs|RB 15 Oertli|P 22 Šipić|P 24 Bader'}
+];
+
+// værdier ud fra position, holdstyrke og nøglespillere (*)
+const TPL={G:{fart:4,reaktion:6,placering:6,aflevering:5,skud:3,praecision:4,vinkel:2,forsvar:3,styrke:6},
+  LW:{fart:8,skud:5,praecision:6,vinkel:8,aflevering:5,forsvar:5,styrke:4},RW:{fart:8,skud:5,praecision:6,vinkel:8,aflevering:5,forsvar:5,styrke:4},
+  LB:{fart:6,skud:7,praecision:6,vinkel:4,aflevering:6,forsvar:6,styrke:6},RB:{fart:6,skud:7,praecision:6,vinkel:4,aflevering:6,forsvar:6,styrke:6},
+  CB:{fart:7,skud:6,praecision:6,vinkel:4,aflevering:8,forsvar:5,styrke:5},P:{fart:5,skud:5,praecision:7,vinkel:3,aflevering:5,forsvar:7,styrke:8}};
+const KEYS={G:['reaktion','placering'],LW:['fart','vinkel','praecision'],RW:['fart','vinkel','praecision'],LB:['skud','praecision','forsvar'],RB:['skud','praecision','forsvar'],CB:['aflevering','skud','praecision'],P:['styrke','praecision','forsvar']};
+function hashN(str){ let h=2166136261; for(const ch of str){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619); } return ((h>>>0)%1000)/1000; }
+function buildTeam(T){
+  const roster=T.p.split('|').map(e=>{
+    const m=e.match(/^(\S+) (\d+) (.+?)([*^!]*)$/), pos=m[1], star=m[4].includes('*'), name=m[3], tp=TPL[pos], r={}, adj=(T.tier-6)*0.4;
+    for(const k in tp){ let v=tp[k]+(k==='fart'?adj*0.5:adj)+(hashN(name+k)-0.5)*1.2; if(star) v+=KEYS[pos].includes(k)?1.6:0.6; r[k]=Math.round(Math.min(10,Math.max(1,v))); }
+    const lefty=(pos==='RB'||pos==='RW')!==m[4].includes('!');                // RB/RW er normalt venstrehåndede, ! vender det
+    return {num:+m[2],name,pos:pos==='G'?'GK':pos==='P'?'PV':pos,r,star,start:m[4].includes('^'),hand:lefty?'L':'R',key:KEYS[pos]};
+  });
+  return {name:T.n,short:T.c,roster};
+}
+const lineupScore=d=>(d.start?1000:0)+(d.star?100:0)+d.key.reduce((a,k)=>a+d.r[k],0);
+const hexRgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const colDist=(a,b)=>{ const A=hexRgb(a),B=hexRgb(b); return Math.hypot(A[0]-B[0],A[1]-B[1],A[2]-B[2]); };
+// landshold (EM 2026) eller klubhold (Champions League 2026/27)
+let league='em'; const teamSels={em:['DEN','SWE'],cl:['AAL','SCM']};
+const curTeams=()=>league==='cl'?CL_TEAMS:EM_TEAMS;
+try{ const L0=localStorage.getItem('hb_league'); if(L0==='em'||L0==='cl') league=L0;
+  for(const k of ['em','cl']){ const t=JSON.parse(localStorage.getItem('hb_teams_'+k)||(k==='em'?localStorage.getItem('hb_teams'):'null')||'null'); const list=k==='cl'?CL_TEAMS:EM_TEAMS;
+    if(t&&t.length===2&&t[0]!==t[1]&&t.every(c=>list.some(x=>x.c===c))) teamSels[k]=t; } }catch(e){}
+let teamSel=teamSels[league];
+function setupTeams(){
+  const A=curTeams().find(t=>t.c===teamSel[0]), B=curTeams().find(t=>t.c===teamSel[1]);
+  TEAMDATA=[buildTeam(A),buildTeam(B)];
+  const kit=(T,w)=>{ const k=T[w]; return {shirt:k[0],trim:k[1],shorts:k[2],num:k[3],sock:k[0],check:!!T.check&&w==='home'}; };
+  const kA=kit(A,'home'); let kB=kit(B,'home'), kBname='hjemme';
+  if(colDist(kA.shirt,kB.shirt)<150){ kB=kit(B,'away'); kBname='ude'; }                  // udeholdet skifter ved farvesammenfald
+  const gkPal=[['#7a6fd6','#2a2470'],['#2e9c62','#134d2f'],['#222222','#f5b83d'],['#ff8a00','#5a2d00'],['#e04aa0','#5c1440'],['#8fd14f','#2f5a10']];
+  const far=c=>Math.min(colDist(c[0],kA.shirt),colDist(c[0],kB.shirt));
+  const gks=gkPal.slice().sort((a,b)=>far(b)-far(a));
+  TEAMS=[{...kA,gk:gks[0][0],gkTrim:gks[0][1]},{...kB,gk:gks[1][0],gkTrim:gks[1][1]}];
+  TEAMS.kitB=kBname;
+}
+// omregning af værdier (5 = som før)
+const rv=(p,k)=>(p.r&&p.r[k])||5;
+const handOf=p=>(p.rid&&p.rid.hand)||((p.role==='RB'||p.role==='RW')?'L':'R'); // kastehånd
+const speedOf=p=>(p.role==='GK'?4.6*(0.85+rv(p,'fart')*0.03):5.0+rv(p,'fart')*0.3)*(0.86+0.14*(p.sta??1)); // trætte spillere er langsommere
+let BENCH=[[],[]], subBan=null, subsUsed=[0,0]; const MAX_SUBS=10; // højst 10 udskiftninger pr. hold pr. kamp
+const benchY=t=>up(t)?21.5:14.5;                                     // bænken står ved midterlinjen på egen banehalvdel
+function swapIn(p,bi,why){
+  const B=BENCH[p.team][bi], out={e:p.rid,sta:p.sta};
+  p.rid=B.e; p.name=B.e.name; p.num=B.e.num; p.r=B.e.r; p.sta=B.sta; p.wantsSub=false;
+  p.skin=SKIN[(B.e.num*3+p.team)%SKIN.length]; p.hair=HAIR[(B.e.num*7+p.team)%HAIR.length];
+  BENCH[p.team][bi]=out; subsUsed[p.team]++;
+  if(why!=='pause') subBan={t:2.6,team:p.team,inn:`${B.e.num} ${B.e.name}`,ud:`${out.e.num} ${out.e.name}`};
+}
+function freshSub(p,minSta){ if(subsUsed[p.team]>=MAX_SUBS) return -1; let bi=-1,best=minSta; BENCH[p.team].forEach((B,i)=>{ if(B.e.pos===p.role&&B.sta>best){ best=B.sta; bi=i; } }); return bi; }
+function updFatigue(dt){
+  for(const p of players){ if(p.role==='GK') continue; const sp=Math.hypot(p.vx,p.vy);
+    p.sta=clamp(p.sta-dt*0.0034*Math.max(0,sp-2.6)/4+(sp<1.5?dt*0.004:0),0.3,1); }
+  for(const t of [0,1]) for(const B of BENCH[t]) B.sta=Math.min(1,B.sta+dt*0.03);
+  if(subBan){ subBan.t-=dt; if(subBan.t<=0) subBan=null; }
+  if(phase!=='play') return;
+  for(const p of players){
+    if(p.role==='GK'||p===ball.holder||p.shot||p.feint||(p===ctrl&&!AUTO)){ p.wantsSub=false; continue; }
+    const att=attTeam(), bl=L(1-p.team,ball.x,ball.y);
+    // kun når holdet løber tilbage og bolden er langt fra eget mål: den trætte spiller løber forbi bænken
+    p.wantsSub=p.sta<0.74&&att!==p.team&&bl.d>17&&freshSub(p,0.82)>=0;
+    if(p.wantsSub){ const y0=benchY(p.team); if(p.x>18.9&&p.y>y0-0.8&&p.y<y0+4.8){ const bi=freshSub(p,0.82); if(bi>=0) swapIn(p,bi,'bænk'); } }
+  }
+}
+function halftimeSubs(){
+  let n=0;
+  for(const p of players){ if(p.role==='GK'){ continue; } const bi=freshSub(p,Math.max(p.sta+0.12,0.8)); if(p.sta<0.8&&bi>=0){ swapIn(p,bi,'pause'); n++; } }
+  for(const p of players) p.sta=Math.min(1,p.sta+0.25);
+  if(n) msg(`${n} udskiftninger i pausen`);
+}
+const SKIN=['#f2c7a5','#e8b48c','#c98d62','#a86f45','#7a4b2c','#f5d2b8'];
+const HAIR=['#2b1a10','#5a3a1e','#d9b56a','#1a1a1a','#8a4a22','#c9c2b0'];
+const SHOT={
+  stand:{dur:.52,rel:.27,air:0,h:0,fwd:.7,spd:25,err:.22,name:'Stående skud'},
+  jump:{dur:.82,rel:.36,air:.7,h:.62,fwd:1.6,spd:23,err:.235,name:'Hopskud'},
+  wing:{dur:.86,rel:.42,air:.72,h:.5,fwd:4.4,spd:21,err:.28,name:'Fløjskud'},
+  fall:{dur:.72,rel:.3,air:.32,h:.16,fwd:3.2,spd:20,err:.2,name:'Faldskud'},
+  under:{dur:.5,rel:.25,air:0,h:0,fwd:.6,spd:23,err:.24,name:'Underhåndsskud'}
+};
+const ATT={LW:[1.0,2.4],LB:[5.3,10.2],CB:[10,10.8],RB:[14.7,10.2],RW:[19,2.4],PV:[10,6.5]};
+const isWing=p=>p.role==='LW'||p.role==='RW';
+const newTrans=(t,early)=>({team:t,t:0,early:!!early,LW:rnd()<0.88,RW:rnd()<0.88}); // fløjene løber i ca. 88 % af tilfældene
+const DSLOT={LW:0,LB:1,CB:2,PV:3,RB:4,RW:5}, SLOTS=[1.7,4.7,8.0,12.0,15.3,18.3];
+
+/* ================= HJÆLPERE ================= */
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const rnd=Math.random;
+const gauss=()=>(rnd()+rnd()+rnd()-1.5)*1.15;
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+let flip=false;                                       // true i 2. halvleg: holdene har byttet side
+const up=t=>(t===0)!==flip;                          // angriber hold t målet ved y=0?
+const goalY=t=>up(t)?0:40;                           // mål som hold t angriber
+const W=(t,lx,d)=>up(t)?{x:lx,y:d}:{x:20-lx,y:40-d}; // lokal (set fra angrebet mod målet) -> verden
+const L=(t,x,y)=>up(t)?{lx:x,d:y}:{lx:20-x,d:40-y};
+const FS=()=>flip?-1:1;                              // skærmretning -> verdensretning for Hold A
+function sixLine(lx,r=6){ if(lx>=8.5&&lx<=11.5) return r; const dx=lx<8.5?8.5-lx:lx-11.5; return dx>=r?0:Math.sqrt(r*r-dx*dx); }
+function inArea(x,y){ for(const t of [0,1]){ const l=L(t,x,y); if(l.d>-0.3&&l.d<sixLine(l.lx)) return true; } return false; }
+
+/* ================= TILSTAND ================= */
+let floorKey='landskamp', matchLen=180, half=1;
+try{ const f=localStorage.getItem('hb_floor'); if(f&&FLOORS[f]) floorKey=f; const m=+localStorage.getItem('hb_len2'); if(m===180||m===300||m===600) matchLen=m; }catch(e){}
+let players=[], ball=null, score=[0,0], clock=0, phase='menu', phaseT=0, time=0, ctrl=null, poss=0, passCount=0;
+let passive=null, atkT=0; // passivt spil
+let trans=null, celebTeam=-1, celebBy=null, autoHome=false, fetch=null;
+let shotPend=null, shotLock=0, possT=null, msgs=[], camY=20, shake=0, kickoffTeam=null, lastAtt=0, started=false, paused=true, restartFn=null;
+const goals=[{shake:0,bulge:null},{shake:0,bulge:null}];
+const stepper=[null,null], chaser=[null,null], helper=[null,null], wave=[1,1]; // wave: afleveringsretning i positionsangrebet (+1 mod højre fløj)
+const LINE=['LW','LB','CB','RB','RW'];
+let crowd=[];
+
+function mkPlayer(t,role,num,i){
+  const d=TEAMDATA[t].roster.filter(x=>x.pos===role).sort((a,b)=>lineupScore(b)-lineupScore(a))[0]||{name:'',r:{}};
+  return {team:t,role,num:d.num||num,name:d.name,r:d.r,rid:d,sta:1,x:10,y:20,vx:0,vy:0,z:0,vz:0,face:t===0?1:-1,phase:rnd()*6,run:0,shot:null,block:0,down:0,thr:0,
+    inAreaOk:false,aiT:0,plan:null,lastFrom:null,skin:SKIN[(i*3+t*2)%SKIN.length],hair:HAIR[(i*5+t)%HAIR.length]};
+}
+
+function newMatch(){
+  setupTeams(); updateTeamsUI();
+  players=[];
+  for(const t of [0,1]) ROLES.forEach((r,i)=>players.push(mkPlayer(t,r,0,i)));
+  // bænken: resten af truppen, klar til at komme ind
+  BENCH=[0,1].map(t=>TEAMDATA[t].roster.filter(e=>!players.some(p=>p.team===t&&p.rid===e)).map(e=>({e,sta:1})));
+  subBan=null; subsUsed=[0,0];
+  flip=false; celebTeam=-1; autoHome=false; score=[0,0]; clock=matchLen; half=1; msgs=[]; passCount=0; time=0; trans=null;
+  ball={x:10,y:20,z:1,vx:0,vy:0,vz:0,mode:'held',holder:null,lastTeam:0,passTo:null,passer:null,checked:new Set(),shooter:null,age:0};
+  for(const p of players){
+    if(p.role==='GK'){ const w=W(1-p.team,10,0.9); p.x=w.x; p.y=w.y; continue; }
+    if(p.team===0){ const [lx]=ATT[p.role]; const w=W(0,lx,p.role==='CB'?20:21.5+(p.role.endsWith('B')?2:0)); p.x=w.x; p.y=w.y; }
+    else { const w=defenseTarget(p); p.x=w.x; p.y=w.y; }
+  }
+  ctrl=null; camY=20;
+  restart('kickoff',0,10,20,'Kampen er i gang');
+  updateHud(true);
+}
+
+/* ================= BESKEDER ================= */
+const STATS={}; let demoCaps=[]; let capLog=[]; function demoCap(t){ capLog.push(t); demoCaps.push({t,a:0}); if(demoCaps.length>2) demoCaps.shift(); }
+function msg(text,big=false,color){ const k=text.replace(/ #\d+$/,''); STATS[k]=(STATS[k]||0)+1; msgs.push({text,t:0,life:big?2:1.1,big,color:color||(big?'#f5b83d':'#ffffff')}); if(msgs.length>3) msgs.shift(); }
+
+/* ================= BOLD-BESIDDELSE ================= */
+function give(q){
+  const b=ball;
+  if(b.mode==='pass'&&b.passer&&b.passer.team===q.team) q.lastFrom=b.passer; else q.lastFrom=null;
+  b.holder=q; b.mode='held'; b.passTo=null; b.shooter=null;
+  if(q.team!==poss){ passCount=0; poss=q.team; passive=null; atkT=0;
+    if(phase==='play'&&kickoffTeam===null) trans=(trans&&trans.team===q.team)?{...trans,early:false,t:0}:newTrans(q.team); }
+  else { passCount++; if(passive&&q.role!=='GK') passive.passes++;
+    if(b.passer){ const i=LINE.indexOf(b.passer.role), j=LINE.indexOf(q.role); if(i>=0&&j>=0&&i!==j) wave[q.team]=Math.sign(j-i); } if(trans&&trans.early&&trans.team!==q.team) trans=null; }
+  for(const o of players) o.offer=null;
+  b.lastTeam=q.team;
+  const fast=trans&&trans.team===q.team;
+  q.aiT=q.role==='GK'?(fast?0.35:0.9):(fast?0.25+rnd()*0.2:0.55+rnd()*0.7);
+  if(!fast&&q.role.endsWith('B')&&posAtt(q.team)) q.aiT=0.38+rnd()*0.22;
+  if(!fast&&isWing(q)&&posAtt(q.team)) q.aiT=0.3+rnd()*0.2;
+  q.holdT=0;   // bagspiller: stød frem mod forsvaret, så afgør
+  for(const p of players) if(p.role==='GK'&&!(p===q&&p.plan)) p.plan=null;
+}
+// positionsangreb: ikke kontra, eller forsvaret er kommet på plads (mindst 4 forsvarere inden for 9,5 m)
+function posAtt(t){ if(!(trans&&trans.team===t)) return true; let n=0; for(const o of players) if(o.team!==t&&o.role!=='GK'&&L(t,o.x,o.y).d<9.5) n++; return n>=4; }
+function attTeam(){ if(phase==='fetch'&&fetch) return fetch.team; if(phase==='goal'&&celebTeam>=0) return 1-celebTeam; if(ball.holder) return ball.holder.team; if(ball.mode==='loose') return poss; return ball.lastTeam; }
+function gkOf(t){ return players.find(p=>p.team===t&&p.role==='GK'); }
+function nearest(team,x,y,fieldOnly=true,excl=null){
+  let best=null,bd=1e9;
+  for(const p of players){ if(p.team!==team||p===excl) continue; if(fieldOnly&&p.role==='GK') continue;
+    const d=Math.hypot(p.x-x,p.y-y); if(d<bd){bd=d;best=p;} }
+  return best;
+}
+function openness(q){ let m=5; for(const o of players){ if(o.team===q.team||o.role==='GK') continue; m=Math.min(m,dist(o,q)); } return m; }
+function laneBlocked(p,q){
+  const ax=q.x-p.x, ay=q.y-p.y, len2=ax*ax+ay*ay||1;
+  for(const o of players){ if(o.team===p.team) continue;
+    const u=((o.x-p.x)*ax+(o.y-p.y)*ay)/len2; if(u<0.12||u>0.9) continue;
+    const px=p.x+ax*u, py=p.y+ay*u; if(Math.hypot(o.x-px,o.y-py)<0.7) return true; }
+  return false;
+}
+function frontDef(p){ // afstand til nærmeste forsvarer mellem spiller og mål
+  const l=L(p.team,p.x,p.y); let m=Infinity;
+  for(const o of players){ if(o.team===p.team||o.role==='GK') continue; const ol=L(p.team,o.x,o.y);
+    if(ol.d<l.d+0.2&&Math.abs(ol.lx-l.lx)<2.4) m=Math.min(m,dist(o,p)); }
+  return m;
+}
+function defendersAhead(p){ const l=L(p.team,p.x,p.y); let n=0; for(const o of players){ if(o.team===p.team||o.role==='GK') continue; if(L(p.team,o.x,o.y).d<l.d-0.3) n++; } return n; }
+
+/* ================= RESTART ================= */
+function restart(kind,team,x,y,text,who){
+  const b=ball; let p;
+  if(kind==='goalthrow'){ p=gkOf(team); }
+  else if(kind==='kickoff'){ p=players.find(q=>q.team===team&&q.role==='PV'); p.x=10; p.y=20; kickoffTeam=team; }
+  else { p=who||nearest(team,x,y); p.x=clamp(x,0,20); p.y=clamp(y,0.5,39.5); }
+  for(const q of players){ q.tack=null; q.throwIn=false; q.offer=null; q.kick=false; q.gt=false; q.seven=false; }
+  p.vx=p.vy=0; p.shot=null; p.down=0; p.z=0;
+  b.passer=null; if(kind!=='free'||p.team!==poss){ passive=null; atkT=0; } give(p); passCount=0; trans=kind==='goalthrow'?newTrans(team):null; celebTeam=-1; celebBy=null;
+  if(kind==='throwin'){ // indkast: låst på sidelinjen, 2-3 medspillere tilbyder sig
+    p.x=x<10?0:20; p.throwIn=true; p.inAreaOk=false;
+    const inw=p.x<10?1:-1, side=up(team)?-1:1, cand=players.filter(q=>q.team===team&&q!==p&&q.role!=='GK').sort((a,c)=>dist(a,p)-dist(c,p)).slice(0,3);
+    const spots=[[3.2,side*3.5],[4.6,0],[3.0,-side*3.2]];
+    cand.forEach((q,i)=>{ const o=pushOut(team,clamp(p.x+inw*spots[i][0],1,19),clamp(p.y+spots[i][1],1,39),6.3); q.offer=pushOut(1-team,o.x,o.y,6.3); });
+  }
+  if(kind==='goalthrow'){ p.aiT=0.35; p.gt=true; }
+  if(kind==='seven'){ // 7-meter: skytten på 7-meter-stregen, målmanden på linjen, resten uden for 9 m
+    const w=W(team,10,7.0); p.x=w.x; p.y=w.y; p.seven=true; p.aiT=0.9+rnd()*0.7; p.face=1;
+    const k=gkOf(1-team), kw=W(team,10,0.6); k.x=kw.x; k.y=kw.y; k.plan=null;
+    for(const q of players){ if(q===p||q.role==='GK') continue; const o=pushOut(team,q.x,q.y,9.3); q.x=o.x; q.y=o.y; q.vx=q.vy=0; }
+  }
+  if(kind==='kickoff'){ p.throwIn=true; p.kick=true; p.aiT=team===0?0.3+rnd()*0.3:0.15+rnd()*0.2; } // hurtigt opgiverkast // står på midten, indtil han har kastet op
+  phase='dead'; phaseT=kind==='kickoff'?0.15:0.9; // ingen kunstig pause: hurtigt opgiverkast er muligt
+  if(text) msg(text);
+}
+
+/* ================= MÅL ================= */
+function scoreGoal(team,text,x,z,gy){
+  if(ball.shooter){ const d0=Math.hypot(ball.shooter.x-10,ball.shooter.y-gy); const k0=d0>20?'mål egen halvdel':d0>12?'mål 12-20m':'mål <12m'; STATS[k0]=(STATS[k0]||0)+1; }
+  const b=ball; score[team]++; if(tourMatch&&tour&&b.shooter&&b.shooter.team===team) addScorer(teamSel[team],b.shooter.name,b.shooter.num);
+  const g=goals[gy===0?0:1];
+  g.bulge={x,z,t:0.6};
+  b.mode='net'; b.x=x; b.y=gy+(gy===0?-0.75:0.75); b.z=Math.max(0.15,z*0.7); b.vx=b.vy=0; b.vz=0;
+  const sc=b.shooter&&b.shooter.team===team?` ${b.shooter.name||'#'+b.shooter.num}`:'';
+  msg(text+sc,true);
+  if(team===0) autoHome=true; // du har scoret: din spiller løber selv hjem
+  phase='goal'; phaseT=0.7; celebTeam=team; celebBy=b.shooter&&b.shooter.team===team?b.shooter:null; restartFn=()=>restart('kickoff',1-team,10,20,'Opgiverkast');
+  updateHud(true);
+}
+
+/* ================= SKUD ================= */
+function chooseShot(p){
+  const l=L(p.team,p.x,p.y);
+  if(p.seven) return 'stand';
+  if((l.lx<4.3||l.lx>15.7)&&l.d<8.5) return 'wing';
+  if(defendersAhead(p)===0&&Math.hypot(p.vx,p.vy)>3) return 'jump';
+  if(l.d<sixLine(l.lx)+1.7) return 'fall';
+  const fd=frontDef(p), sp=Math.hypot(p.vx,p.vy);
+  if(fd<1.9) return 'jump';
+  if(sp>3.6&&(fd<3||l.d>9.5)) return 'jump';
+  return 'stand';
+}
+function startShot(p,ai,forceType){
+  if(p.shot||p.z>0.02||ball.holder!==p||p.throwIn||(p.feint&&p.feint.type==='side'&&p.feint.t<0.3)) return;
+  if(p.feint) p.feint=null;
+  const type=forceType||chooseShot(p);
+  const tg=type==='wing'?W(p.team,10,1.4):W(p.team,10,0.6); let dx=tg.x-p.x, dy=tg.y-p.y; const n=Math.hypot(dx,dy)||1;
+  p.shot={type,t:0,released:false,ai:!!ai,dx:dx/n,dy:dy/n,manual:forceType==='wing'&&!ai};
+  p.inAreaOk=true; p.face=dx>=0?1:-1;
+  if(Math.abs(dx)<0.25*n) p.face=(flip?-1:1)*(handOf(p)==='R'?1:-1);        // skud lige på: kastearmen mod kameraet
+  msg(SHOT[type].name);
+  // forsvaret reagerer
+  let jumper=null, jd=9;
+  for(const q of players){ if(q.team===p.team||q.role==='GK') continue; const d=dist(q,p);
+    if(d<3.3&&L(p.team,q.x,q.y).d<L(p.team,p.x,p.y).d+0.3){ q.block=0.75; if(q!==ctrl&&d<jd){jd=d;jumper=q;} } }
+  if(jumper&&type!=='fall'&&jumper.z<0.01){ jumper.vz=3.1; }
+}
+function launchShot(p){
+  p.seven=false; passive=null; atkT=0;
+  { const d0=Math.hypot(p.x-10,p.y-goalY(p.team)); const k0=d0>20?'skud egen halvdel':d0>12?'skud 12-20m':'skud <12m'; STATS[k0]=(STATS[k0]||0)+1; }
+  const t=p.team, gy=goalY(t), sp=SHOT[p.shot.type], k=gkOf(1-t), b=ball;
+  let ax, zl;
+  if(p.shot.ai||p!==ctrl||AUTO){
+    ax=(k.x<10?1:-1)*(0.5+rnd()*0.45); if(t===1) ax=(k.x<10?1:-1)*(0.5+rnd()*0.45);
+    if(rnd()<0.25) ax=-ax; const hr=rnd(); zl=hr<0.45?0.35:hr<0.9?1.65:1.0;
+    if(p.role.endsWith('B')&&p.shot.type!=='fall'){ if(frontDef(p)<1.6){ zl=1.75; demoCap('4 · Skud over blokken'); } else { zl=0.4; demoCap('4 · Skud forbi forsvareren ved hoften'); } } // oftest nede eller oppe
+  } else {
+    ax=clamp(joy.x,-1,1)*0.95*FS(); zl=joy.y<-0.35?1.65:joy.y>0.35?0.35:(rnd()<(p.shot.type==='under'?0.7:0.5)?0.35:1.65); // uden retning: tilfældigt nede eller oppe
+  }
+  const sd=Math.hypot(p.x-10,p.y-gy); p.shot.dist=sd;
+  const lp=L(t,p.x,p.y), angled=p.shot.type==='wing'||(Math.abs(lp.lx-10)>6&&lp.d<7);
+  let err=sp.err+(frontDef(p)<1.2?0.22:0)+(Math.abs(lp.lx-10)>7?0.06:0)
+    +Math.max(0,sd-9.5)*0.07*(1.6-rv(p,'skud')*0.12);           // langskud: kun gode skytter rammer langt fra
+  err*=(1.5-rv(p,'praecision')*0.1)*(1+(1-(p.sta??1))*0.35);    // præcision (og træthed)
+  if(angled) err+=(10-rv(p,'vinkel'))*0.04;                      // fløjskud og spidse vinkler: fløjene er bedst
+  const tx=10+ax*1.32+gauss()*err, tz=Math.max(0.15,zl+gauss()*err*0.7);
+  const rx=p.x+p.face*0.15, ry=p.y, rz=p.z+(p.shot.type==='fall'?1.45:p.shot.type==='under'?1.0:2.05);
+  const speed=sp.spd*(0.85+rv(p,'skud')*0.03)*(0.93+rnd()*0.12)*(sd>12?Math.max(0.78,1-(sd-12)*0.02):1);
+  const dd=Math.hypot(tx-rx,gy-ry), tt=dd/speed;
+  b.mode='shot'; b.holder=null; b.x=rx; b.y=ry; b.z=rz;
+  b.vx=(tx-rx)/tt; b.vy=(gy-ry)/tt; b.vz=(tz-rz+0.5*G*tt*tt)/tt;
+  b.lastTeam=t; b.shooter=p; b.passer=null; b.age=0; b.checked=new Set([p]);
+  b.curve=null; b.trail=null; b.frame=null;
+  if(p.shot.type==='wing'&&rv(p,'vinkel')>=7&&rnd()<0.14){ // skrueskud: bolden starter udad og drejer ind mod målet
+    const sp=Math.hypot(b.vx,b.vy), nx=-b.vy/sp, ny=b.vx/sp, s0=Math.sign(nx*(10-p.x))||1, D=0.5, a=2*D/(tt*tt);
+    const ax2=tx-s0*D*nx, ay2=gy-s0*D*ny; b.vx=(ax2-rx)/tt; b.vy=(ay2-ry)/tt;
+    b.curve={ax:s0*nx*a,ay:s0*ny*a,t:tt}; msg('Skrueskud!');
+  }
+  keeperPlan(k,p);
+}
+function keeperPlan(k,shooter){
+  const b=ball; if(Math.abs(b.vy)<0.1){ k.plan=null; return; }
+  const tk=(k.y-b.y)/b.vy; if(tk<=0){ k.plan=null; return; }
+  const cx=b.x+b.vx*tk, cz=b.z+b.vz*tk-0.5*G*tk*tk;
+  const react=(0.13+rnd()*0.12)*(1.3-rv(k,'reaktion')*0.06)+(k.faked&&time-k.faked<0.7?0.28:0), avail=Math.max(0,tk-react);
+  const reach=0.36+Math.min(1.0,avail*4.5)+(rv(k,'placering')-5)*0.04;
+  const hf=0.93; // samme rækkevidde uanset højde, så redningsprocenten ikke ændres af højden
+  const diff=Math.abs(cx-k.x);
+  const onTarget=Math.abs(cx-10)<1.62&&cz<2.12;
+  // stjernen: ved hopskud/fløjskud/faldskud tæt på springer målmanden op med arme og ben spredt
+  const star=!!(shooter&&shooter.shot&&shooter.shot.type!=='stand'&&shooter.shot.type!=='under'&&dist(shooter,k)<7.8);
+  let save;
+  if(star) save=onTarget&&diff<(avail>0.2?1.1:0.95)&&rnd()<0.45;
+  else {
+    const sd=shooter&&shooter.shot&&shooter.shot.dist||9;
+    if(sd>11.5){ // langskud: tid nok til at træde ud i siden og tage bolden
+      const need=react+Math.abs(cx-k.x)/6.5;
+      const s2=onTarget&&need<tk+0.06&&rnd()<0.92;
+      k.plan={sd,t:0,react,tk,cx,cz,save:s2,dir:Math.sign(cx-k.x)||1,diff,x0:k.x,done:false,star:false,walk:true};
+      return;
+    }
+    const far=Math.max(0,sd-10);                              // meter ud over 10 m
+    const r2=reach*hf+Math.min(0.6,far*0.08);                 // mere tid til at nå bolden
+    const pS=Math.min(0.97,(diff<0.4?0.72:0.45)+far*0.06);     // og lettere at læse skuddet
+    save=onTarget&&diff<r2&&rnd()<pS;
+  }
+  // dyk kun af og til: oftest når målmanden står i den ene side, og bolden kommer i den anden
+  const dive=!star&&(diff>0.9?rnd()<0.45:diff>0.55?rnd()<0.1:rnd()<0.03);
+  k.plan={sd:shooter&&shooter.shot&&shooter.shot.dist||9,t:0,react:star?react*0.6:react,tk,cx,cz,save,dir:Math.sign(cx-k.x)||1,diff,x0:k.x,done:false,star,dive};
+}
+function saveBall(k,catchIt){
+  const b=ball; msg('REDNING!',false,'#9fe3b0');
+  if(catchIt){ give(k); k.aiT=1.0; return; }
+  b.mode='loose'; b.lastTeam=k.team; trans=newTrans(k.team,true); b.age=0; b.noPick=null;
+  const pl=k.plan||{diff:0.5,cz:1,cx:b.x}, toGoal=Math.sign(b.vy)||1;            // retning mod mållinjen
+  const angle=Math.min(1,Math.abs(b.vx)/(Math.abs(b.vy)||1));                      // skrå skud (fx fra fløjen)
+  const stretch=Math.min(1,pl.diff/1.1);                                           // hvor langt målmanden måtte strække sig
+  const pWide=pl.star?0.3:clamp(0.25+0.35*stretch+0.3*angle+(pl.cz>1.5?0.1:0),0.15,0.85);
+  if(!pl.star&&pl.cz<1.5&&rnd()<0.22){ // dæmpet: bolden falder næsten død ned foran målmanden, som samler den op
+    b.vx=b.vx*0.05+(rnd()-0.5)*0.6; b.vy=-toGoal*(0.3+rnd()*0.5); b.vz=0.4+rnd()*0.6; b.y=k.y-toGoal*0.25; b.x=clamp(pl.cx,8.8,11.2);
+    return;
+  }
+  if(rnd()<pWide){ // styret ud til siden af målet: ryger over baglinjen -> målkast
+    b.noPick=k;
+    let side=Math.sign(pl.cx-10)||Math.sign(b.vx)||(rnd()<0.5?-1:1);
+    if(angle>0.35&&rnd()<0.7) side=Math.sign(b.vx)||side;                          // skrå skud fortsætter i samme retning
+    b.x=clamp(b.x,8.9,11.1); b.y=k.y;
+    const vx=3.2+rnd()*1.8, dy=Math.abs(goalY(1-k.team)-k.y), need=Math.max(0.05,(1.9-Math.abs(b.x-10)*(Math.sign(b.x-10)===side?1:-1))/vx);
+    b.vx=side*vx; b.vy=toGoal*Math.min(1.6+rnd()*1.6,dy/need); b.vz=1+rnd()*2.2; // når altid ud forbi stolpen
+  } else {         // retur ud i feltet: kort, mest foran målet
+    b.vy=-toGoal*(2.2+rnd()*3.3); b.vx=-b.vx*0.25+(rnd()-0.5)*4; b.vz=1+rnd()*2;
+    b.y=k.y-toGoal*0.3;
+  }
+}
+
+/* ================= TAKLING ================= */
+/* ================= HOLD FAST (dit forsvar) =================
+   Tryk Skud tæt på boldholderen: let greb. Hold knappen længere: fastere greb.
+   Holdes den inde helt (ca. 0,8 s): altid frikast. */
+const HOLD_FULL=0.8;
+function holdLevel(h){ return h?Math.min(1,h.t/HOLD_FULL):0; }
+function updHold(dt){
+  const p=ctrl; if(!p||!p.hold) return;
+  const h=p.hold, c=h.c;
+  const lost=phase!=='play'||ball.holder!==c||c.team===p.team||dist(p,c)>2.2||c.shot&&c.shot.released;
+  if(lost){ p.hold=null; return; }
+  if(btn.shot) h.t+=dt*(0.75+rv(p,'forsvar')*0.05)*(1.2-rv(c,'styrke')*0.04); // stærke spillere er sværere at holde
+  if(dist(p,c)<1.0) h.t=Math.max(h.t,0.05);
+  if(h.t>=HOLD_FULL){ // holdt helt fast: frikast hver gang
+    p.hold=null; foul(c,p,'Frikast – holdt fast'); return;
+  }
+  if(!btn.shot){ // sluppet før tid
+    const lv=holdLevel(h), front=L(c.team,p.x,p.y).d<L(c.team,c.x,c.y).d-0.1, r=rnd();
+    p.hold=null;
+    if(lv>0.35&&r<lv*0.45){ foul(c,p,'Frikast'); return; }
+    if(r>0.97-(front?0.05:0.02)*(0.5+lv)){ give(p); msg('Bold erobret',false,'#9fe3b0'); }
+  }
+}
+/* ================= FINTER =================
+   side: sidestep – kroppen viser den ene vej, så et hurtigt skridt den anden vej forbi forsvareren
+   shot: skudfinte – armen går op som til et skud, men bolden holdes tilbage; målmand og forsvarere kan bide på */
+function feintOK(p){ return ball.holder===p&&phase==='play'&&!p.shot&&!p.feint&&!p.throwIn&&!p.seven&&!p.kick&&!p.gt&&p.role!=='GK'&&p.z<=0.02&&!(p.feintCD>0); }
+function frontDefender(p,range){ let best=null,bd=range; const l=L(p.team,p.x,p.y);
+  for(const o of players){ if(o.team===p.team||o.role==='GK'||o.down>0) continue; const d=dist(o,p), ol=L(p.team,o.x,o.y); if(ol.d<l.d+0.4&&d<bd){ bd=d; best=o; } } return best; }
+function startFeint(p,type,dir){
+  if(!feintOK(p)) return;
+  const o=frontDefender(p,2.6);
+  if(type==='side'&&!dir) dir=o?(Math.sign(L(p.team,p.x,p.y).lx-L(p.team,o.x,o.y).lx)||1):(rnd()<0.5?-1:1); // væk fra forsvareren
+  p.feintN=(p.feintN||0)+1; const tired=Math.max(0.35,1-(p.feintN-1)*0.22);       // samme finte igen og igen virker dårligere
+  p.feint={type,t:0,dir,done:false,tired}; p.feintCD=1.1;
+  msg(type==='side'?'Sidestep':'Skudfinte');
+}
+function resolveFeint(p){ // øjeblikket hvor finten virker eller ej
+  const f=p.feint; f.done=true; let fooled=false;
+  if(f.type==='side'){
+    const o=frontDefender(p,2.4);
+    if(o){ const ch=clamp(0.48+(rv(p,'fart')-rv(o,'forsvar'))*0.05,0.2,0.82)*f.tired;
+      if(rnd()<ch){ fooled=true;
+        if(o===ctrl&&!AUTO){ if(ctrl.hold) ctrl.hold=null; o.vx=o.vy=0; o.down=0.25; }            // din forsvarer mister grebet
+        else o.fooled={t:0.7,dir:-f.dir};                                                      // computerens forsvarer går den forkerte vej
+      } }
+  } else {
+    const k=gkOf(1-p.team), sd=Math.hypot(p.x-10,p.y-goalY(p.team));
+    if(sd<12&&rnd()<clamp(0.4+(rv(p,'praecision')-rv(k,'reaktion'))*0.05,0.15,0.75)*f.tired){ // målmanden bider på
+      const side=rnd()<0.5?-1:1; fooled=true; k.faked=time;
+      k.plan={fake:true,t:0,react:0.05,tk:0.32,cx:k.x+side*0.9,cz:rnd()<0.5?0.4:1.2,save:false,dir:side,diff:0.9,x0:k.x,done:true,star:false,dive:rnd()<0.35}; }
+    for(const q of players){ if(q.team===p.team||q.role==='GK'||q===ctrl||q.z>0.02) continue; const l=L(p.team,p.x,p.y), ql=L(p.team,q.x,q.y);
+      if(dist(q,p)<3.2&&ql.d<l.d+0.3&&rnd()<0.55*f.tired){ q.vz=3.1; q.block=0.75; fooled=true; } }   // forsvarere hopper op for at blokere
+  }
+  if(fooled) msg('Narret!',false,'#9fe3b0');
+}
+function updFeint(p,dt){
+  const f=p.feint; f.t+=dt; const l=L(p.team,p.x,p.y), t=p.team;
+  const latW=up(t)?1:-1, fwdW=up(t)?-1:1;                                    // sideværts og fremad i verdenskoordinater
+  if(f.type==='side'){
+    if(f.t<0.14){ p.vx*=Math.pow(0.002,dt); p.vy*=Math.pow(0.002,dt); }       // planter foden og viser den forkerte vej
+    else { if(!f.done) resolveFeint(p); const sp=7.6*(0.8+rv(p,'fart')*0.04); p.vx=f.dir*latW*sp; p.vy=fwdW*2.2; }
+    if(f.t>0.42) p.feint=null;
+  } else {
+    p.vx*=Math.pow(0.01,dt); p.vy*=Math.pow(0.01,dt);
+    if(f.t>0.2&&!f.done) resolveFeint(p);
+    if(f.t>0.46){ p.feint=null; p.aiT=Math.min(p.aiT,0.15); }
+  }
+  if(Math.abs(p.vx)>0.4) p.face=Math.sign(p.vx);
+}
+/* ================= FORSEELSE: FRIKAST ELLER 7-METER ================= */
+function clearChance(c,fouler){ // fri chance: inden for 9 m og ingen anden forsvarer mellem ham og målet
+  const l=L(c.team,c.x,c.y); if(l.d>sixLine(l.lx,9)+0.2) return false;
+  for(const o of players){ if(o.team===c.team||o.role==='GK'||o===fouler) continue; const ol=L(c.team,o.x,o.y);
+    if(ol.d<l.d+0.2&&Math.abs(ol.lx-l.lx)<2.2) return false; }
+  return true;
+}
+function foul(c,fouler,text){
+  c.shot=null; c.z=0; c.vx=c.vy=0;
+  if(clearChance(c,fouler)){ restart('seven',c.team,0,0,'7-METER!',c); return; }
+  const w=pushOut(c.team,c.x,c.y,9); restart('free',c.team,w.x,w.y,text,c);
+}
+function startTackle(p){
+  const c=ball.holder;
+  if(!c||c.throwIn||c.seven||c.team===p.team||p.tack||p.shot||p.down>0||p.z>0.05||p.role==='GK') return;
+  const dx=c.x-p.x, dy=c.y-p.y, d=Math.hypot(dx,dy)||1;
+  p.tack={t:0,hit:false,dx:dx/d,dy:dy/d}; p.face=dx>=0?1:-1;
+}
+function pushOut(t,x,y,r){ // flyt et punkt uden for t's 9-meter-linje
+  const l=L(t,x,y); if(l.d>=sixLine(l.lx,r)) return {x,y};
+  let lx=l.lx, d;
+  if(lx>=8.5&&lx<=11.5) d=r+0.1; else { const cx=lx<8.5?8.5:11.5, vx=lx-cx, vy=Math.max(l.d,0.01), n=Math.hypot(vx,vy); lx=cx+vx/n*(r+0.1); d=vy/n*(r+0.1); }
+  return W(t,clamp(lx,0.3,19.7),d);
+}
+function resolveTackle(p,c){
+  p.tack.hit=true;
+  const front=L(c.team,p.x,p.y).d<L(c.team,c.x,c.y).d-0.1, r=rnd();
+  if(r<(front?0.084:0.036)*(0.6+rv(p,'forsvar')*0.08)*(1.25-rv(c,'styrke')*0.05)){ c.shot=null; c.z=0; give(p); msg('Takling – bold erobret',false,'#9fe3b0'); return; }
+  if(r<(front?0.9:1)){
+    foul(c,p,front?'Frikast':'Frikast – takling bagfra');
+    return;
+  }
+  p.down=0.45; msg('Forbi tacklingen');
+}
+
+/* ================= AFLEVERING ================= */
+function doPass(p,q){
+  const pvLow=q.role==='PV'&&posAtt(p.team)&&p.role!=='GK'&&!p.kick;
+  const b=ball, rz=1.45, d0=dist(p,q), tz=pvLow?0.55:1.35;
+  if(pvLow) demoCap('3 · Lav stødaflevering til stregen'); else if(posAtt(p.team)&&p.role!=='GK'&&!p.kick&&d0<9&&rnd()<0.35) demoCap('3 · Kort aflevering i fart');
+  const lob=d0>16&&rnd()<(p.role==='GK'?0.45:0.18);               // lang aflevering går af og til højt
+  let tx=q.x, ty=q.y, tt=0.3;
+  for(let i=0;i<3;i++){ // løs for hvor modtageren er, når bolden når frem
+    const d=Math.hypot(tx-p.x,ty-p.y);
+    const sp=clamp(16+d*0.52,16,d>18?25:23)*(lob?0.62:1)*(0.9+rv(p,'aflevering')*0.02)*(posAtt(p.team)&&d<9?1.15:1);
+    tt=Math.max(0.1,d/sp);
+    tx=clamp(q.x+q.vx*tt,0.8,19.2); ty=clamp(q.y+q.vy*tt,0.8,39.2);
+  }
+  b.mode='pass'; b.holder=null; b.x=p.x; b.y=p.y; b.z=rz; b.tx=tx; b.ty=ty; b.lob=lob;
+  b.vx=(tx-p.x)/tt; b.vy=(ty-p.y)/tt; b.vz=(tz-rz+0.5*G*tt*tt)/tt;
+  b.passTo=q; b.passer=p; b.lastTeam=p.team; b.age=0; b.checked=new Set(); b.safe=!!p.kick&&rnd()<0.95; // opgiverkast: ca. 95 % sikker
+  p.thr=0.22; p.passT=time; if(Math.abs(tx-p.x)>0.2) p.face=Math.sign(tx-p.x);
+  if(p.throwIn){ p.throwIn=false; } p.gt=false; if(p.kick){ p.kick=false; kickoffTeam=null; } for(const o of players) o.offer=null;
+}
+// ved opgiverkast spiller stregspilleren kun til en af de tre nærmeste medspillere
+function kickOptions(p){ return players.filter(q=>q.team===p.team&&q!==p&&q.role!=='GK').sort((a,b)=>dist(a,p)-dist(b,p)).slice(0,3); }
+function bestTarget(p){
+  let best=null,bs=-1e9; const opts=p.kick?kickOptions(p):null;
+  if(opts) return opts[Math.floor(rnd()*opts.length)];
+  for(const q of players){ if(q.team!==p.team||q===p||q.role==='GK') continue;
+    const d=dist(p,q); let s=openness(q)+rnd()*1.5-(q===p.lastFrom?2:0)-Math.abs(d-7)*0.12-(laneBlocked(p,q)?4:0);
+    if(d>18&&!(p.role==='GK'&&trans)) s-=3;
+    if(trans&&trans.team===p.team&&(q.role==='LW'||q.role==='RW')&&defendersAhead(q)===0) s+=6;
+    if(q.role==='PV'&&!laneBlocked(p,q)&&openness(q)>1.0&&d<9) s+=1.3+rv(p,'aflevering')*0.15; // indspil til stregen
+    if(!opts&&p.role!=='GK'&&posAtt(p.team)){ const i=LINE.indexOf(p.role), j=LINE.indexOf(q.role); // positionsangreb: bolden kører videre til næste mand
+      if(i>=0&&j>=0){ const st=j-i; if(st===wave[p.team]) s+=2.0; else if(Math.abs(st)===1) s+=0.8; else s-=2.6*(Math.abs(st)-1);
+        if(isWing(q)&&openness(q)<2.6) s-=2.5; } }                           // fløjen får kun bolden, når han er fri
+    if(s>bs){bs=s;best=q;} }
+  return best;
+}
+function humanPassTarget(p){
+  const jx=joy.x*FS(), jy=joy.y*FS(), jm=Math.hypot(jx,jy); let best=null,bs=-1e9; const opts=p.kick?kickOptions(p):null;
+  for(const q of players){ if(q.team!==p.team||q===p||q.role==='GK'||(opts&&!opts.includes(q))) continue;
+    const dx=q.x-p.x, dy=q.y-p.y, d=Math.hypot(dx,dy)||1; let s;
+    if(jm>0.3){ s=((dx*jx+dy*jy)/(d*jm))*10-d*0.12; } else s=openness(q)-Math.abs(d-7)*0.2-(laneBlocked(p,q)?3:0);
+    if(s>bs){bs=s;best=q;} }
+  return best;
+}
+
+/* ================= AI ================= */
+function aiCarrier(p,dt){
+  if(phase!=='play'||p.shot) return;
+  if(ctrl&&ctrl.hold&&ctrl.hold.c===p) return; // holdt fast: kan ikke spille bolden af
+  const l=L(p.team,p.x,p.y);
+  if(p.seven){ p.aiT-=dt; if(p.aiT<=0) startShot(p,true,'stand'); return; }
+  if(p.feint) return;
+  if(p.role!=='GK'&&!p.throwIn&&defendersAhead(p)===0&&l.d<8.8){ startShot(p,true); return; }
+  p.holdT=(p.holdT||0)+dt;
+  p.aiT-=dt; if(p.aiT>0) return;
+  if(p.role==='GK'){ const q=bestTarget(p); if(q) doPass(p,q); return; }
+  const r=rnd(), nd=frontDef(p);
+  const wing=(l.lx<4.3||l.lx>15.7)&&l.d<8.5;
+  let shoot=false;
+  if(wing) shoot=openness(p)>2.2?r<0.7:r<0.2;                              // dækket fløj spiller tilbage
+  else if(p.role==='PV') shoot=l.d<8.5&&r<0.7;
+  else if(l.d<10.8) shoot=nd>1.8?r<0.6:nd>1.1?r<0.3:r<0.1;                 // mødt af forsvareren: oftest videre                          // mødt af forsvareren: spil bolden videre
+  if(passCount>9&&l.d<10.5) shoot=true;
+  if(passive&&passive.passes>=2&&l.d<12) shoot=true; // advarsel: computeren afslutter
+  if(l.d>9.6+rv(p,'skud')*0.18||p.throwIn) shoot=false;
+  if(shoot&&p.role.endsWith('B')&&posAtt(p.team)&&!(passive&&passive.passes>=2)){
+    const fw=up(p.team)?-p.vy:p.vy; if(p.holdT<0.32||(fw<1.6&&frontDef(p)>1.2)) shoot=false; } // computeren skyder kun langt fra med gode skytter
+  if(!shoot&&l.d<11&&frontDef(p)<1.7&&feintOK(p)&&rnd()<0.22){ startFeint(p,rnd()<0.6?'side':'shot',0); p.aiT=0.3; return; }
+  if(shoot) startShot(p,true); else if(l.d<14||p.kick||rnd()<0.5){ const q=bestTarget(p); if(q) doPass(p,q); }
+  p.aiT=0.6+rnd()*0.7;
+}
+function attackTarget(p){
+  const t=p.team; let [lx,d]=ATT[p.role];
+  const bl=L(t,ball.x,ball.y), wing=p.role==='LW'||p.role==='RW', back=p.role.endsWith('B');
+  // kontra: fløjene løber langs sidelinjen mod hjørnet, resten følger i anden bølge
+  if(trans&&trans.team===t&&ball.holder!==p){
+    if(wing&&trans[p.role]){
+      const pl=L(t,p.x,p.y), side=lx<10?-1:1;
+      const wd=Math.max(4.6,Math.min(pl.d-1,bl.d-10)); let wlx=10+side*8.5;  // løb ude ved sidelinjen, foran bolden
+      if(pl.d<15&&defendersAhead(p)===0) wlx=10+side*3.5;                     // fri bane: skær ind mod midten
+      return W(t,wlx,wd);
+    }
+  }
+  if(p.role==='PV'){ // stregspilleren finder hullet mellem to forsvarere tæt på bolden
+    const ds=players.filter(o=>o.team!==t&&o.role!=='GK').map(o=>L(t,o.x,o.y).lx).sort((a,c)=>a-c);
+    let gx=10+(bl.lx-10)*0.45, bd=1e9;
+    for(let i=0;i<ds.length-1;i++){ const g=(ds[i]+ds[i+1])/2, w=ds[i+1]-ds[i]; const sc=Math.abs(g-bl.lx)*0.5-w*0.6+Math.abs(g-10)*0.15; if(w>1.2&&sc<bd){ bd=sc; gx=g; } }
+    lx=clamp(gx,6.0,14.0); d=sixLine(lx)+0.4; }
+  else if(wing){ d=2.4+Math.sin(time*0.6+p.num)*0.15; }
+  else {
+    // hele angrebet forskydes samlet mod boldsiden
+    lx+=clamp((bl.lx-10)*0.18,-1.4,1.4)+Math.sin(time*0.6+p.num)*0.1;
+    // boldsiden kommer frem, fjern side holder dybde
+    const side=Math.abs(lx-bl.lx); d+= side<3?-0.4:side>7?0.6:0;
+    if(posAtt(t)){
+      if(ball.mode==='pass'&&ball.passTo===p) d-=1.3;                        // modtageren tager fart frem mod bolden
+      else if(p.passT&&time-p.passT<0.9) d+=0.7;                              // har lige afleveret: træk tilbage
+    }
+  }
+  if(ball.holder===p){
+    if(defendersAhead(p)===0&&L(t,p.x,p.y).d>7){ lx=wing?(lx<10?4:16):clamp(L(t,p.x,p.y).lx,6,14); d=7.4; }
+    else if(wing){ lx=lx<10?2.7:17.3; d=4.9; }
+    else if(p.role!=='PV'){ d=8.7;
+      if(posAtt(t)&&back){ // stød: løb frem mod hullet mellem de to forsvarere foran dig
+        const ds=players.filter(o=>o.team!==t&&o.role!=='GK'&&L(t,o.x,o.y).d<9.5).map(o=>L(t,o.x,o.y).lx).sort((a,c)=>a-c);
+        let gx=lx, bd=1e9; for(let i=0;i<ds.length-1;i++){ const g=(ds[i]+ds[i+1])/2; if(Math.abs(g-lx)<bd&&Math.abs(g-lx)<2.6){ bd=Math.abs(g-lx); gx=g; } }
+        lx=gx; d=7.9; } }
+  }
+  return W(t,lx,d);
+}
+function defenseTarget(p){
+  const t=p.team, o=1-t, bl=L(o,ball.x,ball.y);
+  const f=stepper[t]===p?focusFor(t):null;
+  if(f){ const fl=L(o,f.x,f.y); const dx=10-fl.lx, dy=0.5-fl.d, n=Math.hypot(dx,dy)||1;
+    let lx=fl.lx+dx/n*1.05, d=fl.d+dy/n*1.05; d=clamp(d,sixLine(lx)+0.35,9.0); return W(o,lx,d); } // træder ud, men ikke længere end ca. 9 m
+  const far=bl.d>14, shift=far?0:clamp((bl.lx-10)*0.3,-2.4,2.4);
+  // pladserne regnes i angriberens koordinater, så de spejles: en spiller forsvarer på samme side af banen, som han angriber på
+  let lx=SLOTS[5-DSLOT[p.role]]; lx=10+(lx-10)*(far?0.8:1)+shift;
+  let d=Math.max(sixLine(lx)+0.6,1.6);
+  const hf=helper[t]===p?focusFor(t):null;
+  if(hf){ const hl=L(o,hf.x,hf.y); if(hl.d<10.5){ lx+=(hl.lx-lx)*0.45; d=Math.max(sixLine(lx)+1.0,1.6); } } // naboen hjælper ind mod boldholderen
+  return W(o,lx,d);
+}
+function keeperTarget(p,att){
+  const o=1-p.team;
+  if(att===p.team&&ball.holder!==p) return W(o,10,1.3);
+  const bl=L(o,ball.x,ball.y);
+  if(ball.mode==='loose'&&chaser[p.team]===p) return {x:ball.x,y:ball.y};
+  const dx=bl.lx-10, dy=Math.max(bl.d,0.5), n=Math.hypot(dx,dy);
+  return W(o,clamp(10+dx/n*1.0,8.8,11.2),clamp(dy/n*1.0,0.45,1.2));
+}
+function focusFor(t){ // modstanderens spiller med bold (eller modtager)
+  const b=ball, o=1-t;
+  if(b.holder&&b.holder.team===o&&b.holder.role!=='GK') return b.holder;
+  if(b.mode==='pass'&&b.lastTeam===o&&b.passTo) return b.passTo;
+  return null;
+}
+const KICK={PV:[10,20.25],LW:[1.6,21.4],RW:[18.4,21.4],LB:[7.4,21.3],RB:[12.6,21.3],CB:[10,22.3]}; // center og bagspillere tæt på stregspilleren
+function outOfArea(x,y){ let q={x,y}; for(const t of [0,1]) q=pushOut(t,q.x,q.y,6.15); return q; }
+const GTW={LB:[4.6,30.5],CB:[10,28.8],RB:[15.4,30.5]}; // ventepladser ved målkast (angrebskoordinater, eget mål ved d=40)
+function targetFor(p,att){
+  if(p.wantsSub){ const y0=benchY(p.team); return {x:19.6,y:clamp(p.y,y0+0.5,y0+3.5)}; }
+  const sv=ball.holder&&ball.holder.seven?ball.holder:null;
+  if(sv&&p!==sv&&p.role!=='GK'){ const o=pushOut(sv.team,p.x,p.y,9.3); return o; }
+  if(phase==='fetch'&&fetch&&p.role==='GK'&&p.team===fetch.team) return fetchTarget(p);
+  // målkast: center og bagspillere stiller sig klar til at modtage bolden fra målmanden
+  const gtTeam=phase==='fetch'&&fetch?fetch.team:(ball.holder&&ball.holder.gt?ball.holder.team:-1);
+  if(p.team===gtTeam&&GTW[p.role]){ const g=GTW[p.role]; return W(p.team,g[0],g[1]); }
+  let tg;
+  // opgiverkast: holdet, der skal kaste op, stiller op spredt på egen banehalvdel med stregspilleren på midten
+  const kickTeam=phase==='goal'&&celebTeam>=0?1-celebTeam:(kickoffTeam!==null?kickoffTeam:-1);
+  if(p.team===kickTeam&&p.role!=='GK'&&ball.holder!==p){ const k=KICK[p.role]; return W(p.team,k[0],k[1]); }
+  if(p.role==='GK') tg=keeperTarget(p,att);
+  else if(ball.mode==='loose'&&chaser[p.team]===p) tg=inArea(ball.x,ball.y)?outOfArea(ball.x,ball.y):{x:ball.x+ball.vx*0.15,y:ball.y+ball.vy*0.15};
+  else if(trans&&trans.early&&trans.team===p.team&&isWing(p)&&trans[p.role]) tg=attackTarget(p); // starter kontraløbet før bolden er sikret
+  else if(p.offer) tg=p.offer;
+  else if(att===p.team) tg=attackTarget(p);
+  else tg=defenseTarget(p);
+  if(kickoffTeam!==null&&p.team===kickoffTeam&&ball.holder!==p&&p.role!=='GK'){ tg={x:tg.x,y:up(p.team)?Math.max(tg.y,20.6):Math.min(tg.y,19.4)}; }
+  return tg;
+}
+
+/* ================= SPILLER-OPDATERING ================= */
+function steer(p,dvx,dvy,dt,acc){ const ax=dvx-p.vx, ay=dvy-p.vy, m=Math.hypot(ax,ay); const s=Math.min(1,acc*dt/(m||1)); p.vx+=ax*s; p.vy+=ay*s; }
+function updShot(p,dt){
+  const s=p.shot, sp=SHOT[s.type]; s.t+=dt;
+  if(sp.air>0&&s.t<sp.air){ const u=s.t/sp.air; p.z=4*sp.h*u*(1-u); p.vx=s.dx*sp.fwd; p.vy=s.dy*sp.fwd; }
+  else if(sp.air===0&&s.t<sp.rel){ p.vx=s.dx*sp.fwd; p.vy=s.dy*sp.fwd; }
+  else { p.z=0; p.vx*=Math.pow(0.04,dt); p.vy*=Math.pow(0.04,dt); }
+  // manuelt fløjhop: spilleren skal selv skyde eller aflevere i luften
+  if(!s.manual&&!s.released&&s.t>=sp.rel){ s.released=true; if(ball.holder===p) launchShot(p); }
+  if(s.manual&&!s.released&&s.t>=sp.air&&ball.holder===p){ s.released=true; p.shot=null; p.z=0; restart('goalthrow',1-p.team,0,0,'Bolden tabt i feltet'); return; }
+  if(s.t>=sp.dur){ p.shot=null; p.z=0; if(s.type==='fall') p.down=0.6; }
+}
+function updPlayer(p,dt,att){
+  if(p.thr>0) p.thr-=dt; if(p.feintCD>0) p.feintCD-=dt; if(p.feintN>0&&!p.feint) p.feintN=Math.max(0,p.feintN-dt*0.25); if(p.block>0) p.block-=dt;
+  if(p.shot){ updShot(p,dt); }
+  else if(p.feint){ updFeint(p,dt); }
+  else if(p.fooled&&p.fooled.t>0){ p.fooled.t-=dt; const lw=up(1-p.team)?1:-1; p.vx=p.fooled.dir*lw*3.2; p.vy*=0.8; if(p.fooled.t<=0) p.fooled=null; }
+  else if(p.tack){
+    const tk=p.tack; tk.t+=dt;
+    if(tk.t<0.24){ p.vx=tk.dx*8; p.vy=tk.dy*8; } else { p.vx*=Math.pow(0.02,dt); p.vy*=Math.pow(0.02,dt); }
+    const c=ball.holder;
+    if(!tk.hit&&c&&c.team!==p.team&&dist(p,c)<0.78&&phase==='play'){ resolveTackle(p,c); }
+    if(tk.t>0.45){ if(!tk.hit){ p.down=0.35; } p.tack=null; }
+  }
+  else if(p.down>0){ p.down-=dt; p.vx*=Math.pow(0.02,dt); p.vy*=Math.pow(0.02,dt); }
+  else {
+    let dvx=0,dvy=0;
+    let vmax=speedOf(p)*(ball.holder===p?0.9:1);
+    // hjemløb: spillere på vej tilbage i forsvar (og efter mål) løber ca. 15 % hurtigere for et bedre flow
+    if(p.role!=='GK'&&ball.holder!==p&&(phase==='goal'||(att!==p.team&&L(1-p.team,p.x,p.y).d>13))) vmax*=1.15;
+    if(phase==='fetch'&&fetch&&p.role==='GK'&&p.team===fetch.team) vmax=8.0; // løber hurtigt ud efter bolden
+    if(posAtt(p.team)&&att===p.team&&ball.holder!==p&&ball.passTo!==p&&p.role!=='GK'&&!(p.passT&&time-p.passT<0.9)) vmax*=0.6; // jogger i positionsspil
+    if(ctrl&&ctrl.hold&&ctrl.hold.c===p) vmax*=1-(0.35+0.45*holdLevel(ctrl.hold))*(1.25-rv(p,'styrke')*0.05); // holdt fast: kan næsten ikke komme frem
+    // i kontra jogger alle andre end de løbende fløje op i formation (anden bølge)
+    if(trans&&!trans.early&&trans.team===p.team&&p.role!=='GK'&&ball.holder!==p&&!(isWing(p)&&trans[p.role])) vmax*=0.82;
+    if(p===ctrl&&!AUTO&&p.hold){ const c=p.hold.c, dx=c.x-p.x, dy=c.y-p.y, d=Math.hypot(dx,dy)||1; const sp=Math.min(vmax,Math.max(0,d-0.45)*8+Math.hypot(c.vx,c.vy)); dvx=dx/d*sp; dvy=dy/d*sp; }
+    else if(p===ctrl&&!AUTO&&phase!=='goal'&&phase!=='half'&&!autoHome){ dvx=joy.x*FS()*vmax; dvy=joy.y*FS()*vmax; } // efter mål løber også din spiller selv hjem
+    else if(p.role==='GK'&&p.plan){
+      const pl=p.plan; pl.t+=dt;
+      if(pl.t>pl.react){ const tgx=!pl.walk?pl.x0+clamp(pl.cx-pl.x0,pl.dive?-1.15:-0.5,pl.dive?1.15:0.5):pl.walk?pl.cx:pl.star?pl.x0+clamp(pl.cx-pl.x0,-0.35,0.35):pl.save?pl.cx:pl.x0+pl.dir*Math.min(pl.diff,1.0)*0.75; dvx=clamp((tgx-p.x)*12,pl.walk?-6.5:-7.5,pl.walk?6.5:7.5); if(pl.star&&p.z<=0&&pl.t<pl.react+0.05) p.vz=2.2; }
+      if(pl.t>Math.max(pl.react+0.95,pl.tk+(pl.dive?0.95:0.5))) p.plan=null;
+      p.vx=dvx; p.vy*=0.6;
+    } else {
+      if(ball.holder===p&&p!==ctrl) aiCarrier(p,dt);
+      const tg=targetFor(p,att);
+      if(p.role!=='GK'&&chaser[p.team]!==p&&ball.holder!==p&&!p.offer){ // hold afstand til holdkammerater, så de ikke klumper
+        for(const o of players){ if(o===p||o.team!==p.team||o.role==='GK') continue; const ox=tg.x-o.x, oy=tg.y-o.y, od=Math.hypot(ox,oy);
+          if(od<2.4&&od>0.01){ tg.x+=ox/od*(2.4-od)*0.6; tg.y+=oy/od*(2.4-od)*0.6; } }
+      }
+      const dx=tg.x-p.x, dy=tg.y-p.y, d=Math.hypot(dx,dy);
+      if(d>0.05){ const sp=Math.min(vmax*(d>3?1:0.85),d*(d>3?3:2.6)); dvx=dx/d*sp; dvy=dy/d*sp; }
+    }
+    if((phase==='dead'||p.throwIn||p.seven)&&ball.holder===p){ dvx=dvy=0; p.vx*=0.5; p.vy*=0.5; }
+    let acc=p.role==='GK'?30:24; { const vs=Math.hypot(p.vx,p.vy), ds=Math.hypot(dvx,dvy); if(p.role!=='GK'&&vs>3.5&&ds>0.5&&(p.vx*dvx+p.vy*dvy)/(vs*ds)<0.3){ acc=9; if(!p.turnCap&&ball.holder===p){ p.turnCap=1; demoCap('5 · Retningsskift i fart koster et øjeblik'); } } else p.turnCap=0; }
+    if(!(p.role==='GK'&&p.plan)) steer(p,dvx,dvy,dt,acc);
+    // kropskontakt bremser
+    if(ball.holder===p&&p.role!=='GK') for(const o of players){ if(o.team!==p.team&&o.role!=='GK'&&dist(o,p)<0.62){ p.vx*=0.94; p.vy*=0.94; } }
+  }
+  p.x+=p.vx*dt; p.y+=p.vy*dt;
+  if(!p.shot&&(p.z>0||p.vz>0)){ p.z+=p.vz*dt; p.vz-=G*dt; if(p.z<=0){p.z=0;p.vz=0;} }
+  const sp=Math.hypot(p.vx,p.vy);
+  p.run+=(clamp(sp/6.5,0,1)-p.run)*Math.min(1,dt*10);
+  p.phase+=sp*dt*5.4;
+  if(p.grab||p.hold){ /* vend mod den man holder */ }
+  else if(Math.abs(p.vx)>0.5&&!p.shot&&!(p.role==='GK'&&p.plan)) p.face=Math.sign(p.vx);
+  else if(sp<0.5&&!p.shot&&p.role!=='GK'){ const fx=ball.x-p.x; if(Math.abs(fx)>0.6) p.face=Math.sign(fx); }
+}
+function clampArea(p){
+  if(p.role==='GK'||p.inAreaOk||p.z>0.05) return;
+  for(const t of [0,1]){
+    const l=L(t,p.x,p.y), s=sixLine(l.lx);
+    if(l.d<s&&l.d>-0.5){
+      let nlx=l.lx, nd;
+      if(l.lx>=8.5&&l.lx<=11.5) nd=6.02;
+      else { const cx=l.lx<8.5?8.5:11.5, vx=l.lx-cx, vy=Math.max(l.d,0.01), n=Math.hypot(vx,vy); nlx=cx+vx/n*6.02; nd=vy/n*6.02; }
+      const w=W(t,nlx,nd); p.x=w.x; p.y=w.y;
+    }
+  }
+}
+
+/* ================= BOLD-OPDATERING ================= */
+/* ================= MÅLKAST: MÅLMANDEN HENTER BOLDEN ================= */
+function startFetch(t){
+  const k=gkOf(t); k.plan=null; k.shot=null;
+  fetch={team:t,t:0}; phase='fetch'; ball.mode='out'; ball.holder=null; trans=null;
+  msg('Målkast');
+}
+function fetchTarget(k){
+  const t=fetch.team, own=goalY(1-t), dir=own===0?1:-1;                 // dir: retning ind på banen
+  const tg=ball.holder===k?W(1-t,10+(ball.x-10)*0.25,2.2):{x:ball.x,y:ball.y};
+  const kBehind=(k.y-own)*dir<0, tBehind=(tg.y-own)*dir<0;
+  if(kBehind!==tBehind&&Math.abs(k.x-10)<1.95) return {x:10+(Math.sign(tg.x-10)||1)*2.0,y:own+dir*(kBehind?-0.35:0.35)}; // uden om målet
+  return tg;
+}
+function updFetch(dt){
+  const b=ball, k=gkOf(fetch.team); fetch.t+=dt;
+  if(b.mode==='out'){ // bolden triller videre uden for banen og bremses
+    b.vz-=G*dt; b.x+=b.vx*dt; b.y+=b.vy*dt; b.z+=b.vz*dt;
+    if(b.z<0.1){ b.z=0.1; if(b.vz<-1) b.vz=-b.vz*0.5; else b.vz=0; }
+    const f=Math.exp(-(b.z<=0.11?5.0:1.2)*dt); b.vx*=f; b.vy*=f;
+    const gl=goalY(1-fetch.team); if(Math.abs(b.y-gl)>1.8){ b.y=gl+Math.sign(b.y-gl)*1.8; b.vy=0; } // stopper kort bag baglinjen
+    if(b.x<-0.8||b.x>20.8){ b.x=clamp(b.x,-0.8,20.8); b.vx=0; }
+    if(b.y<-2.4||b.y>42.4){ b.y=clamp(b.y,-2.4,42.4); b.vy=0; }
+    if(dist(k,b)<0.5&&b.z<1.4){ b.mode='held'; b.holder=k; b.vx=b.vy=b.vz=0; }
+  }
+  const back=b.holder===k&&L(1-fetch.team,k.x,k.y).d>0.3&&L(1-fetch.team,k.x,k.y).d<5.5&&k.x>0.5&&k.x<19.5;
+  if(back||fetch.t>5){ fetch=null; restart('goalthrow',k.team,0,0,null); }
+}
+function updBall(dt){
+  const b=ball; b.age+=dt;
+  if(b.mode==='out') return;
+  if(b.mode==='held'){ const h=b.holder; b.x=h.x+h.face*0.35; b.y=h.y+0.05; b.z=1.0+h.z; return; }
+  if(b.mode==='net'){ b.z=Math.max(0.12,b.z-dt*1.2); return; }
+  const px=b.x, py=b.y, pz=b.z;
+  // tæt på målet regnes i små skridt, så bolden kan ramme stolpe og overligger rigtigt
+  const nearGoal=(b.mode==='shot'||b.mode==='loose')&&Math.min(Math.abs(b.y),Math.abs(b.y-40))<2.5, ns=nearGoal?6:1, h=dt/ns;
+  for(let i=0;i<ns;i++){
+    b.vz-=G*h;
+    if(b.curve&&b.age<b.curve.t){ b.vx+=b.curve.ax*h; b.vy+=b.curve.ay*h; }            // skrueskud
+    b.x+=b.vx*h; b.y+=b.vy*h; b.z+=b.vz*h;
+    if(nearGoal&&frameHit(b)) break;
+  }
+  if(b.curve){ (b.trail=b.trail||[]).push([b.x,b.y,b.z]); if(b.trail.length>14) b.trail.shift(); if(b.age>b.curve.t+0.15) b.curve=null; } else if(b.trail) b.trail=null;
+  if(b.z<0.1){ b.z=0.1; b.curve=null;
+    if(b.vz<-1){ b.vz=-b.vz*0.55; b.vx*=0.84; b.vy*=0.84; if(b.mode==='pass') b.mode='loose'; }
+    else { b.vz=0; const f=Math.max(0,1-1.4*dt); b.vx*=f; b.vy*=f; if(b.mode==='shot'&&Math.hypot(b.vx,b.vy)<4) b.mode='loose'; }
+  }
+  // mållinjer
+  if(b.mode==='shot'||b.mode==='loose') for(const gy of [0,40]) for(const postX of [8.5,11.5]){
+    if((px-postX)*(b.x-postX)>=0||Math.abs(b.x-10)>Math.abs(px-10)) continue;       // kun bold på vej ind forbi stolpens linje
+    const f=(postX-px)/(b.x-px), yy=py+(b.y-py)*f, zz=pz+(b.z-pz)*f, behind=gy===0?-yy:yy-40;
+    if(zz>2.0||behind<0.15||behind>1.0) continue;
+    const inward=Math.sign(10-postX), team=up(0)===(gy===0)?0:1;
+    if(behind>0.15){ msg('Sidenettet'); b.vx*=0.1; b.vy*=0.1; b.vz=0; startFetch(1-team); return; }
+  }
+  for(const gy of [0,40]){ if((py-gy)*(b.y-gy)<0&&(gy===0?b.y<0:b.y>40)){ goalLine(gy,px,py,pz); return; } }
+  if(b.mode==='shot'){
+    const k=gkOf(1-b.lastTeam);
+    if(k.plan&&!k.plan.done&&(py-k.y)*(b.y-k.y)<=0){ k.plan.done=true;
+      if(k.plan.save){ k.plan.hit={x:b.x,y:b.y,z:b.z,t:time}; const c=(k.plan.cz>0.4&&k.plan.cz<1.5&&rnd()<0.45)||(k.plan.walk&&rnd()<0.88); saveBall(k,c); return; } }
+    for(const q of players){ if(q.team===b.lastTeam||q.role==='GK'||b.checked.has(q)) continue;
+      if(Math.abs(b.y-q.y)<0.4&&Math.abs(b.x-q.x)<(q.block>0?0.7:0.35)){ b.checked.add(q);
+        const top=q.z+(q.block>0?2.5:1.9);
+        if(b.z<top&&b.z>0.3&&rnd()<(q.block>0?0.2:0.06)*(0.6+rv(q,'forsvar')*0.08)){ b.mode='loose'; b.vy*=-0.25; b.vx=(rnd()-0.5)*6; b.vz=2.5; b.lastTeam=q.team; k.plan=null; msg('Blokeret!'); return; } } }
+  }
+  if(b.mode==='pass'&&b.passTo){ // præcision: bolden følger modtagerens løb
+    const q=b.passTo, hs=Math.hypot(b.vx,b.vy), rd=Math.hypot(q.x-b.x,q.y-b.y);
+    if(rd>0.35&&hs>1){
+      const rt=rd/hs, px=q.x+q.vx*rt, py=q.y+q.vy*rt, dx=px-b.x, dy=py-b.y, dn=Math.hypot(dx,dy)||1, k=Math.min(1,dt*8*(0.6+rv(b.passer||q,'aflevering')*0.08));
+      b.vx+=(dx/dn*hs-b.vx)*k; b.vy+=(dy/dn*hs-b.vy)*k;
+      const rt2=Math.hypot(dx,dy)/hs; if(rt2>0.05) b.vz=(1.3-b.z+0.5*G*rt2*rt2)/rt2;
+    }
+  }
+  if(b.mode==='pass'){
+    for(const q of players){ if(q===b.passer&&b.age<0.25) continue; if(q.shot||q.down>0) continue; if(q.role!=='GK'&&inArea(q.x,q.y)) continue;
+      const d=Math.hypot(q.x-b.x,q.y-b.y);
+      if(b.z>2.4+q.z||b.z<0.15) continue;
+      if(q.team===b.lastTeam){ if((q===b.passTo&&d<0.8)||d<0.45){ give(q); return; } }
+      else if(d<0.5&&!b.checked.has(q)){ b.checked.add(q); if(!b.safe&&rnd()<(q===ctrl?0.75:0.4)*(1.3-rv(b.passer||q,'aflevering')*0.06)*(0.7+rv(q,'forsvar')*0.06)){ give(q); msg('Opsnappet!'); return; } }
+    }
+  }
+  if(b.mode==='loose'&&b.z<1.5){
+    let best=null,bd=0.6;
+    for(const q of players){ if(q.shot||q.down>0) continue; if(q.role!=='GK'&&inArea(q.x,q.y)) continue; if(q===b.noPick&&b.age<0.45) continue; const d=Math.hypot(q.x-b.x,q.y-b.y); if(d<bd){bd=d;best=q;} }
+    if(best){ give(best); return; }
+  }
+  if(b.x<-0.15||b.x>20.15){ restart('throwin',1-b.lastTeam,b.x,b.y,'Indkast'); }
+}
+/* Stolper (lodrette rør) og overligger (vandret rør): bolden preller af efter vinklen den rammer med.
+   Om den så går ind eller ud afgøres af den nye bane – ikke af tilfældighed. */
+const BALL_R=0.095, POST_R=0.045, FRAME_E=0.62;
+function frameHit(b){
+  const R=BALL_R+POST_R;
+  for(const gy of [0,40]){
+    if(Math.abs(b.y-gy)>R+0.05) continue;
+    for(const postX of [8.5,11.5]){                                   // stolperne
+      const dx=b.x-postX, dy=b.y-gy, d=Math.hypot(dx,dy);
+      if(d<R&&b.z<2.0+R&&d>1e-4){ const nx=dx/d, ny=dy/d, vn=b.vx*nx+b.vy*ny;
+        if(vn<0){ b.vx-=(1+FRAME_E)*vn*nx; b.vy-=(1+FRAME_E)*vn*ny; const tx=-ny, ty=nx, vt=b.vx*tx+b.vy*ty; b.vx-=vt*tx*0.15; b.vy-=vt*ty*0.15;
+          b.x=postX+nx*R; b.y=gy+ny*R; onFrame(b,'post',gy); return true; } } }
+    if(Math.abs(b.x-10)<1.5+POST_R){                                    // overliggeren
+      const dy=b.y-gy, dz=b.z-2.0, d=Math.hypot(dy,dz);
+      if(d<R&&d>1e-4){ const ny=dy/d, nz=dz/d, vn=b.vy*ny+b.vz*nz;
+        if(vn<0){ b.vy-=(1+FRAME_E)*vn*ny; b.vz-=(1+FRAME_E)*vn*nz; b.vx*=0.9; b.y=gy+ny*R; b.z=2.0+nz*R; onFrame(b,'bar',gy); return true; } } }
+  }
+  return false;
+}
+function onFrame(b,type,gy){
+  goals[gy===0?0:1].shake=0.45; shake=0.25; b.curve=null;
+  b.frame={type,t:time}; msg(type==='post'?'STOLPE!':'OVERLIGGER!',false,'#ffd36b');
+  for(const p of players) if(p.role==='GK'&&p.plan) p.plan.done=true;   // målmanden er forbi bolden
+}
+function postOut(gy,postX,inward){
+  const b=ball, into=gy===0?0.15:-0.15;
+  b.y=gy+into; b.x=postX-inward*0.12; b.vy=-b.vy*(0.35+rnd()*0.2); b.vx=-inward*(2+rnd()*4)+b.vx*0.15; b.vz*=0.6; b.mode='loose';
+  goals[gy===0?0:1].shake=0.45; shake=0.25;
+  msg('STOLPE UD!',false,'#ffd36b');
+}
+function goalLine(gy,px,py,pz){
+  const b=ball, f=(gy-py)/(b.y-py), x=px+(b.x-px)*f, z=pz+(b.z-pz)*f;
+  const team=up(0)===(gy===0)?0:1, gi=gy===0?0:1, ins=Math.abs(x-10);
+  if(ins<1.5-BALL_R&&z<2.0-BALL_R){
+    const fr=b.frame&&time-b.frame.t<0.9?b.frame.type:null;
+    if(b.mode==='shot'||(b.mode==='loose'&&(b.lastTeam===team||fr)&&b.age<1.6)){ scoreGoal(team,fr==='post'?'STOLPE IND!':fr==='bar'?'OVERLIGGER IND!':'MÅL!',x,z,gy); return; }
+    restart('goalthrow',1-team,0,0,'Målmanden samler op'); return;
+  }
+  if(b.mode==='shot'&&!(b.frame&&time-b.frame.t<0.9)) msg('Forbi');
+  startFetch(1-team);
+}
+
+/* ================= HOVEDLØKKE ================= */
+function updCtrl(att){
+  if(AUTO){ ctrl=null; return; }
+  const b=ball, fieldNear=()=>nearest(0,b.x,b.y,true);
+  if(b.holder&&b.holder.team===0&&b.holder.role!=='GK'){ ctrl=b.holder; }
+  else if(b.mode==='pass'&&b.lastTeam===0&&b.passTo&&b.passTo.role!=='GK'){ ctrl=b.passTo; }
+  else if(b.mode==='loose'){ const n=fieldNear(); if(!ctrl||ctrl.role==='GK'||dist(ctrl,b)>dist(n,b)+1.2) ctrl=n; }
+  else if(b.mode==='shot'&&b.lastTeam===0){ /* behold */ }
+  else if(!ctrl||ctrl.role==='GK'||(att===1&&lastAtt===0)){ ctrl=fieldNear(); }
+  if(!ctrl) ctrl=fieldNear();
+}
+function step(dt){
+  time+=dt;
+  if(phase==='play'||phase==='dead'||phase==='fetch'){ clock-=dt; }
+  if(phase==='dead'){ phaseT-=dt; if(phaseT<=0){ phase='play'; } }
+  if(kickoffTeam!==null&&!(ball.holder&&ball.holder.kick)){ kickoffTeam=null; for(const q of players) q.kick=false; }
+  if(phase==='fetch'&&fetch) updFetch(dt);
+  // passivt spil: efter ca. 25 sek. uden skud kommer advarslen, og så må holdet højst lave 4 afleveringer
+  if(phase==='play'&&ball.holder&&ball.holder.role!=='GK'&&!ball.holder.seven){ atkT+=dt;
+    if(!passive&&atkT>25){ passive={team:ball.holder.team,passes:0}; msg('Passivt spil – advarsel',false,'#ffb347'); }
+    if(passive&&passive.passes>=4&&ball.holder.team===passive.team){ const h=ball.holder; passive=null; atkT=0;
+      const w=pushOut(1-h.team,h.x,h.y,0.1); restart('free',1-h.team,w.x,w.y,'Passivt spil – bolden til modstanderen'); } }
+  if(phase==='goal'){ phaseT-=dt; if(phaseT<=0&&restartFn){ const f=restartFn; restartFn=null; f(); } }
+  if(clock<=0&&phase==='play'&&ball.mode!=='shot'){ clock=0; if(half===1) halfTime(); else endMatch(); return; }
+  if(phase==='half'){ phaseT-=dt; if(phaseT<=0){ secondHalf(); } }
+  const att=attTeam();
+  if(trans){ trans.t+=dt; if(trans.early?trans.t>3:(trans.team!==att||trans.t>7)) trans=null; }
+  updCtrl(att);
+  if(autoHome){
+    const c=ctrl, bh=ball.holder;
+    if(!c||(bh&&bh.team===c.team)||(kickoffTeam===null&&phase==='play'&&dist(c,defenseTarget(c))<1.3&&L(1-c.team,c.x,c.y).d<12)||(bh&&bh.team!==c.team&&L(1-c.team,bh.x,bh.y).d<12)) autoHome=false;
+  }
+  // stepper & chasers
+  for(const t of [0,1]){
+    const f=focusFor(t); stepper[t]=null; helper[t]=null;
+    if(f&&L(1-t,f.x,f.y).d<12.5){ let best=null,bd=1e9; for(const q of players){ if(q.team!==t||q.role==='GK'||q===ctrl) continue; const d=dist(q,f); if(d<bd){bd=d;best=q;} } stepper[t]=best;
+      let hb=null,hd=1e9; for(const q of players){ if(q.team!==t||q.role==='GK'||q===ctrl||q===best) continue; const fl=L(1-t,f.x,f.y), ql=L(1-t,q.x,q.y); if(Math.abs(ql.lx-10)>Math.abs(fl.lx-10)+0.5) continue; const d=dist(q,f); if(d<hd){hd=d;hb=q;} } helper[t]=hd<5?hb:null; }
+    chaser[t]=null;
+    if(ball.mode==='loose'){ const k=gkOf(t); const own=L(1-t,ball.x,ball.y); if(own.d<sixLine(own.lx)+0.2&&own.d>-0.3) chaser[t]=k; else chaser[t]=nearest(t,ball.x,ball.y,true,ctrl&&ctrl.team===t?ctrl:null); }
+  }
+  // input
+  if(phase!=='play') shotPend=null;
+  // bolden vundet på egen banehalvdel (takling, opsnapning): et ekstra tryk på Skud lige bagefter skyder ikke
+  shotLock=Math.max(0,shotLock-dt);
+  if(ball.holder){ const h=ball.holder;
+    if(ctrl&&h.team===ctrl.team&&!AUTO&&possT!==null&&possT!==h.team&&L(h.team,h.x,h.y).d>20){ shotLock=0.6; shotPend=null; }
+    possT=h.team; }
+  if(shotLock>0&&ball.holder===ctrl) btn.shotEdge=false;
+  if(ctrl&&!AUTO&&(phase==='play')){
+    if(btn.shotEdge){
+      if(ball.holder===ctrl&&ctrl.shot&&ctrl.shot.manual&&!ctrl.shot.released){ ctrl.shot.released=true; launchShot(ctrl); }
+      else if(ball.holder===ctrl&&!ctrl.shot&&!ctrl.seven&&!ctrl.throwIn&&(ctrl.role==='LB'||ctrl.role==='CB'||ctrl.role==='RB')) shotPend={t:0,p:ctrl}; // bagspiller: vent og se, om det er et kort tryk
+      else if(ball.holder===ctrl) startShot(ctrl,false);
+      else if(att===1&&ctrl.z<0.01&&!ctrl.shot&&!ctrl.tack&&ctrl.down<=0){
+        const c=ball.holder;
+        if(c&&c.team===1&&c.role!=='GK'&&!c.shot&&!c.throwIn&&dist(ctrl,c)<2.0) ctrl.hold={t:0,c}; // oftest: tag fat i boldholderen
+        else { ctrl.vz=3.4; ctrl.block=0.8; } // ellers: hop op med armene for at dække af
+      }
+    }
+    if(shotPend){ const sp=shotPend; sp.t+=dt;
+      if(sp.p!==ctrl||ball.holder!==ctrl||ctrl.shot) shotPend=null;
+      else if(!btn.shot){ shotPend=null; startShot(ctrl,false,rnd()<0.8?'stand':'under'); } // kort tryk: stående skud (80 %) eller underhåndsskud (20 %)
+      else if(sp.t>=0.13){ shotPend=null; startShot(ctrl,false); } }                     // holdt nede: skudtype efter situationen
+    if(btn.passEdge){
+      if(ball.holder===ctrl&&!ctrl.shot&&!ctrl.seven){ const q=humanPassTarget(ctrl); if(q) doPass(ctrl,q); }
+      else if(ball.holder===ctrl&&ctrl.shot&&ctrl.shot.manual&&!ctrl.shot.released){ const q=humanPassTarget(ctrl); if(q){ ctrl.shot.released=true; doPass(ctrl,q); } }
+      else if(att===1){ const n=nearest(0,ball.x,ball.y,true,ctrl); if(n) ctrl=n; }
+    }
+  }
+    if(btn.fakeEdge&&ctrl&&!AUTO&&ball.holder===ctrl){ // finte: sidestep når du styrer til siden, ellers skudfinte
+      const lat=joy.x*FS()*(up(ctrl.team)?1:-1);
+      startFeint(ctrl,Math.abs(lat)>0.35?'side':'shot',Math.sign(lat)||0);
+    }
+  btn.shotEdge=btn.passEdge=btn.fakeEdge=false;
+  updHold(dt);
+  updFatigue(dt);
+  for(const p of players) p.grab=null;
+  const hc=ball.holder;
+  if(hc&&hc.role!=='GK'&&phase==='play') for(const o of players){
+    if(!hc.throwIn&&!o.fooled&&o.team!==hc.team&&o.role!=='GK'&&!o.tack&&!o.shot&&dist(o,hc)<0.85){ o.grab=hc; o.face=Math.sign(hc.x-o.x)||o.face; } }
+  for(const pv of players){ if(pv.role!=='PV'||ball.holder===pv||pv.shot) continue;
+    const d=nearest(1-pv.team,pv.x,pv.y,true); if(d&&!d.tack&&dist(d,pv)<0.95){ d.grab=pv; pv.grab=d; pv.face=Math.sign(d.x-pv.x)||pv.face; if(d!==ctrl) d.face=Math.sign(pv.x-d.x)||d.face; } }
+  if(ctrl&&ctrl.hold){ ctrl.grab=ctrl.hold.c; ctrl.face=Math.sign(ctrl.hold.c.x-ctrl.x)||ctrl.face; }
+  for(const p of players) updPlayer(p,dt,att);
+  const wh=ball.holder;
+  if(phase==='play'&&wh&&(wh.role==='LW'||wh.role==='RW')&&!wh.shot&&wh.z<=0&&wh.down<=0&&!(ctrl&&ctrl.hold&&ctrl.hold.c===wh)){
+    const l=L(wh.team,wh.x,wh.y);
+    if((l.lx<5.2||l.lx>14.8)&&l.d<sixLine(l.lx)+0.3){
+      const g=W(wh.team,10,1.4), gx=g.x-wh.x, gy=g.y-wh.y, gn=Math.hypot(gx,gy)||1;
+      if((wh.vx*gx+wh.vy*gy)/gn>1.2) startShot(wh,wh!==ctrl||AUTO,'wing');
+    }
+  }
+  // adskillelse
+  for(let i=0;i<players.length;i++) for(let j=i+1;j<players.length;j++){
+    const a=players[i], c=players[j]; if(a.z>0.3||c.z>0.3) continue;
+    const dx=c.x-a.x, dy=c.y-a.y, d=Math.hypot(dx,dy);
+    if(d<0.55&&d>0.001){ const pu=(0.55-d)/2, nx=dx/d, ny=dy/d; a.x-=nx*pu; a.y-=ny*pu; c.x+=nx*pu; c.y+=ny*pu; }
+  }
+  for(const p of players){
+    clampArea(p);
+    if(p.inAreaOk&&!p.shot&&p.down<=0&&!inArea(p.x,p.y)) p.inAreaOk=false;
+    if(!(phase==='fetch'&&p.role==='GK')){ const m=p.throwIn?0:0.25; p.x=clamp(p.x,m,20-m); p.y=clamp(p.y,0.25,39.75); }
+  }
+  // AI-forsvarere takler, når de er tæt på boldholderen
+  const c=ball.holder;
+  if(phase==='play'&&c&&c.role!=='GK'&&!c.shot){
+    for(const o of players){ if(o.team===c.team||o.role==='GK'||o===ctrl||o.down>0||o.tack) continue;
+      if(!c.throwIn&&!c.seven&&!o.fooled&&!c.feint&&dist(o,c)<1.05&&rnd()<0.45*dt){ startTackle(o); break; } }
+  }
+  if(phase!=='menu') updBall(dt);
+  lastAtt=att;
+  for(const g of goals){ if(g.shake>0) g.shake-=dt; if(g.bulge){ g.bulge.t-=dt; if(g.bulge.t<=0) g.bulge=null; } }
+  if(shake>0) shake-=dt;
+  for(const m of msgs) m.t+=dt; msgs=msgs.filter(m=>m.t<m.life);
+}
+
+/* ================= TEGNING ================= */
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+let DPR=1,VW=0,VH=0,SC=16;
+function resize(){ DPR=Math.min(2,window.devicePixelRatio||1); VW=innerWidth; VH=innerHeight; cv.width=Math.round(VW*DPR); cv.height=Math.round(VH*DPR); SC=Math.min(VW/20.6,VH/26); }
+function buildCrowd(){
+  crowd=[]; const cols=['#d8322f','#f1efe8','#2a5fa8','#f5b83d','#8a8f98','#d8322f','#1a1a1a','#e8b48c'];
+  const add=(x0,x1,y0,y1,n)=>{ for(let i=0;i<n;i++) crowd.push({x:x0+rnd()*(x1-x0),y:y0+rnd()*(y1-y0),c:cols[Math.floor(rnd()*cols.length)],s:rnd()}); };
+  add(-14,-2.6,-7,47,520); add(23.4,34,-7,47,520); add(-2,22,-8,-3.4,120); add(-2,22,43.4,48,120);
+  crowd.sort((a,b)=>a.y-b.y);
+}
+function areaPath(gy){
+  ctx.beginPath();
+  if(gy===0){ ctx.moveTo(2.5,0); ctx.arc(8.5,0,6,Math.PI,Math.PI/2,true); ctx.lineTo(11.5,6); ctx.arc(11.5,0,6,Math.PI/2,0,true); ctx.closePath(); }
+  else { ctx.moveTo(2.5,40); ctx.arc(8.5,40,6,Math.PI,Math.PI*1.5,false); ctx.lineTo(11.5,34); ctx.arc(11.5,40,6,Math.PI*1.5,Math.PI*2,false); ctx.closePath(); }
+}
+function nineLine(gy){
+  ctx.beginPath();
+  if(gy===0){ ctx.arc(8.5,0,9,Math.PI,Math.PI/2,true); ctx.lineTo(11.5,9); ctx.arc(11.5,0,9,Math.PI/2,0,true); }
+  else { ctx.arc(8.5,40,9,Math.PI,Math.PI*1.5,false); ctx.lineTo(11.5,31); ctx.arc(11.5,40,9,Math.PI*1.5,Math.PI*2,false); }
+}
+function drawFloor(){
+  const F=FLOORS[floorKey];
+  ctx.fillStyle=F.out; ctx.fillRect(-60,-60,140,160);
+  // tilskuere
+  for(const c of crowd){ ctx.fillStyle='rgba(0,0,0,.25)'; ctx.fillRect(c.x-0.3,c.y-0.05,0.6,0.5); ctx.fillStyle=c.c; ctx.fillRect(c.x-0.24,c.y,0.48,0.36);
+    ctx.fillStyle='#e8c09a'; ctx.beginPath(); ctx.arc(c.x,c.y-0.12+Math.sin(time*3+c.s*20)*0.04*(c.s>0.7?1:0),0.17,0,7); ctx.fill(); }
+  ctx.fillStyle=F.runoff; ctx.fillRect(-1.8,-2.8,23.6,45.6);
+  ctx.fillStyle=F.field; ctx.fillRect(0,0,20,40);
+  if(F.plank){ ctx.strokeStyle=F.plank; ctx.lineWidth=0.025; ctx.beginPath();
+    for(let x=0.4;x<20;x+=0.4){ ctx.moveTo(x,0); ctx.lineTo(x,40); }
+    for(let x=0;x<20;x+=0.4){ const o=((x*7.3)%3); for(let y=o;y<40;y+=3){ ctx.moveTo(x,y); ctx.lineTo(x+0.4,y); } }
+    ctx.stroke(); }
+  ctx.fillStyle=F.area; areaPath(0); ctx.fill(); areaPath(40); ctx.fill();
+  ctx.strokeStyle=F.line; ctx.lineWidth=0.08;
+  ctx.strokeRect(0,0,20,40);
+  ctx.beginPath(); ctx.moveTo(0,20); ctx.lineTo(20,20); ctx.stroke();
+  areaPath(0); ctx.stroke(); areaPath(40); ctx.stroke();
+  ctx.save(); ctx.beginPath(); ctx.rect(0,0,20,40); ctx.clip();
+  ctx.setLineDash([0.3,0.25]); nineLine(0); ctx.stroke(); nineLine(40); ctx.stroke(); ctx.restore();
+  ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(9.5,7); ctx.lineTo(10.5,7); ctx.moveTo(9.5,33); ctx.lineTo(10.5,33);
+  ctx.moveTo(9.925,4); ctx.lineTo(10.075,4); ctx.moveTo(9.925,36); ctx.lineTo(10.075,36);
+  ctx.moveTo(-0.15,15.5); ctx.lineTo(0.15,15.5); ctx.moveTo(-0.15,24.5); ctx.lineTo(0.15,24.5);
+  ctx.moveTo(19.85,15.5); ctx.lineTo(20.15,15.5); ctx.moveTo(19.85,24.5); ctx.lineTo(20.15,24.5); ctx.stroke();
+  // centerlogo
+  ctx.globalAlpha=0.16; ctx.lineWidth=0.12; ctx.beginPath(); ctx.arc(10,20,1.6,0,7); ctx.stroke(); ctx.globalAlpha=1;
+  // bander
+  const [c1,c2]=F.board;
+  for(let y=-2.4;y<42.4;y+=4){ ctx.fillStyle=((y/4|0)%2)?c1:c2; ctx.fillRect(-1.75,y,0.3,3.9); ctx.fillRect(21.45,y,0.3,3.9); }
+  for(let x=-1.6;x<21.6;x+=4){ ctx.fillStyle=((x/4|0)%2)?c2:c1; ctx.fillRect(x,-2.75,3.9,0.3); ctx.fillRect(x,42.45,3.9,0.3); }
+  // bænke
+  for(const t of [0,1]){ const y0=flip?40-benchY(t)-4:benchY(t); ctx.fillStyle='#2b3140'; ctx.fillRect(20.55,y0,0.9,4.2);
+    ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=0.05; ctx.setLineDash([0.2,0.15]); ctx.strokeRect(19.0,y0,1.0,4.2); ctx.setLineDash([]); // udskiftningszone
+    const n=Math.min(8,BENCH[t]?BENCH[t].length:5);
+    for(let i=0;i<n;i++){ const yy=y0+0.3+i*0.5; ctx.fillStyle=TEAMS[t].shirt; ctx.fillRect(20.68,yy,0.6,0.36); ctx.fillStyle='#e8b48c'; ctx.beginPath(); ctx.arc(20.98,yy-0.04,0.12,0,7); ctx.fill(); } }
+}
+const P=(x,y,z)=>[x,y-z*ZF];
+function drawGoal(gi){ // gi = mål i visningen (0 = øverst)
+  const gy=gi===0?0:40, dir=gi===0?-1:1, g=goals[flip?1-gi:gi];
+  const sh=g.shake>0?Math.sin(time*70)*g.shake*0.06:0;
+  const net=()=>{
+    ctx.fillStyle='rgba(255,255,255,.14)'; ctx.strokeStyle='rgba(255,255,255,.45)'; ctx.lineWidth=0.025;
+    const by=gy+dir*1.0, bh=1.15;
+    const poly=pts=>{ ctx.beginPath(); pts.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p)); ctx.closePath(); ctx.fill(); ctx.stroke(); };
+    poly([P(8.5,by,0),P(11.5,by,0),P(11.5,by,bh),P(8.5,by,bh)]);
+    poly([P(8.5,gy,0),P(8.5,by,0),P(8.5,by,bh),P(8.5,gy,2)]);
+    poly([P(11.5,gy,0),P(11.5,by,0),P(11.5,by,bh),P(11.5,gy,2)]);
+    poly([P(8.5,gy,2),P(11.5,gy,2),P(11.5,by,bh),P(8.5,by,bh)]);
+    ctx.beginPath(); for(let i=1;i<10;i++){ const x=8.5+i*0.3; ctx.moveTo(...P(x,by,0)); ctx.lineTo(...P(x,by,bh)); ctx.lineTo(...P(x,gy,2)); }
+    for(let j=1;j<4;j++){ const z=bh*j/4; ctx.moveTo(...P(8.5,by,z)); ctx.lineTo(...P(11.5,by,z)); } ctx.stroke();
+    if(g.bulge){ const [bx,byy]=P(flip?20-g.bulge.x:g.bulge.x,by+dir*0.25,g.bulge.z*0.55); ctx.fillStyle=`rgba(255,255,255,${0.5*g.bulge.t/0.6})`; ctx.beginPath(); ctx.ellipse(bx,byy,0.55,0.35,0,0,7); ctx.fill(); }
+  };
+  const frame=()=>{
+    ctx.lineCap='butt'; ctx.lineWidth=0.13;
+    const seg=(a,b)=>{ ctx.strokeStyle='#ffffff'; ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+      ctx.strokeStyle='#d8322f'; ctx.setLineDash([0.2,0.2]); ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); ctx.setLineDash([]); };
+    seg(P(8.5+sh,gy,0),P(8.5+sh,gy,2)); seg(P(11.5+sh,gy,0),P(11.5+sh,gy,2)); seg(P(8.5+sh,gy,2),P(11.5+sh,gy,2));
+    ctx.lineCap='round';
+  };
+  if(dir<0){ net(); frame(); } else { frame(); net(); }
+}
+function limb(a,b,w,col){ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke(); }
+function drawTrail(){ const tr=ball.trail; if(!tr||tr.length<2) return; ctx.lineCap='round';
+  for(let i=1;i<tr.length;i++){ const a=tr[i-1], c=tr[i], A=P(flip?20-a[0]:a[0],flip?40-a[1]:a[1],a[2]), B=P(flip?20-c[0]:c[0],flip?40-c[1]:c[1],c[2]);
+    ctx.strokeStyle=`rgba(255,240,200,${0.5*i/tr.length})`; ctx.lineWidth=0.06+0.08*i/tr.length; ctx.beginPath(); ctx.moveTo(...A); ctx.lineTo(...B); ctx.stroke(); } }
+function drawBallAt(x,y,r=0.14){
+  ctx.fillStyle='#f6f2e4'; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+  ctx.strokeStyle='#2a5fa8'; ctx.lineWidth=r*0.32; ctx.beginPath(); ctx.arc(x-r*0.4,y,r*0.75,-0.9,0.9); ctx.stroke();
+  ctx.strokeStyle='#d8322f'; ctx.beginPath(); ctx.arc(x+r*0.5,y,r*0.7,2.3,4.0); ctx.stroke();
+  ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=0.025; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.stroke();
+}
+/* ---------- målmandsredninger: refleks som udgangspunkt, dyk af og til ----------
+   Positurer skrives i skærmretning: lh/rh = venstre/højre arm på skærmen, lf/rf = venstre/højre ben.
+   Den arm og det ben, der er på boldens side, bruges til redningen, så armene aldrig krydser kroppen. */
+const easeO=u=>1-(1-u)*(1-u), lerp=(a,b,w)=>a+(b-a)*w;
+const lp=(a,b,w)=>[lerp(a[0],b[0],w),lerp(a[1],b[1],w)];
+function blendPose(A,B,w){ return {rot:lerp(A.rot,B.rot,w),lift:lerp(A.lift,B.lift,w),ox:lerp(A.ox,B.ox,w),oy:lerp(A.oy,B.oy,w),lf:lp(A.lf,B.lf,w),rf:lp(A.rf,B.rf,w),lh:lp(A.lh,B.lh,w),rh:lp(A.rh,B.rh,w)}; }
+function sided(sd,base,ballArm,otherArm,ballLeg,otherLeg){ // placér lemmer på boldens side
+  return sd>0?{...base,rh:ballArm,lh:otherArm,rf:ballLeg,lf:otherLeg}:{...base,lh:ballArm,rh:otherArm,lf:ballLeg,rf:otherLeg};
+}
+function readyPose(){ return {rot:0,lift:0,ox:Math.sin(time*5)*0.03,oy:0.04,lf:[-0.42,0],rf:[0.42,0],lh:[-0.48,-1.95],rh:[0.48,-1.95]}; }
+function gkPose(p,pl,f){
+  const R=readyPose();
+  const toL=P=>f>0?P:{...P,lh:[-P.rh[0],P.rh[1]],rh:[-P.lh[0],P.lh[1]],lf:[-P.rf[0],P.rf[1]],rf:[-P.lf[0],P.lf[1]]}; // skærm -> krop
+  // armene oppe kun når modstanderen har bolden, ellers sænket
+  const guardOn=!!ball&&attTeam()!==p.team; p.guard=(p.guard??1)+((guardOn?1:0)-(p.guard??1))*0.12;
+  const relax={rot:0,lift:0,ox:0,oy:0,lf:[-0.24,0],rf:[0.24,0],lh:[-0.32,-0.82],rh:[0.32,-0.82]};
+  if(!pl||pl.t<pl.react) return toL(blendPose(relax,R,pl?1:p.guard));
+  const sd=pl.dir*FS(), h=pl.cz, u=clamp((pl.t-pl.react)/Math.max(0.1,pl.tk-pl.react),0,1), v=pl.t-pl.tk;
+  let S;
+  if(pl.dive){ // dyk: kort og kontrolleret, ikke så voldsomt
+    const e=easeO(u), low=h<0.7, high=h>1.5;
+    const rmax=high?0.4:low?0.95:0.85, lmax=high?0.42:low?0.12:0.32;
+    const fly=e=>sided(sd,{rot:sd*rmax*e,lift:lmax*Math.sin(e*Math.PI/2),ox:0,oy:0},
+      [sd*(0.25+0.15*e),-1.5-0.7*e],[sd*0.05,-1.45-0.55*e],[sd*0.25,-0.3*e],[-sd*0.3,-0.02]);
+    if(v<0) S=blendPose(R,fly(e),Math.min(1,u*2.5));
+    else {
+      const F=fly(1), land=sided(sd,{rot:sd*Math.min(1.25,rmax+0.3),lift:0,ox:0,oy:0.06},[sd*0.3,-1.95],[sd*0.1,-1.8],[sd*0.2,-0.1],[-sd*0.3,0]);
+      const kneel=sided(sd,{rot:sd*0.2,lift:0,ox:0,oy:0.26},[sd*0.45,-1.2],[-sd*0.45,-1.15],[sd*0.3,-0.22],[-sd*0.35,-0.04]);
+      if(high) S=v<0.3?blendPose(F,{...R,oy:0.14},v/0.3):blendPose({...R,oy:0.14},R,Math.min(1,(v-0.3)/0.25));
+      else if(v<0.22) S=blendPose(F,land,v/0.22);
+      else if(v<0.42) S=land;
+      else if(v<0.62) S=blendPose(land,kneel,(v-0.42)/0.2);
+      else S=blendPose(kneel,R,Math.min(1,(v-0.62)/0.22));
+    }
+  } else { // refleks
+    const e=easeO(Math.min(1,u*1.5));
+    let T;
+    if(pl.star) T={rot:0,lift:0.3*Math.sin(e*Math.PI/2),ox:0,oy:0,lf:[-0.58,-0.05],rf:[0.58,-0.05],lh:[-0.72,-1.95],rh:[0.72,-1.95]};
+    else if(h<0.65) T=sided(sd,{rot:sd*0.14*e,lift:0,ox:sd*0.1*e,oy:0.28*e},[sd*0.72,-0.72],[-sd*0.38,-1.95],[sd*(0.4+0.7*e),-0.03],[-sd*0.28,0]);   // spagat: benet ud langs gulvet, armen ned
+    else if(h<1.45) T=sided(sd,{rot:sd*0.3*e,lift:0.05,ox:sd*0.08*e,oy:0},[sd*0.95,-1.42],[-sd*0.4,-1.95],[sd*0.48,0],[-sd*0.3,0]);                  // armen ud i siden
+    else T=sided(sd,{rot:sd*0.18*e,lift:0.34*Math.sin(e*Math.PI/2),ox:0,oy:0},[sd*0.55,-2.36],[-sd*0.42,-2.08],[sd*0.4,-0.06],[-sd*0.4,-0.06]);   // hop med armen op
+    if(v<0) S=blendPose(R,T,Math.min(1,u*2.2));
+    else {
+      const jolt=v<0.1?Math.sin(v/0.1*Math.PI)*0.07*sd:0;
+      S=v<0.2?{...T,ox:T.ox+jolt}:blendPose(T,R,Math.min(1,(v-0.2)/0.25));
+      if(v>0.2&&v<0.45) S.lift+=Math.sin((v-0.2)/0.25*Math.PI)*0.08;
+    }
+  }
+  return toL(S);
+}
+function drawPlayer(p){
+  const px=flip?20-p.x:p.x, py=flip?40-p.y:p.y, f=flip?-p.face:p.face;
+  const T=TEAMS[p.team], gk=p.role==='GK';
+  const shirt=gk?T.gk:T.shirt, trim=gk?T.gkTrim:T.trim, shorts=gk?T.gkTrim:T.shorts;
+  // skygge
+  ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(px,py+0.03,Math.max(0.18,0.38-p.z*0.12),0.13,0,0,7); ctx.fill();
+  if(p===ctrl){ ctx.strokeStyle='#f5b83d'; ctx.lineWidth=0.07; ctx.beginPath(); ctx.ellipse(px,py+0.03,0.55,0.22,0,0,7); ctx.stroke(); }
+  let rot=0, lift=p.z, ox=0, oy=0;
+  const s=Math.sin(p.phase), c=Math.cos(p.phase), run=p.run;
+  let lf=[-0.09+s*0.26*run,-Math.max(0,c)*0.13*run], rf=[0.09-s*0.26*run,-Math.max(0,-c)*0.13*run];
+  let lh=[-0.3-s*0.17*run,-0.88], rh=[0.3+s*0.17*run,-0.88], bl=null;
+  const holding=ball.holder===p&&ball.mode==='held';
+  if(gk){
+    lf=[-0.27+s*0.1*run,0]; rf=[0.27-s*0.1*run,0]; lh=[-0.55,-1.42]; rh=[0.55,-1.42];
+    const pl=p.plan;
+    if(!(pl&&pl.walk)&&(pl||(!holding&&p.run<0.3))){ const P=gkPose(p,pl,f); rot=P.rot; lift+=P.lift; ox=P.ox; oy=P.oy; lf=P.lf; rf=P.rf; lh=P.lh; rh=P.rh; }
+    else if(pl&&pl.walk&&pl.t>pl.react){ const hz=-clamp(pl.cz,0.3,2.0); lh=[0.05,hz-0.05]; rh=[0.3,hz]; lf=[-0.27+s*0.15,0]; rf=[0.27-s*0.15,0]; }
+    else if(pl&&pl.star&&pl.t>pl.react){ lh=[-0.62,-1.95]; rh=[0.62,-1.95]; lf=[-0.48,-0.02]; rf=[0.48,-0.02]; }
+    else if(pl&&pl.t>pl.react){ const pr=Math.min(1,(pl.t-pl.react)/0.22), mag=Math.min(1,pl.diff/0.9+0.25);
+      rot=pl.dir*FS()*pr*(pl.cz>1.4?0.55:1.15)*mag; lift+=Math.sin(Math.min(1,pr)*Math.PI*0.5)*0.15*mag;
+      lh=[-0.22,-2.05]; rh=[0.22,-2.05]; lf=[-0.32,0]; rf=[0.3,-0.06]; }
+  }
+  if(p.shot){
+    const sp=SHOT[p.shot.type], st=p.shot;
+    if(sp.air>0&&st.t<sp.air){ lf=[-0.2,-0.3]; rf=[0.12,-0.06]; }
+    if(st.type==='under'){ lf=[-0.3,0]; rf=[0.32,-0.04]; rot=f*0.16;                      // underhånd: armen svinger lavt bagud og frem
+      if(!st.released){ const w=Math.min(1,st.t/sp.rel); rh=[0.3-0.75*w,-0.85+0.25*w]; lh=[0.38,-1.2]; }
+      else { rh=[0.6,-0.9]; lh=[-0.3,-1.0]; } }
+    else if(!st.released){ const w=Math.min(1,st.t/sp.rel); rh=[0.36-0.66*w,-1.05-0.9*w]; lh=[0.34,-1.42]; }
+    else { rh=[0.48,-1.22]; lh=[-0.32,-0.95]; }
+    if(st.type==='fall') rot=f*Math.min(1.2,st.t/sp.dur*1.6);
+  }
+  if(p.grab&&!p.tack&&!p.shot&&!holding&&!gk){ const j=Math.sin(time*15+p.num)*0.035; lh=[0.4,-1.15+j]; rh=[0.5,-1.3-j]; rot=f*0.12; ox=Math.sin(time*11+p.num*2)*0.03; }
+  if(phase==='goal'&&p===celebBy&&!p.shot&&!p.down){ lh=[-0.26,-2.08]; rh=[0.26,-2.08]; }
+  if(p.down>0) rot=f*1.35;
+  if(p.feint){ const ft=p.feint, sd=ft.dir*(up(p.team)?1:-1)*FS();       // sd: retning på skærmen
+    if(ft.type==='side'){
+      if(ft.t<0.14){ const w=ft.t/0.14; rot=-sd*0.32*w; ox=-sd*0.08*w;          // kroppen og skulderen viser den forkerte vej
+        lf=[-0.34,0]; rf=[0.34,0]; lh=[-0.38*f,-1.1]; rh=[0.4,-1.15]; }
+      else { const w=Math.min(1,(ft.t-0.14)/0.1); rot=sd*0.38*w;               // eksplosivt skridt den anden vej
+        lf=[-0.42*sd*f,-0.05]; rf=[0.32*sd*f,-0.22]; lh=[-0.35,-1.05]; rh=[0.45,-1.2]; }
+    } else {
+      const w=ft.t<0.2?ft.t/0.2:Math.max(0,1-(ft.t-0.2)/0.2);                  // armen op som til skud og ned igen
+      rh=[0.36-0.66*w,-1.05-0.9*w]; lh=[0.34,-1.42+0.3*(1-w)]; rot=-f*0.12*w; lf=[-0.3,0]; rf=[0.25,-0.05*w];
+    } }
+  if(p.fooled){ rot=(p.fooled.dir*(up(1-p.team)?1:-1)*FS())*0.35; lf=[-0.4,0]; rf=[0.35,-0.1]; lh=[-0.5,-1.3]; rh=[0.5,-1.3]; }
+  if(p.tack){ const k=Math.min(1,p.tack.t/0.15); rot=f*0.3*k; lh=[0.42,-1.18]; rh=[0.55,-1.22]; lf=[-0.3,0]; rf=[0.22,-0.04]; }
+  if(p.block>0&&!p.shot){ lh=[-0.24,-2.02]; rh=[0.24,-2.02]; }
+  if(p.thr>0&&!p.shot){ rh=[0.52,-1.28]; }
+  if(holding&&!p.shot){
+    if(run>0.25&&!gk){ const bz=0.12+Math.abs(Math.sin(p.phase*0.5))*0.62; bl=[0.36,-bz]; rh=[0.34,-bz-0.16]; }
+    else { rh=[0.36,-1.05]; bl=[0.42,-1.1]; }
+  }
+  if(holding&&p.shot&&!p.shot.released) bl=[rh[0],rh[1]-0.06];
+  if(holding&&p.feint){ bl=p.feint.type==='shot'?[rh[0],rh[1]-0.06]:[0.4,-1.12]; if(p.feint.type==='side') rh=[0.38,-1.08]; }
+  ctx.save(); ctx.translate(px+ox,py-lift*ZF+oy); ctx.rotate(rot); ctx.scale(f,1);
+  ctx.lineCap='round';
+  const sh=[-0.23,-1.3], sr=[0.23,-1.3];
+  // kastehånd: rh er boldarmen. Set fra siden er den forreste arm højre hånd, når spilleren vender mod højre på skærmen.
+  // Venstrehåndede mod højre (og højrehåndede mod venstre) kaster derfor med den bagerste arm
+  const far=!gk&&(holding||p.shot||p.thr>0||p.feint)&&((f>0)===(handOf(p)==='L'));
+  let backArm=lh, frontArm=rh;
+  if(far){ backArm=[rh[0]-0.12,rh[1]]; frontArm=lh[0]<0?[lh[0]+0.4,lh[1]]:lh; if(bl) bl=[bl[0]-0.12,bl[1]]; }
+  // bagerste arm
+  limb(sh,backArm,0.1,p.skin); limb(sh,[sh[0]+(backArm[0]-sh[0])*0.3,sh[1]+(backArm[1]-sh[1])*0.3],0.13,shirt);
+  // ben
+  const hip=-0.8;
+  limb([-0.08,hip],lf,0.13,p.skin); limb([0.08,hip],rf,0.13,p.skin);
+  limb([lf[0]*0.7-0.08*0.3,lf[1]+(hip-lf[1])*0.3],lf,0.135,T.sock); limb([rf[0]*0.7+0.08*0.3,rf[1]+(hip-rf[1])*0.3],rf,0.135,T.sock);
+  ctx.fillStyle='#1d1f24'; ctx.beginPath(); ctx.ellipse(lf[0]+0.03,lf[1],0.1,0.05,0,0,7); ctx.ellipse(rf[0]+0.03,rf[1],0.1,0.05,0,0,7); ctx.fill();
+  // shorts + trøje
+  ctx.fillStyle=shorts; ctx.fillRect(-0.2,-0.95,0.4,0.24);
+  ctx.fillStyle=shirt; ctx.beginPath(); ctx.roundRect?ctx.roundRect(-0.22,-1.4,0.44,0.52,0.08):ctx.rect(-0.22,-1.4,0.44,0.52); ctx.fill();
+  if(T.check&&!gk){ ctx.fillStyle=T.trim; for(let ix=0;ix<4;ix++) for(let iy=0;iy<4;iy++) if((ix+iy)%2) ctx.fillRect(-0.22+ix*0.11,-1.33+iy*0.11,0.11,0.11); }
+  ctx.fillStyle=trim; ctx.fillRect(-0.22,-1.4,0.44,0.07); ctx.fillRect(-0.22,-0.95,0.44,0.04);
+  ctx.save(); ctx.scale(f,1); ctx.fillStyle=gk?'#ffffff':T.num; ctx.font='700 0.28px "Barlow Condensed",Arial,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(String(p.num),0,-1.1); ctx.restore();
+  // hoved
+  ctx.fillStyle=p.skin; ctx.beginPath(); ctx.arc(0.01,-1.56,0.155,0,7); ctx.fill();
+  ctx.fillStyle=p.hair; ctx.beginPath(); ctx.arc(0.0,-1.6,0.16,Math.PI*1.05,Math.PI*2.05); ctx.fill();
+  ctx.fillStyle='#1d1f24'; ctx.beginPath(); ctx.arc(0.08,-1.56,0.022,0,7); ctx.fill();
+  if(bl&&far) drawBallAt(bl[0],bl[1],0.13);                                // bolden i den bagerste hånd, foran trøjen men bag den forreste arm
+  // forreste arm
+  limb(sr,frontArm,0.1,p.skin); limb(sr,[sr[0]+(frontArm[0]-sr[0])*0.3,sr[1]+(frontArm[1]-sr[1])*0.3],0.13,shirt);
+  if(bl&&!far) drawBallAt(bl[0],bl[1],0.13);
+  ctx.restore();
+  if(p===ctrl){ ctx.fillStyle='#f5b83d'; ctx.font='700 0.42px "Barlow Condensed",Arial,sans-serif'; ctx.textAlign='center'; ctx.fillText(p.num+(p.name?' '+p.name.toUpperCase():''),px,py-lift*ZF-2.05);
+    const st=p.sta??1; ctx.fillStyle='rgba(6,11,19,.6)'; ctx.fillRect(px-0.5,py+0.22,1.0,0.1); ctx.fillStyle=st>0.6?'#5fd17a':st>0.4?'#f5b83d':'#e0503a'; ctx.fillRect(px-0.5,py+0.22,1.0*st,0.1); }
+}
+function render(){
+  const ft=ball.holder||ball;
+  let ty=flip?40-ft.y:ft.y;
+  const viewH=VH/SC, anchor=VH*0.44/SC;
+  let lo=(phase==='fetch'?-5.2:-3.5)+anchor, hi=43.5-(viewH-anchor)+ (VW<600?5.5:0);
+  let target=lo>hi?(lo+hi)/2:clamp(ty,lo,hi);
+  camY+=(target-camY)*0.08;
+  const sx=shake>0?(rnd()-0.5)*shake*0.6:0, sy=shake>0?(rnd()-0.5)*shake*0.6:0;
+  ctx.setTransform(DPR,0,0,DPR,0,0); ctx.fillStyle=FLOORS[floorKey].out; ctx.fillRect(0,0,VW,VH);
+  ctx.setTransform(DPR*SC,0,0,DPR*SC,DPR*(VW/2-(10-sx)*SC),DPR*(VH*0.44-(camY-sy)*SC));
+  drawFloor();
+  // boldskygge
+  const bx=flip?20-ball.x:ball.x, by=flip?40-ball.y:ball.y;
+  if(ball.mode!=='held'){ ctx.fillStyle='rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(bx,by,0.14,0.07,0,0,7); ctx.fill(); }
+  const ents=players.map(p=>({y:flip?40-p.y:p.y,f:()=>drawPlayer(p)}));
+  ents.push({y:-0.001,f:()=>drawGoal(0)},{y:40.001,f:()=>drawGoal(1)});
+  // det nederste mål er nærmest kameraet: bolden foran mållinjen skal tegnes oven på nettet, bolden inde i nettet bagved
+  const bKey=by>38&&by<40?40.002:by>40&&by<41.5?39.999:by;
+  if(ball.mode!=='held') ents.push({y:bKey,f:()=>{ drawTrail(); drawBallAt(bx,by-ball.z*ZF,0.14); }});
+  ents.sort((a,b)=>a.y-b.y); for(const e of ents) e.f();
+  // redningseffekt
+  for(const p of players){ const h=p.plan&&p.plan.hit; if(!h) continue; const a=(time-h.t)/0.3; if(a<0||a>1) continue;
+    const hx=flip?20-h.x:h.x, hy=(flip?40-h.y:h.y)-h.z*ZF; ctx.strokeStyle=`rgba(255,255,255,${0.8*(1-a)})`; ctx.lineWidth=0.06;
+    ctx.beginPath(); ctx.arc(hx,hy,0.18+a*0.55,0,7); ctx.stroke();
+    for(let i=0;i<6;i++){ const an=i*Math.PI/3+0.3; ctx.beginPath(); ctx.moveTo(hx+Math.cos(an)*(0.25+a*0.4),hy+Math.sin(an)*(0.25+a*0.4)); ctx.lineTo(hx+Math.cos(an)*(0.4+a*0.6),hy+Math.sin(an)*(0.4+a*0.6)); ctx.stroke(); } }
+  // greb-måler
+  if(ctrl&&ctrl.hold&&!AUTO){
+    const lv=holdLevel(ctrl.hold), hx=flip?20-ctrl.x:ctrl.x, hy=(flip?40-ctrl.y:ctrl.y)-2.45;
+    ctx.fillStyle='rgba(6,11,19,.75)'; ctx.fillRect(hx-0.62,hy-0.1,1.24,0.2);
+    ctx.fillStyle=lv<0.45?'#f5b83d':lv<0.8?'#e8742a':'#e03b2f'; ctx.fillRect(hx-0.6,hy-0.08,1.2*lv,0.16);
+  }
+  // sigte
+  if(ctrl&&ctrl.shot&&!ctrl.shot.released&&!AUTO){
+    const zl=joy.y<-0.35?1.65:joy.y>0.35?0.35:1.0, ax=10+clamp(joy.x,-1,1)*0.95*1.32;
+    const [x,y]=P(ax,0,zl); ctx.strokeStyle='#f5b83d'; ctx.lineWidth=0.06; ctx.beginPath(); ctx.arc(x,y,0.22,0,7); ctx.moveTo(x-0.35,y); ctx.lineTo(x+0.35,y); ctx.moveTo(x,y-0.35); ctx.lineTo(x,y+0.35); ctx.stroke();
+  }
+  // beskeder
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  { ctx.fillStyle='rgba(6,11,19,.78)'; const bw=Math.min(VW-24,520); ctx.fillRect((VW-bw)/2,64,bw,48); ctx.fillStyle='#f5b83d'; ctx.font='700 17px "Barlow Condensed",Arial,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('DEMO – IKKE INDFØRT ENDNU',VW/2,78); ctx.fillStyle='#eef2f7'; ctx.font='600 15px "Barlow Condensed",Arial,sans-serif'; ctx.fillText('3 afleveringer i rytme · 4 skudvalg · 5 fart og inerti',VW/2,98);
+    let cy=VH-70; for(let i=demoCaps.length-1;i>=0;i--){ const c=demoCaps[i]; c.a+=1/60; const al=Math.max(0,Math.min(1,(2.4-c.a)*2)); if(al<=0) continue; ctx.globalAlpha=al; ctx.fillStyle='rgba(6,11,19,.8)'; ctx.font='700 20px "Barlow Condensed",Arial,sans-serif'; const w=ctx.measureText(c.t).width+28; ctx.fillRect((VW-w)/2,cy-17,w,34); ctx.fillStyle='#ffffff'; ctx.fillText(c.t,VW/2,cy); cy-=42; } ctx.globalAlpha=1; demoCaps=demoCaps.filter(c=>c.a<2.4); }
+  let my=VH*0.2;
+  for(const m of msgs){
+    const a=Math.min(1,(m.life-m.t)*3,m.t*8); ctx.globalAlpha=a;
+    const size=m.big?Math.min(64,VW*0.13):Math.min(30,VW*0.07);
+    ctx.font=`700 ${size}px "Barlow Condensed",Arial,sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.lineWidth=size*0.14; ctx.strokeStyle='rgba(6,11,19,.85)'; ctx.strokeText(m.text,VW/2,my); ctx.fillStyle=m.color; ctx.fillText(m.text,VW/2,my);
+    my+=size*1.1;
+  }
+  ctx.globalAlpha=1;
+}
+
+/* ================= HUD & MENU ================= */
+const $=id=>document.getElementById(id);
+let hudCache='';
+function updateHud(force){
+  // uret viser kamptid som i en rigtig kamp (0-30 og 30-60 min), men en halvleg varer kun 5 eller 10 minutter
+  const g=Math.min(1800,Math.floor((1-Math.max(0,clock)/matchLen)*1800))+(half-1)*1800, s=`${score[0]}|${score[1]}|${g}|${half}`;
+  if(!force&&s===hudCache) return; hudCache=s;
+  $('hv').textContent=half+'. HV'; $('sA').textContent=score[0]; $('sB').textContent=score[1];
+  $('clk').textContent=`${Math.floor(g/60)}:${String(g%60).padStart(2,'0')}`;
+}
+let subKey='';
+function updateSubBan(){ const el=$('subBan'); if(!el) return; if(!subBan){ if(!el.hidden){ el.hidden=true; subKey=''; } return; }
+  const k=subBan.inn+subBan.ud; if(k===subKey) return; subKey=k; el.hidden=false;
+  el.innerHTML=`<span class="sw" style="background:${TEAMS[subBan.team].shirt}"></span><span>${teamSel[subBan.team]}</span><span class="in">IND ${subBan.inn}</span><span class="ud">UD ${subBan.ud}</span>`; }
+function updatePassive(){ const el=$('pas'); if(!el) return; if(passive){ el.hidden=false; el.textContent='PASSIV '+Math.max(0,4-passive.passes); } else el.hidden=true; }
+function updateButtons(){ /* knapperne hedder altid Skud og Aflever */ }
+function secondHalf(){
+  // spejl alt i verden samtidig med at visningen vendes, så intet hopper på skærmen
+  flip=!flip; half=2; clock=matchLen; halftimeSubs();
+  for(const p of players){ p.x=20-p.x; p.y=40-p.y; p.vx=-p.vx; p.vy=-p.vy; p.face=-p.face; p.plan=null; p.shot=null; p.tack=null; p.z=0; }
+  ball.x=20-ball.x; ball.y=40-ball.y;
+  restart('kickoff',1,10,20,'2. halvleg');
+  msg('Holdene har skiftet side');
+  updateHud(true);
+}
+function halfTime(){
+  phase='half'; phaseT=3.2; trans=null;
+  msg('HALVLEG',true); msg(`${teamSel[0]} ${score[0]} – ${score[1]} ${teamSel[1]} · sideskift`,false,'#f5b83d');
+  if(ball.holder){ ball.holder.vx=ball.holder.vy=0; }
+  ball.mode='held'; if(!ball.holder) ball.holder=nearest(1,10,20,true);
+  updateHud(true);
+}
+function endMatch(){
+  phase='over'; paused=true;
+  if(tourMatch&&tour){ endTourMatch(); return; }
+  const r=$('result'); r.hidden=false;
+  r.textContent=`Slutresultat: ${TEAMDATA[0].name} ${score[0]} – ${score[1]} ${TEAMDATA[1].name}`+(score[0]>score[1]?' · Sejr!':score[0]<score[1]?' · Nederlag':' · Uafgjort');
+  $('resumeBtn').hidden=true; $('startBtn').textContent='Ny kamp'; $('menu').hidden=false;
+}
+/* ================= TURNERING =================
+   EM og Champions League spilles i samme format: grupper af 4 (3 kampe), mellemrunde/hovedrunde i to grupper
+   af 6 (4 kampe, point mod holdet fra egen gruppe tages med), semifinaler, bronzekamp og finale.
+   Du spiller dit holds kampe, resten af kampene simuleres ud fra holdenes styrke. */
+let gameMode='friendly', tour=null, tourMatch=null;
+try{ const gm=localStorage.getItem('hb_mode'); if(gm==='tour') gameMode='tour'; tour=JSON.parse(localStorage.getItem('hb_tour')||'null'); if(tour&&(!tour.ko||tour.v!==2)) tour=null; }catch(e){}
+const STAGES={em:{title:'EM 2026',group:'Indledende runde',main:'Mellemrunde',semi:'Semifinale',bronze:'Bronzekamp',final:'Finale'},
+              cl:{title:'Champions League 26/27',group:'Gruppespil',main:'Hovedrunde',qf:'Kvartfinale',semi:'Final4 i Köln · semifinale',bronze:'Final4 i Köln · bronzekamp',final:'Final4 i Köln · finale'}};
+const saveTour=()=>{ try{ localStorage.setItem('hb_tour',JSON.stringify(tour)); }catch(e){} };
+const tList=()=>tour.league==='cl'?CL_TEAMS:EM_TEAMS, tT=c=>tList().find(t=>t.c===c), tName=c=>tT(c).n;
+const isCL=()=>tour.league==='cl';
+// grupper af 4: EM spiller én gang mod hver (3 kampe), Champions League hjemme og ude (6 kampe)
+const rrRounds=(g,dbl)=>{ const r=[[[g[0],g[1]],[g[2],g[3]]],[[g[0],g[2]],[g[1],g[3]]],[[g[0],g[3]],[g[1],g[2]]]]; return dbl?[...r,...r.map(x=>x.map(([a,b])=>[b,a]))]:r; };
+// mellemrunde/hovedrunde: kun mod de 4 hold man ikke mødte i gruppen (EM: én gang, CL: hjemme og ude)
+const mrRounds=(X,Y,Z,dbl)=>{ const [a1,a2]=X,[b1,b2]=Y,[c1,c2]=Z; const r=[[[a1,b1],[a2,c1],[b2,c2]],[[a1,b2],[a2,c2],[b1,c1]],[[a1,c1],[a2,b2],[b1,c2]],[[a1,c2],[a2,b1],[b2,c1]]];
+  return dbl?[...r,...r.map(x=>x.map(([a,b])=>[b,a]))]:r; };
+function newTour(lg,team){
+  const list=lg==='cl'?CL_TEAMS:EM_TEAMS, groups={};
+  'ABCDEF'.split('').forEach((g,i)=>groups[g]=list.slice(i*4,i*4+4).map(t=>t.c));        // de rigtige grupper (holdene ligger i gruppeorden)
+  const R=Object.values(groups).map(g=>rrRounds(g,lg==='cl'));
+  tour={league:lg,team,stage:'group',round:0,groups,rounds:R[0].map((_,i)=>R.flatMap(x=>x[i])),results:[],scorers:{},mainGroups:null,ko:{},done:false,result:null,champion:null,v:2};
+  saveTour();
+}
+function groupOf(c){ return Object.keys(tour.groups).find(g=>tour.groups[g].includes(c)); }
+function table(teams,stages){
+  const T={}; teams.forEach(c=>T[c]={c,k:0,v:0,u:0,t:0,gf:0,ga:0,p:0});
+  for(const r of tour.results){ if(!T[r.a]||!T[r.b]||!stages(r)) continue;
+    const A=T[r.a],B=T[r.b], ga=r.ga-(r.so===r.a?1:0), gb=r.gb-(r.so===r.b?1:0); A.k++;B.k++; A.gf+=ga;A.ga+=gb;B.gf+=gb;B.ga+=ga;
+    if(ga>gb){A.v++;B.t++;A.p+=2;} else if(ga<gb){B.v++;A.t++;B.p+=2;} else {A.u++;B.u++;A.p++;B.p++;} }
+  return Object.values(T).sort((a,b)=>b.p-a.p||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf||tT(b.c).tier-tT(a.c).tier);
+}
+const groupTable=g=>table(tour.groups[g],r=>r.stage==='group');
+// EM tager point med mod holdet fra egen gruppe; Champions League starter forfra i hovedrunden
+function mainTable(m){ return table(tour.mainGroups[m],r=>r.stage==='main'||(!isCL()&&r.stage==='group'&&groupOf(r.a)===groupOf(r.b))); }
+function addScorer(code,name,num,n=1){ const k=code+'|'+name; const s0=tour.scorers[k]||(tour.scorers[k]={code,name,num,g:0}); s0.g+=n; }
+function simScorers(code,goals){
+  const ro=buildTeam(tT(code)).roster.filter(e=>e.pos!=='GK'), w=ro.map(e=>e.r.skud*1.3+e.r.praecision+(e.pos==='LW'||e.pos==='RW'?1:0)+(e.star?4:0)+(e.pos==='PV'?2:0));
+  const tot=w.reduce((a,b)=>a+b,0);
+  for(let i=0;i<goals;i++){ let r=rnd()*tot,j=0; while(r>w[j]){ r-=w[j]; j++; } addScorer(code,ro[j].name,ro[j].num); }
+}
+const leg1=(a,b)=>tour.results.find(r=>r.stage==='qf'&&r.round===0&&r.a===b&&r.b===a);
+function koFlag(){ return ['semi','bronze','final'].includes(tour.stage)?'ko':(tour.stage==='qf'&&tour.round===1?'agg':''); }
+function settle(a,b,ga,gb,ko,pA){ // uafgjort i knockout / samlet: straffekast (vinderen får +1)
+  let tieA=ga, tieB=gb; if(ko==='agg'){ const l=leg1(a,b); tieA+=l.gb; tieB+=l.ga; }
+  if(ko&&tieA===tieB){ if(rnd()<pA){ return {ga:ga+1,gb,so:a}; } return {ga,gb:gb+1,so:b}; }
+  return {ga,gb,so:null};
+}
+function simMatch(a,b,ko){
+  const ta=tT(a).tier, tb=tT(b).tier;
+  const ga=Math.round(clamp(27+(ta-tb)*1.4+gauss()*3.2,16,42)), gb=Math.round(clamp(27+(tb-ta)*1.4+gauss()*3.2,16,42));
+  simScorers(a,ga); simScorers(b,gb);
+  const s0=settle(a,b,ga,gb,ko,0.5+(ta-tb)*0.05);
+  return {a,b,ga:s0.ga,gb:s0.gb,so:s0.so,note:s0.so?'e. straffekast':''};
+}
+function curMatches(){ const st=tour.stage; if(st==='group'||st==='main'||st==='qf') return tour.rounds[tour.round]||[]; return tour.ko[st]||[]; }
+function myMatch(){ return curMatches().find(m=>m[0]===tour.team||m[1]===tour.team); }
+const winnerOf=r=>r.ga>r.gb?r.a:r.b, loserOf=r=>r.ga>r.gb?r.b:r.a;
+function aggWinner(a,b){ const r1=tour.results.find(r=>r.stage==='qf'&&r.round===0&&r.a===a&&r.b===b), r2=tour.results.find(r=>r.stage==='qf'&&r.round===1&&r.a===b&&r.b===a);
+  const A=r1.ga+r2.gb, B=r1.gb+r2.ga; return A>B?a:B>A?b:(r2.so||a); }
+function out(text){ if(!tour.result) tour.result=text; }
+function tourStep(){
+  const st=tour.stage, S=STAGES[tour.league];
+  if(st==='group'||st==='main'||st==='qf'){ tour.round++; if(tour.round<tour.rounds.length) return; }
+  if(st==='group'){
+    const q={}; for(const g of Object.keys(tour.groups)){ const t=groupTable(g); q[g]=[t[0].c,t[1].c]; }
+    tour.mainGroups={I:[...q.A,...q.B,...q.C],II:[...q.D,...q.E,...q.F]};
+    const I=mrRounds(q.A,q.B,q.C,isCL()), II=mrRounds(q.D,q.E,q.F,isCL());
+    tour.rounds=I.map((r,i)=>[...r,...II[i]]); tour.stage='main'; tour.round=0;
+    if(![...tour.mainGroups.I,...tour.mainGroups.II].includes(tour.team)) out(`Ude efter ${S.group.toLowerCase()} (nr. ${groupTable(groupOf(tour.team)).findIndex(x=>x.c===tour.team)+1} i gruppen)`);
+    return;
+  }
+  if(st==='main'){
+    const I=mainTable('I').map(x=>x.c), II=mainTable('II').map(x=>x.c), mine=I.includes(tour.team)?I:II, pos=mine.indexOf(tour.team)+1;
+    if(isCL()){ const q=[[I[0],II[3]],[I[1],II[2]],[II[0],I[3]],[II[1],I[2]]]; tour.ko.qf=q; tour.rounds=[q,q.map(([a,b])=>[b,a])]; tour.stage='qf'; tour.round=0;
+      if(pos>4) out(`Ude efter ${S.main.toLowerCase()} (nr. ${pos})`); }
+    else { tour.ko.semi=[[I[0],II[1]],[II[0],I[1]]]; tour.stage='semi'; if(pos>2) out(`Ude efter ${S.main.toLowerCase()} (nr. ${pos})`); }
+    return;
+  }
+  if(st==='qf'){ const w=tour.ko.qf.map(([a,b])=>aggWinner(a,b)); tour.ko.semi=[[w[0],w[1]],[w[2],w[3]]]; tour.stage='semi';
+    if(tour.ko.qf.some(m=>m.includes(tour.team))&&!w.includes(tour.team)) out('Ude i kvartfinalen'); return; }
+  if(st==='semi'){ const r=tour.results.filter(r=>r.stage==='semi'); tour.ko.final=[[winnerOf(r[0]),winnerOf(r[1])]]; tour.ko.bronze=[[loserOf(r[0]),loserOf(r[1])]]; tour.stage='bronze'; return; }
+  if(st==='bronze'){ const r=tour.results.find(r=>r.stage==='bronze'); if(r.a===tour.team||r.b===tour.team) out(winnerOf(r)===tour.team?'Bronze! Nr. 3':'Nr. 4'); tour.stage='final'; return; }
+  if(st==='final'){ const f=tour.results.find(r=>r.stage==='final'); tour.champion=winnerOf(f);
+    if(f.a===tour.team||f.b===tour.team) out(tour.champion===tour.team?'MESTER!':'Sølv! Tabt finale'); tour.stage='end'; tour.done=true; }
+}
+function playStep(myRes){
+  const ko=koFlag();
+  for(const m of curMatches()){ const r=(myRes&&m[0]===myRes.a&&m[1]===myRes.b)?myRes:simMatch(m[0],m[1],ko); r.stage=tour.stage; r.round=tour.round; tour.results.push(r); }
+  tourStep();
+}
+function recordRound(myRes){
+  playStep(myRes);
+  let guard=0; while(!tour.done&&!myMatch()&&guard++<40) playStep(null);   // dit hold er ude eller holder fri: resten simuleres
+  saveTour();
+}
+function tableHTML(rows,qual){ return `<table class="tbl"><tr><th>#</th><th>Hold</th><th>K</th><th>V</th><th>U</th><th>T</th><th>Mål</th><th>P</th></tr>`+
+  rows.map((r,i)=>`<tr class="${r.c===tour.team?'me':''} ${i<qual?'q':''}"><td>${i+1}</td><td>${tName(r.c)}</td><td>${r.k}</td><td>${r.v}</td><td>${r.u}</td><td>${r.t}</td><td>${r.gf}-${r.ga}</td><td>${r.p}</td></tr>`).join('')+'</table>'; }
+const resLine=r=>`<div class="${r.a===tour.team||r.b===tour.team?'me':''}">${tName(r.a)} ${r.ga}–${r.gb} ${tName(r.b)}${r.note?` <small>(${r.note})</small>`:''}</div>`;
+function showTour(){
+  const S=STAGES[tour.league];
+  $('tTitle').textContent=S.title+' · '+tName(tour.team);
+  let html='', stage=tour.done?'Turneringen er slut':S[tour.stage]+(tour.stage==='group'||tour.stage==='main'?` · kamp ${tour.round+1} af ${tour.rounds.length}`:tour.stage==='qf'?` · ${tour.round+1}. kamp`:'');
+  if(tour.done){ html+=`<div class="tbig">${tour.result||''}</div>`; if(tour.champion) html+=`<div class="tres" style="text-align:center">Vinder: <b>${tName(tour.champion)}</b></div>`;
+    const ko=tour.results.filter(r=>['qf','semi','bronze','final'].includes(r.stage)); if(ko.length) html+=`<div class="tsec">Slutspil</div><div class="tres">${ko.map(resLine).join('')}</div>`; }
+  else { const m=myMatch(); if(m){ const l=tour.stage==='qf'&&tour.round===1?leg1(m[0],m[1]):null;
+    html+=`<div class="tsec">Næste kamp${l?` · 1. kamp endte ${tName(l.a)} ${l.ga}–${l.gb} ${tName(l.b)}`:''}</div><div class="tnext"><span>${tName(m[0])}</span><span>–</span><span>${tName(m[1])}</span></div>`; } }
+  if(tour.mainGroups){ const g=tour.mainGroups.I.includes(tour.team)?'I':'II'; if(tour.mainGroups[g].includes(tour.team)) html+=`<div class="tsec">${S.main} · gruppe ${g}</div>`+tableHTML(mainTable(g),2); }
+  const g0=groupOf(tour.team); html+=`<div class="tsec">${S.group} · gruppe ${g0}</div>`+tableHTML(groupTable(g0),2);
+  const last=tour.results.slice(-12).filter(r=>r.stage===tour.results[tour.results.length-1]?.stage); if(last.length) html+=`<div class="tsec">Seneste resultater</div><div class="tres">${last.slice(-8).map(resLine).join('')}</div>`;
+  const top=Object.values(tour.scorers).sort((a,b)=>b.g-a.g).slice(0,8);
+  if(top.length) html+=`<div class="tsec">Topscorere</div><div class="tres">${top.map((x,i)=>`<div class="${x.code===tour.team?'me':''}">${i+1}. ${x.name} (${x.code}) <b style="float:right">${x.g}</b></div>`).join('')}</div>`;
+  $('tStage').textContent=stage; $('tBody').innerHTML=html; $('tPlay').hidden=tour.done;
+  $('menu').hidden=true; $('tour').hidden=false; paused=true;
+}
+function playTourMatch(){
+  const m=myMatch(); if(!m) return;
+  const opp=m[0]===tour.team?m[1]:m[0]; league=tour.league; teamSel=teamSels[league]=[tour.team,opp];
+  tourMatch={a:m[0],b:m[1],ko:koFlag()};
+  $('tour').hidden=true; $('result').hidden=true; newMatch(); started=true; paused=false;
+}
+function endTourMatch(){
+  const meA=tourMatch.a===teamSel[0], ga0=meA?score[0]:score[1], gb0=meA?score[1]:score[0];
+  const pA=0.5+(tT(tourMatch.a).tier-tT(tourMatch.b).tier)*0.04, st=settle(tourMatch.a,tourMatch.b,ga0,gb0,tourMatch.ko,pA);
+  const res={a:tourMatch.a,b:tourMatch.b,ga:st.ga,gb:st.gb,so:st.so,note:st.so?'e. straffekast':''};
+  tourMatch=null; recordRound(res); started=false; showTour();
+}
+function updateTeamsUI(){
+  const A=curTeams().find(t=>t.c===teamSel[0]), B=curTeams().find(t=>t.c===teamSel[1]);
+  if(TEAMS.length&&TEAMDATA[0]&&TEAMDATA[0].short===teamSel[0]){ $('swA').style.background=TEAMS[0].shirt; $('swB').style.background=TEAMS[1].shirt; }
+  $('nA').textContent=teamSel[0]; $('nB').textContent=teamSel[1];
+  $('subTxt').textContent=(league==='cl'?'EHF Champions League 2026/27.':'EM 2026, herrer.')+' Du angriber opad. Hallgulv, kamptid og styring finder du under Indstillinger.';
+  const show=(T,sel)=>{ const bt=buildTeam(T), xi=['GK','LW','LB','CB','RB','RW','PV'].map(r=>bt.roster.filter(x=>x.pos===r).sort((a,b)=>lineupScore(b)-lineupScore(a))[0]).filter(Boolean);
+    return `<div><span class="kit" style="background:${T.home[0]}"></span><b>${T.n}</b><br>${xi.map(x=>`${x.pos.replace('PV','ST')} ${x.num} ${x.name}`).join('<br>')}</div>`; };
+  $('lineup').innerHTML=show(A)+((typeof gameMode!=='undefined'&&gameMode==='tour')?'':show(B));
+}
+function fillSelects(){
+  for(const [id,i] of [['selA',0],['selB',1]]){ const el=$(id); el.innerHTML=curTeams().slice().sort((a,b)=>a.n.localeCompare(b.n,'da')).map(t=>`<option value="${t.c}">${t.n}</option>`).join(''); el.value=teamSel[i];
+    el.onchange=()=>{ teamSel[i]=el.value; if(teamSel[0]===teamSel[1]){ teamSel[1-i]=curTeams().find(t=>t.c!==el.value).c; $(i?'selA':'selB').value=teamSel[1-i]; }
+      try{ localStorage.setItem('hb_teams_'+league,JSON.stringify(teamSel)); }catch(e){} if(!started){ newMatch(); paused=true; } else updateTeamsUI(); refreshMode(); }; }
+}
+function refreshMode(){
+  [...$('modeSeg').children].forEach(c=>c.setAttribute('aria-pressed',c.dataset.m===gameMode));
+  const T=gameMode==='tour'; updateTeamsUI(); $('selBWrap').style.visibility=T?'hidden':''; $('vsTxt').style.visibility=T?'hidden':'';
+  const cont=T&&tour&&tour.league===league&&tour.team===teamSel[0]&&!tour.done;
+  $('startBtn').textContent=T?(cont?'Fortsæt turnering':'Start turnering'):(started?'Start ny kamp':'Start kamp');
+  $('newTourBtn').hidden=!cont;
+}
+function buildMenu(){
+  $('verTag').textContent='v'+VERSION;
+  fillSelects();
+  [...$('leagueSeg').children].forEach(b=>{ b.setAttribute('aria-pressed',b.dataset.l===league);
+    b.onclick=()=>{ league=b.dataset.l; teamSel=teamSels[league]; floorKey=league==='cl'?'cl':'landskamp'; try{ localStorage.setItem('hb_floor',floorKey); }catch(e){} [...$('floors').children].forEach((c,i)=>c.setAttribute('aria-pressed',Object.keys(FLOORS)[i]===floorKey)); try{ localStorage.setItem('hb_league',league); }catch(e){}
+      [...$('leagueSeg').children].forEach(c=>c.setAttribute('aria-pressed',c===b)); fillSelects(); if(!started){ newMatch(); paused=true; } else updateTeamsUI(); refreshMode(); }; });
+  updateTeamsUI();
+  const fl=$('floors'); fl.innerHTML='';
+  for(const [k,F] of Object.entries(FLOORS)){
+    const b=document.createElement('button'); b.className='fl'; b.setAttribute('aria-pressed',k===floorKey);
+    b.innerHTML=`<span class="chip" style="background:${F.field}"><i style="background:${F.area}"></i></span>${F.name}`;
+    b.onclick=()=>{ floorKey=k; try{localStorage.setItem('hb_floor',k);}catch(e){} [...fl.children].forEach(c=>c.setAttribute('aria-pressed',c===b)); };
+    fl.appendChild(b);
+  }
+  [...$('lenSeg').children].forEach(b=>{ b.setAttribute('aria-pressed',+b.dataset.len===matchLen);
+    b.onclick=()=>{ matchLen=+b.dataset.len; try{localStorage.setItem('hb_len2',matchLen);}catch(e){} [...$('lenSeg').children].forEach(c=>c.setAttribute('aria-pressed',c===b)); }; });
+  $('startBtn').onclick=()=>{
+    if(gameMode==='tour'){ if(!(tour&&tour.league===league&&tour.team===teamSel[0]&&!tour.done)) newTour(league,teamSel[0]); showTour(); return; }
+    tourMatch=null; $('result').hidden=true; newMatch(); started=true; paused=false; $('menu').hidden=true; $('startBtn').textContent='Start ny kamp'; };
+  $('newTourBtn').onclick=()=>{ newTour(league,teamSel[0]); showTour(); };
+  $('tPlay').onclick=playTourMatch;
+  $('tNew').onclick=()=>{ newTour(tour.league,tour.team); showTour(); };
+  $('tMenu').onclick=()=>{ $('tour').hidden=true; $('menu').hidden=false; refreshMode(); };
+  [...$('modeSeg').children].forEach(b=>{ b.onclick=()=>{ gameMode=b.dataset.m; try{ localStorage.setItem('hb_mode',gameMode); }catch(e){} refreshMode(); }; });
+  refreshMode();
+  $('resumeBtn').onclick=()=>{ paused=false; $('menu').hidden=true; };
+  $('fsBtn').onclick=()=>{ const d=document.documentElement; try{ if(document.fullscreenElement) document.exitFullscreen(); else (d.requestFullscreen||d.webkitRequestFullscreen).call(d).catch?.(()=>{}); }catch(e){} };
+  $('pauseBtn').onclick=openMenu;
+}
+function openMenu(){ if(phase==='over') return; paused=true; $('resumeBtn').hidden=!started; $('menu').hidden=false; }
+
+/* ================= INPUT ================= */
+const joy={x:0,y:0}, btn={shot:false,pass:false,fake:false,shotEdge:false,passEdge:false,fakeEdge:false};
+const stick={id:null,ox:0,oy:0,tx:0,ty:0};
+const keys=new Set();
+function placeStick(x,y,kx,ky){ const z=$('stickZone').getBoundingClientRect(); $('stickBase').style.left=(x-z.left)+'px'; $('stickBase').style.top=(y-z.top)+'px'; $('stickKnob').style.left=(kx-z.left)+'px'; $('stickKnob').style.top=(ky-z.top)+'px'; }
+function restStick(){ const z=$('stickZone').getBoundingClientRect(); const x=z.left+Math.max(80,z.width*0.4), y=z.top+z.height-Math.max(95,z.height*0.42); stick.ox=x; stick.oy=y; placeStick(x,y,x,y); }
+function bindInput(){
+  const zone=$('stickZone');
+  zone.addEventListener('pointerdown',e=>{ e.preventDefault(); stick.id=e.pointerId; stick.ox=e.clientX; stick.oy=e.clientY; zone.setPointerCapture(e.pointerId); placeStick(e.clientX,e.clientY,e.clientX,e.clientY); stick.tx=stick.ty=0; });
+  zone.addEventListener('pointermove',e=>{ if(e.pointerId!==stick.id) return; let dx=e.clientX-stick.ox, dy=e.clientY-stick.oy; const m=Math.hypot(dx,dy), R=48;
+    if(m>R){ dx=dx/m*R; dy=dy/m*R; } stick.tx=dx/R; stick.ty=dy/R; placeStick(stick.ox,stick.oy,stick.ox+dx,stick.oy+dy); });
+  const end=e=>{ if(e.pointerId!==stick.id) return; stick.id=null; stick.tx=stick.ty=0; restStick(); };
+  zone.addEventListener('pointerup',end); zone.addEventListener('pointercancel',end);
+  const bind=(el,k)=>{ el.addEventListener('pointerdown',e=>{ e.preventDefault(); btn[k]=true; btn[k+'Edge']=true; el.classList.add('on'); });
+    const up=()=>{ btn[k]=false; el.classList.remove('on'); }; el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up); el.addEventListener('pointerleave',up); };
+  bind($('btnShot'),'shot'); bind($('btnPass'),'pass'); bind($('btnFake'),'fake');
+  addEventListener('keydown',e=>{ const k=e.key.toLowerCase(); if(e.repeat){ return; }
+    if(k===' '||k==='k'){ btn.shotEdge=true; btn.shot=true; e.preventDefault(); }
+    else if(k==='f'||k==='c'){ btn.fakeEdge=true; }
+    else if(k==='x'||k==='j'||k==='l'){ btn.passEdge=true; }
+    else if(k==='p'||k==='escape'){ if(paused&&started&&phase!=='over'){ paused=false; $('menu').hidden=true; } else openMenu(); }
+    keys.add(k); if(k.startsWith('arrow')) e.preventDefault(); });
+  addEventListener('keyup',e=>{ const k=e.key.toLowerCase(); keys.delete(k); if(k===' '||k==='k') btn.shot=false; });
+  addEventListener('blur',()=>keys.clear());
+  addEventListener('resize',()=>{ resize(); restStick(); });
+}
+function readJoy(){
+  let x=stick.tx, y=stick.ty;
+  if(keys.size){ let kx=0,ky=0; if(keys.has('arrowleft')||keys.has('a')) kx--; if(keys.has('arrowright')||keys.has('d')) kx++; if(keys.has('arrowup')||keys.has('w')) ky--; if(keys.has('arrowdown')||keys.has('s')) ky++;
+    if(kx||ky){ const m=Math.hypot(kx,ky); x=kx/m; y=ky/m; } }
+  const m=Math.hypot(x,y); if(m<0.12){ x=0; y=0; }
+  joy.x=x; joy.y=y;
+}
+
+/* ================= START ================= */
+let last=performance.now(), acc=0;
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  readJoy();
+  if(!paused&&ball){ acc+=dt; while(acc>=STEP){ step(STEP); acc-=STEP; } updateHud(false); updateButtons(); updatePassive(); updateSubBan(); }
+  if(ball) render(); else { ctx.setTransform(DPR,0,0,DPR,0,0); ctx.fillStyle='#0b1422'; ctx.fillRect(0,0,VW,VH); }
+  requestAnimationFrame(frame);
+}
+resize(); buildCrowd(); buildMenu(); bindInput(); restStick();
+newMatch(); paused=true; // baggrundsbillede bag menuen
+if(AUTO){ started=true; paused=false; $('menu').hidden=true; }
+requestAnimationFrame(frame);
+window.__x={pa:()=>{const h=ball.holder; return h&&h.role!=='GK'&&posAtt(h.team)&&L(h.team,h.x,h.y).d<13;},clear:()=>{demoCaps=[];capLog=[];},log:()=>capLog};window.__hb={step:s=>{for(let i=0;i<s;i++) step(STEP);},state:()=>({score,phase,clock,mode:ball.mode}),stats:STATS};
+})();
+</script>
