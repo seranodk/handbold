@@ -1,4 +1,4 @@
-<title>Håndbold v0.20.0</title>
+<title>Håndbold v0.20.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -162,7 +162,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.20.0';
+const VERSION='0.20.1';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -221,49 +221,49 @@ const EM_TEAMS=[
  {c:'GER',n:'Tyskland',tier:9,home:['#f4f4f2','#111111','#111111','#111111'],away:['#151515','#d4202a','#151515','#f2c200'],
   p:'G 33 Wolff*^|G 1 Späth|LW 36 Mertens*^|LW 34 Dahmke|LB 18 Köster*^|LB 13 Langhoff|LB 71 Grgić*|LB 5 Schluroff|CB 15 Knorr*^|CB 3 Lichtlein|CB 30 Kiesler|RB 23 Uscins*^|RB 32 Semper|RW 17 Zerbe*^|RW 14 Häseler|P 4 Golla*^|P 80 Kohlbacher'},
  {c:'ESP',n:'Spanien',tier:8,home:['#c8102e','#f6c400','#14275e','#f6c400'],away:['#14275e','#c8102e','#14275e','#ffffff'],
-  p:'G 25 Hernández*|G 12 Corrales|LW 70 Fernández|LW 13 Guijarro|RW 28 Gómez*|RW 14 Solé|LB 24 D. Dujshebaev*|LB 8 Casado|LB 7 Gurri|CB 9 Tarrafeta*|CB 15 P. Cikusa|RB 10 A. Dujshebaev*|RB 77 Urdangarin|P 20 Serdio*|P 23 Bazán'},
+  p:'G 25 Hernández*^|G 12 Corrales|LW 70 Fernández^|LW 13 Guijarro|RW 28 Gómez*^|RW 14 Solé|LB 24 D. Dujshebaev*^|LB 8 Casado|LB 7 Gurri|CB 9 Tarrafeta*^|CB 15 P. Cikusa|RB 10 A. Dujshebaev*^|RB 77 Urdangarin|P 20 Serdio*^|P 23 Bazán'},
  {c:'AUT',n:'Østrig',tier:6,home:['#e3141b','#ffffff','#e3141b','#ffffff'],away:['#ffffff','#e3141b','#ffffff','#e3141b'],
-  p:'G 98 C. Möstl*|G 16 Kaiper|LW 24 Sager|LW 20 Frimmel|RW 9 Muck|RW 38 Sgonc|LB 53 Bilyk*|LB 32 Cl. Möstl|LB 6 Mahr|CB 72 Hutecek*|CB 66 E. Kofler|RB 7 Božović*|RB 30 Živković|P 55 Wagner*|P 26 Herburger'},
+  p:'G 98 C. Möstl*^|G 16 Kaiper|LW 24 Sager|LW 20 Frimmel^|RW 9 Muck|RW 38 Sgonc|LB 53 Bilyk*^|LB 32 Cl. Möstl|LB 6 Mahr|CB 72 Hutecek*^|CB 66 E. Kofler|RB 7 Božović*|RB 30 Živković|P 55 Wagner*^|P 26 Herburger'},
  {c:'SRB',n:'Serbien',tier:6,home:['#c6363c','#0c4076','#0c4076','#ffffff'],away:['#ffffff','#c6363c','#0c4076','#c6363c'],
-  p:'G 1 Cupara*|G 77 Krivokapić|LW 21 V. Ilić|LW 19 N. Ilić|RW 15 Kojadinović|RW 3 Vorkapić|LB 20 Pušica*|LB 11 Abutović|LB 29 Tasić|CB 24 Kukić*|CB 8 Antonijević|RB 30 Nikolić|RB 51 Crnoglavac|P 93 Marsenić*|P 4 Jevtić'},
+  p:'G 1 Cupara*^|G 77 Krivokapić|LW 21 V. Ilić|LW 19 N. Ilić|RW 15 Kojadinović|RW 3 Vorkapić|LB 20 Pušica*|LB 11 Abutović|LB 29 Tasić|CB 24 Kukić*^|CB 8 Antonijević|RB 30 Nikolić|RB 51 Crnoglavac|P 93 Marsenić*^|P 4 Jevtić'},
  {c:'DEN',n:'Danmark',tier:10,home:['#d0021b','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#d0021b','#d0021b','#d0021b'],
   p:'G 12 E. Nielsen*^|G 20 K. Møller*|LW 7 Jakobsen*^~|LW 4 M. Landin*|LB 43 Pytlick*^|LB 28 Andersson|LB 64 L. Møller|CB 11 Lauge*^|CB 42 Arnoldsen*|CB 22 Mensah|CB 59 Svane Knudsen|RB 19 Gidsel*^|RB 3 Kirkeløkke|RB 38 Hoxer|RW 26 J. Hansen*^|P 15 Saugstrup*^|P 34 Hald*|P 25 L. Jørgensen'},
  {c:'POR',n:'Portugal',tier:8,home:['#c8102e','#046a38','#046a38','#ffffff'],away:['#ffffff','#c8102e','#ffffff','#046a38'],
-  p:'G 41 Capdeville*|G 16 Rêma|LW 23 Branquinho*|LW 21 L. Fernandes|RW 25 Areia*|RW 11 J. Monteiro|LB 13 Salvador*|LB 20 M. Neves|LB 24 A. Cavalcanti|CB 79 Martim Costa*|CB 14 Rui Silva|RB 26 Francisco Costa*|RB 33 D. Silva|P 8 Iturriza*|P 82 Frade'},
+  p:'G 41 Capdeville*^|G 16 Rêma|LW 23 Branquinho*^|LW 21 L. Fernandes|RW 25 Areia*^|RW 11 J. Monteiro|LB 13 Salvador*^|LB 20 M. Neves|LB 24 A. Cavalcanti|CB 79 Martim Costa*^|CB 14 Rui Silva|RB 26 Francisco Costa*^|RB 33 D. Silva|P 8 Iturriza*^|P 82 Frade'},
  {c:'MKD',n:'Nordmakedonien',tier:5,home:['#d20000','#ffe600','#d20000','#ffe600'],away:['#ffe600','#d20000','#ffe600','#d20000'],
   p:'G 1 Mitrevski*|G 12 Tomovski|LW 5 Dimitrioski|LW 55 Pe. Atanasijević|RW 19 Ne. Kosteski|RW 26 Ni. Kosteski|LB 38 Djonov|LB 6 Mladenović|LB 23 Gjorgovski|CB 18 Kuzmanovski*|CB 9 Gjorgiev|RB 30 Nikolov|RB 4 Velkovski|P 33 Peshevski|P 17 Markoski'},
  {c:'ROU',n:'Rumænien',tier:4,home:['#fcd116','#002b7f','#002b7f','#002b7f'],away:['#002b7f','#ce1126','#002b7f','#fcd116'],
   p:'G 1 Iancu*|G 16 Popescu|LW 7 Andrei|LW 15 Ghivil|RW 9 Grigore|RW 4 R. Ștefan|LB 17 Racoțea*|LB 8 Militaru|LB 3 Ilie|CB 10 Cumpănici|CB 21 Caba|RB 13 Ghiță|RB 77 Dodica|P 20 Szász|P 31 Dumitrana'},
  {c:'FRA',n:'Frankrig',tier:9,home:['#1d3c8f','#e1000f','#1d3c8f','#ffffff'],away:['#ffffff','#1d3c8f','#ffffff','#1d3c8f'],
-  p:'G 92 Desbonnet*|G 16 Bolzinger|LW 25 Descat*|LW 31 Nahi|RW 29 Kounkoud*|RW 2 Y. Lenne|LB 8 Prandi*|LB 37 Zaepfel|LB 7 Lagarde|CB 4 Minne*|CB 41 Fadhuile|CB 19 Gaudin|RB 10 Mem*^|RB 9 Richardson*|P 23 Fabregas*|P 11 Tournat'},
+  p:'G 92 Desbonnet*^|G 16 Bolzinger|LW 25 Descat*^|LW 31 Nahi|RW 29 Kounkoud*^|RW 2 Y. Lenne|LB 8 Prandi*^|LB 37 Zaepfel|LB 7 Lagarde|CB 4 Minne*^|CB 41 Fadhuile|CB 19 Gaudin|RB 10 Mem*^|RB 9 Richardson*|P 23 Fabregas*^|P 11 Tournat'},
  {c:'NOR',n:'Norge',tier:8,home:['#ba0c2f','#ffffff','#00205b','#ffffff'],away:['#ffffff','#00205b','#ffffff','#ba0c2f'],
-  p:'G 30 Bergerud*|G 1 Haug|LW 40 A. Pedersen*|LW 6 Barthold|RW 19 Bjørnsen*|RW 44 Gulliksen|LB 5 Sagosen*|LB 10 Rønningen|LB 18 Aar|CB 22 Grøndahl*|CB 24 O\'Sullivan|RB 45 Schønningsen|RB 15 Haugstvedt|P 21 Gullerud*|P 9 H. Jakobsen'},
+  p:'G 30 Bergerud*^|G 1 Haug|LW 40 A. Pedersen*^|LW 6 Barthold|RW 19 Bjørnsen*^|RW 44 Gulliksen|LB 5 Sagosen*^|LB 10 Rønningen|LB 18 Aar|CB 22 Grøndahl*|CB 24 O\'Sullivan|RB 45 Schønningsen|RB 15 Haugstvedt|P 21 Gullerud*^|P 9 H. Jakobsen'},
  {c:'CZE',n:'Tjekkiet',tier:6,home:['#d7141a','#11457e','#ffffff','#ffffff'],away:['#ffffff','#11457e','#11457e','#d7141a'],
   p:'G 1 Mrkva*|G 24 Mokroš|LW 3 Široký|LW 9 Beneš|RW 14 Šterba|RW 29 Harabiš|LB 31 Klíma*|LB 34 Solák|LB 23 Josef|CB 21 Palát|CB 43 Douda|RB 7 Piroch|RB 87 Tůma|P 37 Uzek|P 33 Nantl'},
  {c:'UKR',n:'Ukraine',tier:4,home:['#ffd500','#005bbb','#005bbb','#005bbb'],away:['#005bbb','#ffd500','#005bbb','#ffd500'],
   p:'G 1 Terekhov|G 51 Novikov|LW 13 Artemenko*|LW 11 Denysov|RW 5 Akimenko|RW 7 Blyzniuk|LB 17 Turchenko*|LB 88 Kovalenko|LB 35 Minotskyi|CB 21 Kasai|CB 15 Tilte|RB 53 Cherkashchenko|RB 22 Dontsov|P 10 Tiutiunnyk|P 6 Tsymbaliuk'},
  {c:'SLO',n:'Slovenien',tier:7,home:['#ffffff','#00a650','#005da4','#005da4'],away:['#005da4','#00a650','#005da4','#ffffff'],
-  p:'G 26 Ferlin*|G 16 Vujović|LW 20 Kodrin*|LW 24 A. Makuc|RW 8 B. Janc*|RW 13 Marguč|LB 51 Mačkovšek*|LB 5 Henigman|LB 15 Guček|CB 35 D. Makuc*|CB 23 Zarabec|RB 17 Cehte*|RB 18 Kljun|P 3 Blagotinšek*|P 92 Drobež'},
+  p:'G 26 Ferlin*^|G 16 Vujović|LW 20 Kodrin*|LW 24 A. Makuc|RW 8 B. Janc*^|RW 13 Marguč|LB 51 Mačkovšek*^|LB 5 Henigman|LB 15 Guček|CB 35 D. Makuc*^|CB 23 Zarabec|RB 17 Cehte*^|RB 18 Kljun|P 3 Blagotinšek*^|P 92 Drobež'},
  {c:'FRO',n:'Færøerne',tier:6,home:['#ffffff','#005eb8','#005eb8','#ef3340'],away:['#005eb8','#ef3340','#005eb8','#ffffff'],
-  p:'G 12 Guttesen*|G 1 P. Jacobsen|LW 9 R. B. Hansen|LW 6 Mortensen|RW 17 West av Teigum*|RW 7 Norðberg|LB 78 Ó. Mittún*|LB 4 í Selvindi|LB 30 Mikkelsen|CB 71 Ellefsen á Skipagøtu*|CB 31 Hávardsson|RB 10 Johansen|RB 5 P. H. Rasmussen|P 79 T. H. Rasmussen|P 8 Mikkjalsson'},
+  p:'G 12 Guttesen*|G 1 P. Jacobsen|LW 9 R. B. Hansen|LW 6 Mortensen|RW 17 West av Teigum*^|RW 7 Norðberg|LB 78 Ó. Mittún*^|LB 4 í Selvindi|LB 30 Mikkelsen|CB 71 Ellefsen á Skipagøtu*^|CB 31 Hávardsson|RB 10 Johansen|RB 5 P. H. Rasmussen|P 79 T. H. Rasmussen|P 8 Mikkjalsson'},
  {c:'MNE',n:'Montenegro',tier:5,home:['#c40308','#d4af37','#c40308','#d4af37'],away:['#ffffff','#c40308','#ffffff','#c40308'],
   p:'G 16 Simić*|G 1 Matović|LW 6 Mi. Vujović|LW 2 F. Vujović|RW 35 Lončar|RW 13 M. Radović|LB 87 Borozan*|LB 37 M. Bakić|LB 24 Božović|CB 9 Čepić|CB 14 Barjaktarović|RB 7 Čavor*|RB 21 Radoičić|P 8 Lazović|P 36 Pelidija'},
  {c:'SUI',n:'Schweiz',tier:6,home:['#d52b1e','#ffffff','#d52b1e','#ffffff'],away:['#ffffff','#d52b1e','#ffffff','#d52b1e'],
-  p:'G 16 Portner*|G 12 Grazioli|LW 29 S. Zehnder|LW 24 Schlumpf|RW 41 Epp|RW 21 Steenaerts|LB 8 M. Zehnder*|LB 4 Rubin*|LB 20 Maros|CB 11 Aellen*|CB 22 Schelker|RB 13 Kusio|RB 18 Küttel|P 17 Röthlisberger*|P 3 Meister'},
+  p:'G 16 Portner*^|G 12 Grazioli|LW 29 S. Zehnder|LW 24 Schlumpf|RW 41 Epp|RW 21 Steenaerts|LB 8 M. Zehnder*^|LB 4 Rubin*|LB 20 Maros|CB 11 Aellen*|CB 22 Schelker|RB 13 Kusio|RB 18 Küttel|P 17 Röthlisberger*^|P 3 Meister'},
  {c:'SWE',n:'Sverige',tier:8,home:['#fecc02','#006aa7','#006aa7','#006aa7'],away:['#006aa7','#fecc02','#006aa7','#fecc02'],
-  p:'G 12 Palicka*|G 16 Thulin|LW 15 Wanne*|LW 43 Montebovi|RW 11 Pettersson*|RW 3 Persson|LB 42 E. Johansson^|LB 17 Jeppsson|LB 49 Wallinius|CB 24 Gottfridsson*|CB 19 Claar*|RB 23 Lagergren*|RB 33 Sandell|P 5 Darj*|P 6 F. Möller'},
+  p:'G 12 Palicka*^|G 16 Thulin|LW 15 Wanne*^|LW 43 Montebovi|RW 11 Pettersson*^|RW 3 Persson|LB 42 E. Johansson^|LB 17 Jeppsson|LB 49 Wallinius|CB 24 Gottfridsson*^|CB 19 Claar*|RB 23 Lagergren*^|RB 33 Sandell|P 5 Darj*^|P 6 F. Möller'},
  {c:'CRO',n:'Kroatien',tier:8,home:['#e30a17','#ffffff','#ffffff','#171796'],away:['#171796','#e30a17','#171796','#ffffff'],check:true,
-  p:'G 1 Kuzmanović*|G 12 M. Mandić|LW 62 Jelinić*|LW 2 Mihić|RW 6 Šoštarić*|RW 57 Glavaš|LB 11 Srna*|LB 30 Mamić|LB 15 Ljevar|CB 33 Cindrić*|CB 41 Lučin|RB 51 I. Martinović*|RB 9 Klarica|P 93 Načinović*|P 40 Grahovac'},
+  p:'G 1 Kuzmanović*^|G 12 M. Mandić|LW 62 Jelinić*^|LW 2 Mihić|RW 6 Šoštarić*^|RW 57 Glavaš|LB 11 Srna*^|LB 30 Mamić|LB 15 Ljevar|CB 33 Cindrić*^|CB 41 Lučin|RB 51 I. Martinović*^|RB 9 Klarica|P 93 Načinović*^|P 40 Grahovac'},
  {c:'NED',n:'Holland',tier:6,home:['#f36c21','#ffffff','#f36c21','#ffffff'],away:['#1c3f94','#f36c21','#1c3f94','#ffffff'],
-  p:'G 30 A. Versteijnen*|G 18 Dijkstra|LW 5 ten Velde*|LW 17 Geenen|RW 14 Schagen*|RW 27 Smit|LB 77 Baijens*|LB 23 R. Jansen|LB 32 van der Ban|CB 22 Steins*|CB 9 Hoogland|RB 31 Smits*|RB 29 Skwarczynski|P 24 Manders|P 21 M. Kleijkers'},
+  p:'G 30 A. Versteijnen*|G 18 Dijkstra|LW 5 ten Velde*|LW 17 Geenen|RW 14 Schagen*|RW 27 Smit|LB 77 Baijens*|LB 23 R. Jansen|LB 32 van der Ban|CB 22 Steins*^|CB 9 Hoogland|RB 31 Smits*^|RB 29 Skwarczynski|P 24 Manders|P 21 M. Kleijkers'},
  {c:'GEO',n:'Georgien',tier:4,home:['#ffffff','#e8112d','#ffffff','#e8112d'],away:['#e8112d','#ffffff','#e8112d','#ffffff'],
   p:'G 1 Rukhadze|G 20 I. Dikhaminjia|LW 36 J. Imnadze|LW 5 V. Khelisupali|RW 71 G. Dikhaminjia*|RW 35 L. Imnadze|LB 28 D. Grishikashvili|LB 13 Zarnadze|LB 34 Gavashelishvili|CB 9 Areshidze|CB 6 Patashuri|RB 11 Tskhovrebadze*|RB 24 Gogava|P 3 Lapiashvili|P 31 G. Grishikashvili'},
  {c:'HUN',n:'Ungarn',tier:7,home:['#ce2939','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#477050','#ce2939','#ce2939'],
-  p:'G 32 Palasics*|G 1 Andó|LW 7 Bóka*|LW 4 Hári|RW 91 Imre*|RW 26 Rodríguez|LB 39 Bodó*|LB 17 B. Nagy|LB 9 Pergel|CB 15 M. Győri*|CB 77 Hanusz|RB 43 Ilić*|RB 23 Máthé|P 27 Bánhidi*|P 45 Rosta'},
+  p:'G 32 Palasics*^|G 1 Andó|LW 7 Bóka*^|LW 4 Hári|RW 91 Imre*^|RW 26 Rodríguez|LB 39 Bodó*^|LB 17 B. Nagy|LB 9 Pergel|CB 15 M. Győri*|CB 77 Hanusz|RB 43 Ilić*^|RB 23 Máthé|P 27 Bánhidi*^|P 45 Rosta'},
  {c:'ISL',n:'Island',tier:8,home:['#02529c','#dc1e35','#02529c','#ffffff'],away:['#ffffff','#02529c','#ffffff','#02529c'],
-  p:'G 1 Gústavsson*|G 16 Hallgrímsson*^|LW 19 Þorkelsson*|LW 8 Elísson|RW 2 Ríkharðsson*|LB 9 E. Ö. Jónsson*|LB 15 Gunnarsson|LB 6 Ásgeirsson|CB 10 G. Kristjánsson*|CB 3 Smárason|CB 25 Þrastarson|RB 14 Magnússon*|RB 7 V. Kristjánsson*|P 18 Viðarsson*|P 21 Arnarsson'},
+  p:'G 1 Gústavsson*|G 16 Hallgrímsson*^|LW 19 Þorkelsson*^|LW 8 Elísson|RW 2 Ríkharðsson*^|LB 9 E. Ö. Jónsson*^|LB 15 Gunnarsson|LB 6 Ásgeirsson|CB 10 G. Kristjánsson*^|CB 3 Smárason|CB 25 Þrastarson|RB 14 Magnússon*^|RB 7 V. Kristjánsson*|P 18 Viðarsson*^|P 21 Arnarsson'},
  {c:'POL',n:'Polen',tier:6,home:['#ffffff','#dc143c','#dc143c','#dc143c'],away:['#dc143c','#ffffff','#dc143c','#ffffff'],
-  p:'G 13 Wałach*|G 75 Jastrzębski|LW 25 Jarosiewicz|LW 19 Czuwara|RW 23 Moryto*|RW 3 Daszek*|LB 48 T. Gębala*|LB 2 Przytuła|LB 12 Pietrasik|CB 4 Jędraszczyk|CB 5 Olejniczak|RB 17 Widomski|RB 30 Tomczak|P 28 M. Gębala*|P 7 Walczak'},
+  p:'G 13 Wałach*|G 75 Jastrzębski|LW 25 Jarosiewicz|LW 19 Czuwara|RW 23 Moryto*^|RW 3 Daszek*|LB 48 T. Gębala*|LB 2 Przytuła|LB 12 Pietrasik|CB 4 Jędraszczyk|CB 5 Olejniczak|RB 17 Widomski|RB 30 Tomczak|P 28 M. Gębala*^|P 7 Walczak'},
  {c:'ITA',n:'Italien',tier:4,home:['#0064aa','#ffffff','#0064aa','#ffffff'],away:['#ffffff','#0064aa','#ffffff','#0064aa'],
   p:'G 1 Ebner*|G 90 Pavani|LW 40 Sirot|LW 4 De Angelis|RW 2 Prantner*|RW 56 Wierer|LB 15 S. Mengon*|LB 24 Helmersson|LB 23 Manojlović|CB 10 M. Mengon|CB 8 Savini|RB 44 Cuello|RB 3 Zanon|P 18 Martini|P 33 Aldini'}
 ];
@@ -858,7 +858,7 @@ function aiCarrier(p,dt){
     if(p.sevenFake&&p.aiT<0.45&&!p.feint){ p.sevenFake=false; p.feint={type:'shot',t:0,dir:0,done:true,tired:1}; gkOf(1-p.team).faked=rnd()<0.45?time:0; } // skudfinte: målmanden kan bide på
     if(p.aiT<=0&&!p.feint) startShot(p,true,'stand'); return; }
   if(p.feint) return;
-  if(p.role!=='GK'&&!p.throwIn&&defendersAhead(p)===0&&l.d<8.8){ startShot(p,true); return; }
+  if(p.role!=='GK'&&!p.throwIn&&defendersAhead(p)===0&&l.d<(isWing(p)?6.9:8.8)){ startShot(p,true); return; } // fri: fløjene løber helt ind, før de hopper
   p.holdT=(p.holdT||0)+dt;
   if(p.role==='GK'&&p.longPlan&&p.holdT>0.25&&!p.throwIn){ // langt udkast: vent på, at en fløj er fri
     const w=players.filter(q=>q.team===p.team&&isWing(q)&&wingOpen(p,q)).sort((a,b)=>L(a.team,a.x,a.y).d-L(b.team,b.x,b.y).d)[0];
@@ -919,7 +919,7 @@ function attackTarget(p){
     }
   }
   if(ball.holder===p){
-    if(defendersAhead(p)===0&&L(t,p.x,p.y).d>7){ lx=wing?(lx<10?4:16):clamp(L(t,p.x,p.y).lx,6,14); d=7.4; }
+    if(defendersAhead(p)===0&&L(t,p.x,p.y).d>(wing?5.8:7)){ lx=wing?(lx<10?5.6:14.4):clamp(L(t,p.x,p.y).lx,6,14); d=wing?5.6:7.4; }
     else if(wing){ lx=lx<10?2.7:17.3; d=4.9; }
     else if(p.role!=='PV'){ d=8.7;
       if(posAtt(t)&&back){ // stød: løb frem mod hullet mellem de to forsvarere foran dig
