@@ -2,6 +2,21 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.20.0 – 2026-11-01 – 7-meter-situationer, kastehånd og landshold
+- 7-meter vises nu med det, der førte til straffekastet. En kort slowmotion efter situationen:
+  - Hevet ned bagfra: forsvareren tager om angriberen, som falder bagover
+  - Fældet: forsvareren glider ind med benet, og angriberen falder forover
+  - Slag på armen: angriberen bliver ramt på kastearmen i skuddet og går i knæ
+  - Skubbet i luften: angriberen bliver skubbet i hopskuddet og lander på siden
+  - Derefter tones skærmen kort ned (ca. 0,5 sek.) og op igen ved 7-meter-opstillingen
+- Computerens forsvarere laver af og til forseelser på en fri chance, så der kommer 1-3 straffekast i en kamp
+- Straffekasteren er holdets bedste skytte på banen (en fast straffekaster kan markeres med `~` i truppen). Han venter lidt, laver af og til en skudfinte, og ca. 3 ud af 4 går ind
+- Fejlrettelse, kastehånd: Hold A ses bagfra og Hold B forfra, men kastearmen blev tegnet, som om spillerne blev set fra siden, så højrehåndede så venstrehåndede ud. Nu går armen op på den rigtige side, og bolden bæres i kastehånden. Kun højre back og højre fløj er venstrehåndede
+- Hele spillet kører 7 % langsommere. En halvleg varer stadig det valgte antal minutter
+- Landshold:
+  - Danmark og Tyskland har fået truppen fra EM-finalen 2026 og rigtige startere (Danmark: E. Nielsen, Jakobsen, Pytlick, Lauge, Gidsel, J. Hansen, Saugstrup. Tyskland: Wolff, Mertens, Köster, Knorr, Uscins, Zerbe, Golla)
+  - Island starter med Viktor Gísli Hallgrímsson i mål, Frankrig med Dika Mem på højre back og Sverige med Eric Johansson på venstre back
+
 ## v0.19.3 – 2026-11-01 – Tyvstart og fløjene over midten
 - Fløjene tyvstarter: når modstanderen afslutter, sætter forsvarets fløje i ca. 60 % af tilfældene i løb op langs sidelinjen, så de er klar til kontra eller hurtigt oppe efter et mål
 - Ved opgiverkast må fløjene stå et par meter inde på modstanderens banehalvdel
