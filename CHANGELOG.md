@@ -2,6 +2,12 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.19.3 – 2026-11-01 – Tyvstart og fløjene over midten
+- Fløjene tyvstarter: når modstanderen afslutter, sætter forsvarets fløje i ca. 60 % af tilfældene i løb op langs sidelinjen, så de er klar til kontra eller hurtigt oppe efter et mål
+- Ved opgiverkast må fløjene stå et par meter inde på modstanderens banehalvdel
+- Ingen står helt stille ved opgiverkast: spillerne tripper på pladsen, mens de venter
+- Tid fra opgiverkast til begge fløje står i hjørnet: ca. 2,3 sekunder (2,6 i v0.19.2, 4,8 i v0.19.1)
+
 ## v0.19.2 – 2026-11-01 – Fløjene hurtigt op efter opgiverkast
 - Fejlrettelse: angriberne joggede i hele angrebet, også på vej op ad banen efter opgiverkast, så fløjene kom sidst. De jogger nu først, når de er oppe ved ca. 13 m
 - Fløjene løber 10 % hurtigere op ad banen og er blandt de første oppe sammen med stregspilleren. Tid fra opgiverkast til begge fløje står i hjørnet: ca. 2,6 sekunder mod ca. 4,8 før

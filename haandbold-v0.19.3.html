@@ -1,4 +1,4 @@
-<title>Håndbold v0.19.2</title>
+<title>Håndbold v0.19.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -162,7 +162,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.19.2';
+const VERSION='0.19.3';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -619,6 +619,7 @@ function launchShot(p){
     b.curve={ax:s0*nx*a,ay:s0*ny*a,t:tt}; msg('Skrueskud!');
   }
   keeperPlan(k,p);
+  for(const q of players) if(q.team!==t&&isWing(q)&&q!==ctrl) q.early=rnd()<0.6?time:0; // forsvarets fløje tyvstarter, når der afsluttes
 }
 function keeperPlan(k,shooter){
   const b=ball; if(Math.abs(b.vy)<0.1){ k.plan=null; return; }
@@ -939,7 +940,7 @@ function focusFor(t){ // modstanderens spiller med bold (eller modtager)
   if(b.mode==='pass'&&b.lastTeam===o&&b.passTo) return b.passTo;
   return null;
 }
-const KICK={PV:[10,20.25],LW:[1.6,21.4],RW:[18.4,21.4],LB:[7.4,21.3],RB:[12.6,21.3],CB:[10,22.3]}; // center og bagspillere tæt på stregspilleren
+const KICK={PV:[10,20.25],LW:[1.6,17.6],RW:[18.4,17.6],LB:[7.4,21.3],RB:[12.6,21.3],CB:[10,22.3]}; // center og bagspillere tæt på stregspilleren, fløjene et par meter over midten
 function outOfArea(x,y){ let q={x,y}; for(const t of [0,1]) q=pushOut(t,q.x,q.y,6.15); return q; }
 const GTW={LB:[4.6,30.5],CB:[10,28.8],RB:[15.4,30.5]}; // ventepladser ved målkast (angrebskoordinater, eget mål ved d=40)
 function targetFor(p,att){
@@ -953,14 +954,15 @@ function targetFor(p,att){
   let tg;
   // opgiverkast: holdet, der skal kaste op, stiller op spredt på egen banehalvdel med stregspilleren på midten
   const kickTeam=phase==='goal'&&celebTeam>=0?1-celebTeam:(kickoffTeam!==null?kickoffTeam:-1);
-  if(p.team===kickTeam&&p.role!=='GK'&&ball.holder!==p){ const k=KICK[p.role]; return W(p.team,k[0],k[1]); }
+  if(p.team===kickTeam&&p.role!=='GK'&&ball.holder!==p){ const k=KICK[p.role], w=Math.sin(time*2.2+p.num)*0.45; return W(p.team,k[0]+w,k[1]+Math.cos(time*1.7+p.num)*0.3); } // tripper på pladsen
   if(p.role==='GK') tg=keeperTarget(p,att);
   else if(ball.mode==='loose'&&chaser[p.team]===p) tg=inArea(ball.x,ball.y)?outOfArea(ball.x,ball.y):{x:ball.x+ball.vx*0.15,y:ball.y+ball.vy*0.15};
   else if(trans&&trans.early&&trans.team===p.team&&isWing(p)&&trans[p.role]) tg=attackTarget(p); // starter kontraløbet før bolden er sikret
   else if(p.offer) tg=p.offer;
+  else if(p.early&&isWing(p)&&att!==p.team&&!(ball.holder&&ball.holder.team!==p.team)&&time-p.early<2.6) tg=W(p.team,p.role==='LW'?1.2:18.8,20.5); // tyvstart langs sidelinjen
   else if(att===p.team) tg=attackTarget(p);
   else tg=defenseTarget(p);
-  if(kickoffTeam!==null&&p.team===kickoffTeam&&ball.holder!==p&&p.role!=='GK'){ tg={x:tg.x,y:up(p.team)?Math.max(tg.y,20.6):Math.min(tg.y,19.4)}; }
+  if(kickoffTeam!==null&&p.team===kickoffTeam&&ball.holder!==p&&p.role!=='GK'){ const lim=isWing(p)?2.6:-0.6; tg={x:tg.x,y:up(p.team)?Math.max(tg.y,20-lim):Math.min(tg.y,20+lim)}; } // fløjene må stå lidt over midten
   return tg;
 }
 
