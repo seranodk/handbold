@@ -1,4 +1,4 @@
-<title>Håndbold v0.23.3</title>
+<title>Håndbold v0.23.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -162,7 +162,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.23.3';
+const VERSION='0.23.4';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -470,7 +470,9 @@ function newMatch(){ koPend=null; refs=[];
 
 /* ================= BESKEDER ================= */
 const STATS={};
-function msg(text,big=false,color){ const k=text.replace(/ #\d+$/,''); STATS[k]=(STATS[k]||0)+1; msgs.push({text,t:0,life:big?2:1.1,big,color:color||(big?'#f5b83d':'#ffffff')}); if(msgs.length>3) msgs.shift(); }
+// kun frikast, straffekast, halvleg og resultater vises på skærmen; alt andet tælles kun i statistikken
+function msg(text,big=false,color,show){ const k=text.replace(/ #\d+$/,''); STATS[k]=(STATS[k]||0)+1;
+  if(!show&&!/^(Frikast|STRAFFEKAST|HALVLEG)/.test(text)) return; msgs.push({text,t:0,life:big?2:1.1,big,color:color||(big?'#f5b83d':'#ffffff')}); if(msgs.length>3) msgs.shift(); }
 
 /* ================= BOLD-BESIDDELSE ================= */
 function give(q){
@@ -1738,13 +1740,20 @@ function secondHalf(){ koPend=null;
 }
 function halfTime(){
   phase='half'; phaseT=3.2; trans=null;
-  msg('HALVLEG',true); msg(`${teamSel[0]} ${score[0]} – ${score[1]} ${teamSel[1]} · sideskift`,false,'#f5b83d');
+  msg('HALVLEG',true); msg(`${teamSel[0]} ${score[0]} – ${score[1]} ${teamSel[1]}`,false,'#f5b83d',true);
   if(ball.holder){ ball.holder.vx=ball.holder.vy=0; }
   ball.mode='held'; if(!ball.holder) ball.holder=nearest(1,10,20,true);
   updateHud(true);
 }
 function endMatch(){
-  phase='over'; paused=true;
+  phase='over'; msgs=[];
+  msg('SLUT',true,null,true); msg(`${teamSel[0]} ${score[0]} – ${score[1]} ${teamSel[1]}`,true,'#ffffff',true);   // resultatet vises på banen
+  for(const m of msgs) m.life=99;
+  if(AUTO){ endMatch2(); return; }
+  setTimeout(endMatch2,2600);
+}
+function endMatch2(){
+  paused=true;
   if(tourMatch&&tour){ endTourMatch(); return; }
   const r=$('result'); r.hidden=false;
   r.textContent=`Slutresultat: ${TEAMDATA[0].name} ${score[0]} – ${score[1]} ${TEAMDATA[1].name}`+(score[0]>score[1]?' · Sejr!':score[0]<score[1]?' · Nederlag':' · Uafgjort');

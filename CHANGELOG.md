@@ -2,6 +2,10 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.23.4 – 2026-11-02 – Færre tekster på skærmen
+- Alle statusbeskeder på banen er fjernet undtagen frikast, straffekast og halvleg med stillingen
+- Når kampen er slut, står SLUT og resultatet på banen i ca. 2,5 sekunder, før menuen kommer frem
+
 ## v0.23.3 – 2026-11-02 – Kamera og straffekast-besked
 - Kameraet kan gå ca. 12 % længere op, så scoretavlen ikke længere dækker det øverste mål og målmanden
 - Ved straffekast står der nu kun STRAFFEKAST (ikke længere hvem der blev fældet, eller hvem der skal skyde)
