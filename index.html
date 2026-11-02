@@ -1,4 +1,4 @@
-<title>Håndbold v0.25.0</title>
+<title>Håndbold v0.25.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -135,6 +135,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
       <button class="big" id="bSeason">Sæson<small>Herreligaen · Bundesliga 2026/27</small></button>
       <div id="result" hidden></div>
       <button class="go" id="resumeBtn" hidden>Fortsæt kamp</button>
+      <div class="sub" id="diffTag" style="text-align:center;opacity:.7"></div>
       <div class="row bottom"><button class="ghost" id="bSettings">Indstillinger</button><button class="ghost" id="fsBtn">Fuld skærm</button></div>
     </div>
     <div id="vPlay" class="view" hidden>
@@ -157,6 +158,8 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
       <div class="set">
         <div class="lbl">Hallgulv</div>
         <div class="floors" id="floors"></div>
+        <div class="lbl">Sværhedsgrad</div>
+        <div class="seg" id="diffSeg"><button data-d="0">Let</button><button data-d="1">Normal</button><button data-d="2">Svær</button></div>
         <div class="lbl">Kamptid</div>
         <div class="seg" id="lenSeg">
           <button data-len="180" aria-pressed="true">2 × 3 min</button><button data-len="300">2 × 5 min</button><button data-len="600">2 × 10 min</button>
@@ -189,7 +192,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.25.0';
+const VERSION='0.25.1';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -468,7 +471,9 @@ function setupTeams(){
   TEAMS.kitB=kBname;
 }
 // omregning af værdier (5 = som før)
-const rv=(p,k)=>(p.r&&p.r[k])||5;
+// sværhedsgrad: 0 = let (som før), 1 = normal, 2 = svær. Modstanderen (Hold B) får bedre værdier og bliver hurtigere og mere aggressiv
+const DIFF_NAME=['Let','Normal','Svær'], DIFF_BOOST=[0,0.9,1.8];
+const rv=(p,k)=>((p.r&&p.r[k])||5)+(p.team===1?DIFF_BOOST[diff]:0);
 const HDEF={GK:192,LW:183,RW:183,LB:195,RB:192,CB:188,PV:195}; // standardhøjde (cm), hvis truppen ikke har spillerens højde
 const hgt=p=>(p.rid&&p.rid.h)||HDEF[p.role]||190;
 const handSide=p=>(p.team===0?1:-1)*(handOf(p)==='R'?1:-1); // kastehåndens side på skærmen (+1 = højre)
@@ -533,8 +538,8 @@ function sixLine(lx,r=6){ if(lx>=8.5&&lx<=11.5) return r; const dx=lx<8.5?8.5-lx
 function inArea(x,y){ for(const t of [0,1]){ const l=L(t,x,y); if(l.d>-0.3&&l.d<sixLine(l.lx)) return true; } return false; }
 
 /* ================= TILSTAND ================= */
-let floorKey='landskamp', matchLen=180, half=1;
-try{ const f=localStorage.getItem('hb_floor'); if(f&&FLOORS[f]) floorKey=f; const m=+localStorage.getItem('hb_len2'); if(m===180||m===300||m===600) matchLen=m; }catch(e){}
+let floorKey='landskamp', matchLen=180, half=1, diff=0;
+try{ const f=localStorage.getItem('hb_floor'); if(f&&FLOORS[f]) floorKey=f; const m=+localStorage.getItem('hb_len2'); if(m===180||m===300||m===600) matchLen=m; const dv=+localStorage.getItem('hb_diff'); if(dv===1||dv===2) diff=dv; }catch(e){}
 let players=[], ball=null, score=[0,0], clock=0, phase='menu', phaseT=0, time=0, ctrl=null, poss=0, passCount=0;
 let passive=null, atkT=0; // passivt spil
 let trans=null, celebTeam=-1, celebBy=null, autoHome=false, fetch=null;
@@ -593,6 +598,7 @@ function give(q){
   if(!fast&&q.role.endsWith('B')&&posAtt(q.team)) q.aiT=0.38+rnd()*0.22;  // bagspiller: kort stød frem mod forsvaret, så afgør
   if(!fast&&isWing(q)&&posAtt(q.team)) q.aiT=0.3+rnd()*0.2;
   { const st=sty(q.team); if(!fast&&q.role!=='GK') q.aiT*=st==='tempo'?0.8:st==='taktisk'?1.2:1; } // tempohold spiller hurtigere, taktiske hold er tålmodige
+  if(q.team===1&&q.role!=='GK') q.aiT*=1-0.1*diff;                         // svær modstander tænker hurtigere
   q.holdT=0; if(q.role==='GK') q.longPlan=rnd()<(sty(q.team)==='kontra'?0.26:0.16);                      // målmanden: 20 % langt udkast til fløjen, ellers kort
   for(const p of players) if(p.role==='GK'&&!(p===q&&p.plan)) p.plan=null;
 }
@@ -1316,7 +1322,7 @@ function updBall(dt){
       const d=Math.hypot(q.x-b.x,q.y-b.y);
       if(b.z>2.4+q.z||b.z<0.15) continue;
       if(q.team===b.lastTeam){ if((q===b.passTo&&d<0.8)||d<0.45){ give(q); return; } }
-      else if(d<0.5&&!b.checked.has(q)){ b.checked.add(q); if(!b.safe&&rnd()<(q===ctrl?0.75:0.4)*(1.3-rv(b.passer||q,'aflevering')*0.06)*(0.7+rv(q,'forsvar')*0.06)){ give(q); msg('Opsnappet!'); return; } }
+      else if(d<0.5&&!b.checked.has(q)){ b.checked.add(q); if(!b.safe&&rnd()<(q===ctrl?0.75:0.4)*(q.team===1?1+0.25*diff:1)*(1.3-rv(b.passer||q,'aflevering')*0.06)*(0.7+rv(q,'forsvar')*0.06)){ give(q); msg('Opsnappet!'); return; } }
     }
   }
   if(b.mode==='loose'&&b.z<1.5){
@@ -1502,7 +1508,7 @@ function step(dt){
   const c=ball.holder;
   if(phase==='play'&&c&&c.role!=='GK'&&!c.shot){
     for(const o of players){ if(o.team===c.team||o.role==='GK'||o===ctrl||o.down>0||o.tack) continue;
-      if(!c.throwIn&&!c.seven&&!o.fooled&&!c.feint&&dist(o,c)<1.05&&rnd()<0.45*dt){ startTackle(o); break; } }
+      if(!c.throwIn&&!c.seven&&!o.fooled&&!c.feint&&dist(o,c)<1.05&&rnd()<0.45*(o.team===1?1+0.3*diff:1)*dt){ startTackle(o); break; } }
   }
   if(phase!=='menu') updBall(dt);
   lastAtt=att;
@@ -2106,6 +2112,9 @@ function buildMenu(){
   }
   [...$('lenSeg').children].forEach(b=>{ b.setAttribute('aria-pressed',+b.dataset.len===matchLen);
     b.onclick=()=>{ matchLen=+b.dataset.len; try{localStorage.setItem('hb_len2',matchLen);}catch(e){} [...$('lenSeg').children].forEach(c=>c.setAttribute('aria-pressed',c===b)); }; });
+  [...$('diffSeg').children].forEach(b=>{ b.setAttribute('aria-pressed',+b.dataset.d===diff);
+    b.onclick=()=>{ diff=+b.dataset.d; try{localStorage.setItem('hb_diff',diff);}catch(e){} [...$('diffSeg').children].forEach(c=>c.setAttribute('aria-pressed',c===b)); $('diffTag').textContent='Sværhedsgrad: '+DIFF_NAME[diff]; }; });
+  $('diffTag').textContent='Sværhedsgrad: '+DIFF_NAME[diff];
   $('bQuick').onclick=quickMatch;
   $('bFriendly').onclick=()=>enterMode('friendly');
   $('bTour').onclick=()=>enterMode('tour');

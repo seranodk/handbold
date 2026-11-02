@@ -2,6 +2,11 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.25.1 – 2026-11-02 – Sværhedsgrader
+- Ny indstilling: Sværhedsgrad med Let (som hidtil), Normal og Svær. Den valgte sværhedsgrad vises på forsiden
+- På Normal og Svær bliver modstanderen bedre (højere værdier i skud, præcision, forsvar, fart og målmandens reaktion), tænker hurtigere med bolden, tackler oftere og opsnapper flere afleveringer
+- Tempoet er det samme. Simulerede kampe i turneringer og sæsoner påvirkes ikke
+
 ## v0.25.0 – 2026-11-02 – Løbeanimation, bolden i luften, boldfysik og kropskontakt
 - Løbeanimation: armene svinger modsat benene med bøjede albuer, spillerne læner sig frem og hopper let i skridtet
 - Forsvarsstilling: tæt på eget mål står forsvarerne bredt og bøjet i knæene med armene oppe og bevæger sig sidelæns

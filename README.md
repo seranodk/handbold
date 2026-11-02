@@ -6,6 +6,7 @@ Håndboldspil til browser og mobil i top-down-stil, i samme familie som Sensible
 - Kode: https://github.com/seranodk/handbold
 - Spil lokalt: åbn `index.html`. Hver version gemmes også som `haandbold-vX.Y.Z.html`
 - Releaselog: se `CHANGELOG.md`
+- Sværhedsgrad: Let, Normal eller Svær (Indstillinger)
 - Kamptid: 2 × 3 min (standard), 2 × 5 min eller 2 × 10 min (Indstillinger). Uret viser rigtig håndboldtid (0-60 min)
 - Hovedmenu: Hurtigkamp, Venskabskamp, Turneringer, Sæson og Indstillinger
 - Turneringer: EM 2026 eller Champions League 2026/27 med gruppe, mellemrunde, semifinale og finale (gemmes i browseren)
