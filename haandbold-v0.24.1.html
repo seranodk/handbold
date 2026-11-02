@@ -1,4 +1,4 @@
-<title>Håndbold v0.24.0</title>
+<title>Håndbold v0.24.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -189,7 +189,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.24.0';
+const VERSION='0.24.1';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -329,7 +329,7 @@ const CL_TEAMS=[
  {c:'SZE',n:'OTP Bank-Pick Szeged',tier:8,home:['#0057a8','#ffffff','#0057a8','#ffffff'],away:['#ffffff','#0057a8','#ffffff','#0057a8'],
   p:'G 80 Portner*^|G 16 Mikler|LW 18 Jelinić*^|LW 25 Frimmel|RW 24 Šoštarić*^|RW 93 Szilágyi|LB 51 Mačkovšek*|LB 77 M. Rød*^|LB 44 Horiha|CB 34 Kukić^|CB 7 Lukács|RB 11 Sandell*^|RB 97 Matić|P 27 Bánhidi|P 45 Rosta^|P 31 Toto'},
  {c:'GOG',n:'GOG',tier:7,home:['#f5c400','#13294b','#13294b','#13294b'],away:['#13294b','#f5c400','#13294b','#f5c400'],
-  p:'G 1 K. Møller*^|G 12 F. Wolff|LW 17 Dalby|LW 21 Kildelund|RW 33 I. Persson*^|RW 34 Münster-Hansen|LB 78 Ó. Mittún*|LB 8 M. Zehnder*^|LB 7 Vilhelmsen|CB 29 H. Lykke*^|CB 3 N. Pedersen|RB 2 E. K. Bak|RB 24 E. Sørensen|P 4 Magaard*^|P 13 L. Balstad|RB 79 Tønnesen*'},
+  p:'G 1 K. Møller*^|G 12 F. Wolff|LW 17 Dalby|LW 21 Kildelund|RW 33 I. Persson*^|RW 34 Münster-Hansen|CB 78 Ó. Mittún*^|LB 8 M. Zehnder*^|LB 7 Vilhelmsen|RB 29 H. Lykke*^|CB 3 N. Pedersen|RB 2 E. K. Bak|RB 24 E. Sørensen|P 4 Magaard*^|P 13 L. Balstad|LB 79 Tonnesen'},
  {c:'KRI',n:'IFK Kristianstad',tier:5,home:['#0a4ea2','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#0a4ea2','#0a4ea2','#0a4ea2'],
   p:'G 1 Skoog^|G 12 Oredsson|LW 20 Frend Öfors*^|LW 18 L. Kjellman|RW 14 Leyman^|RW 51 Barnestam|LB 13 Ó. Guðmundsson*|LB 22 Aðalsteinsson^@192|LB 6 Henningsson|CB 9 A. Hallbäck^|CB 24 Bjarnason|RB 77 Erlingsson|RB 28 Ivarsson|P 17 Petrović|P 10 Höghielm^@186|RB 49 Biel Nielsen*^@185'},
  {c:'BAR',n:'Barça',tier:10,home:['#a50044','#004d98','#004d98','#f6c400'],away:['#f6c400','#a50044','#a50044','#a50044'],
@@ -351,17 +351,23 @@ const CL_TEAMS=[
 ];
 // Herreligaen (tophaandbold.dk: positioner og højder) og Bundesliga (sportschau.de: kampkader 2026/27). Hold fra Champions League genbruges
 const LG_TEAMS=[
+ {c:'AAL',n:'Aalborg Håndbold',tier:9,home:['#d4141c','#ffffff','#d4141c','#ffffff'],away:['#ffffff','#d4141c','#ffffff','#d4141c'],
+  p:'G 1 N. Landin*^@201|G 12 Norsten@196|P 2 Lindskog@199|LB 3 Nilsson@194|RW 4 Wiesmach@181|CB 5 Sagosen*@195|LB 7 Arnoldsen*^@194|P 8 Rønningen@204|RB 9 Anderson@193|P 11 Hald*^@203|RB 14 Hoxer*^@196|LW 17 Blonz@189|RW 18 Nielsen*^@189|LW 19 M. Landin*^@197|P 20 Möller@196|CB 21 Knorr*^@191|LW 23 Norlyk@183|LB 25 Munk*@200'},
+ {c:'GOG',n:'GOG',tier:8,home:['#f5c400','#13294b','#13294b','#13294b'],away:['#13294b','#f5c400','#13294b','#f5c400'],
+  p:'G 1 K. Møller*^@200|G 12 F. Møller@196|LB 3 Pedersen@195|P 4 Magaard*^@194|RB 7 Vilhelmsen@194|LB 8 Zehnder*^@190|LW 10 Pellas^@184|LW 11 K. Jacobsen@179|P 13 Balstad@196|LW 17 Dalby@187|P 20 Jespersen@193|RB 24 Sørensen@195|RB 27 Jakobsen@196|RB 29 Lykke*^@180|RW 33 Persson*^@190|RW 34 Münster@186|CB 39 Boysen@174|CB 78 Mittun*^@186|LB 79 Tonnesen@189|P 83 S. Jacobsen@201'},
+ {c:'SAH',n:'SAH Aarhus',tier:6,home:['#151515','#f2c200','#151515','#f2c200'],away:['#f2c200','#151515','#f2c200','#151515'],
+  p:'G 12 Brandbyge*^@196|G 21 Petersen@192|RB 3 Kristjansson*^@198|LW 5 Jensen@188|CB 6 Bonefeld@195|LB 7 Dreyer@195|LB 13 Bruun@200|RB 14 O. Hansen@185|LB 15 Lærke*^@203|P 17 Søgaard^@192|CB 22 Rasmussen@185|LW 25 Cieslak^@183|RW 26 J. Hansen*^@190|P 28 Kaalund@191|RW 29 Villemoes@197|CB 32 Olsson*^@189|CB 33 Søberg@198'},
  {c:'SHH',n:'Sønderjyske',tier:7,home:['#3aa0dc','#ffffff','#1d3d6b','#ffffff'],away:['#ffffff','#3aa0dc','#ffffff','#3aa0dc'],
   p:'G 1 Rex*@200|G 12 Petersen@186|G 16 Fries@196|P 2 Schmidt*@198|LB 4 Kirkegaard*@200|LW 5 Bergholt@190|CB 6 Konradsson*@190|LB 9 Skytte@190|CB 17 Szilléry@175|P 18 Bjørnshauge@198|P 23 Pedersen@197|RW 24 Augustinussen@198|RB 26 Madsen@193|CB 29 Fredriksen@190|RW 33 Stankiewicz@186|LW 43 la Cour@175|RB 48 Setterblom*@195|LB 97 Taboada@200'},
- {c:'BSH',n:'Bjerringbro-Silkeborg',tier:7,home:['#163a7a','#f28c00','#163a7a','#ffffff'],away:['#ffffff','#163a7a','#ffffff','#163a7a'],
+ {c:'BSH',n:'Bjerringbro-Silkeborg',tier:7,home:['#151515','#ffffff','#151515','#ffffff'],away:['#ffffff','#151515','#ffffff','#151515'],
   p:'G 1 Roganovic*@196|G 12 Pedersen@204|G 29 Frandsen@204|RW 4 Boldsen@188|CB 10 Knudsen@185|CB 11 Lauge*@196|RB 13 Lid*@201|P 14 Lynggaard@198|LB 17 Sagosen@186|P 19 Christensen@198|LW 20 Kjærgaard@199|RB 21 Bundgaard@191|P 22 Zachariassen*@192|LW 23 Juul*@196|LB 25 Sinding@200|LB 37 Dalgaard@188|RW 74 Lyngsø@189|LB 97 Rahbek*@197'},
  {c:'REH',n:'Ribe-Esbjerg',tier:6,home:['#0a5cb8','#ffffff','#0a5cb8','#ffffff'],away:['#ffffff','#0a5cb8','#0a5cb8','#0a5cb8'],
   p:'G 1 Iversen*@192|G 12 Boutaf@193|RW 2 Myrup@190|LB 3 Jørgensen@190|LB 4 Asgeirsson@199|P 5 Meyer@198|LW 7 Krogh@189|CB 8 Sundtoft@183|RW 9 Aarhus@190|LW 10 Tollbring*@182|CB 14 Käll*@186|CB 15 Legér@195|P 18 Karlsen@196|RB 19 Hallgren*@190|P 24 Sjursen@194|RB 26 Termansen@197|LB 49 Wallinius*@199'},
- {c:'SKH',n:'Skjern Håndbold',tier:7,home:['#d01f2f','#ffffff','#111111','#ffffff'],away:['#ffffff','#d01f2f','#ffffff','#d01f2f'],
+ {c:'SKH',n:'Skjern Håndbold',tier:7,home:['#0a7a3d','#ffffff','#0a7a3d','#ffffff'],away:['#ffffff','#0a7a3d','#ffffff','#0a7a3d'],
   p:'G 1 Rughave*@200|G 12 Zetterlund@185|LB 2 Bjergfelt|RB 4 Lindenchrone*@195|LB 5 Holm*@194|P 7 Buric@197|P 11 Møller@200|LW 19 Christensen@190|RW 20 Arnelin@185|RW 21 Rasmussen@180|CB 22 Larsen*@190|LB 23 Midtgaard@190|LB 26 Würtz*@200|CB 27 Månsson@180|P 36 Raaholt@201|LW 70 Kristensen@178'},
  {c:'TTH',n:'TTH Holstebro',tier:6,home:['#151515','#e3141b','#151515','#ffffff'],away:['#ffffff','#151515','#ffffff','#151515'],
   p:'G 1 Schatzl@192|G 41 Capdeville*@190|LW 2 Als@200|P 4 Povlsgaard*@204|P 5 Arnoldsen@201|LB 7 Aar*@199|RB 8 Grønbech@197|LW 10 Bramming@182|CB 11 Damgaard*@190|CB 14 Hansen@196|RW 17 Amby@184|RW 19 Pedersen@183|RB 21 Smed*@198|RB 33 Andrason@191|LB 42 Reitan@191|P 79 Rasmussen@195'},
- {c:'KIF',n:'KIF Kolding',tier:5,home:['#0b2f6b','#ffffff','#0b2f6b','#ffffff'],away:['#ffffff','#0b2f6b','#ffffff','#0b2f6b'],
+ {c:'KIF',n:'KIF Kolding',tier:5,home:['#ffffff','#0b2f6b','#0b2f6b','#0b2f6b'],away:['#1c4fa0','#ffffff','#1c4fa0','#ffffff'],
   p:'G 1 Bang*@196|G 12 Jensen@194|P 2 Thomsen@202|LW 4 Skaarup@186|P 6 Hermansen@192|CB 7 Langmack*@189|LB 9 Jørgensen@190|LB 11 C. Kragh*@196|P 18 Pedersen@198|RB 21 Vestergaard@195|LW 22 Larsson@170|CB 23 Ahlstrand@185|RB 25 Bugge*@200|RW 27 Bertelsen@178|RW 28 Aagreen@192|LW 29 M. Kragh@196'},
  {c:'MTH',n:'Mors-Thy',tier:5,home:['#1e8f4e','#ffffff','#1e8f4e','#ffffff'],away:['#ffffff','#1e8f4e','#ffffff','#1e8f4e'],
   p:'G 1 Henriksen*@186|G 12 Dalsgaard@196|LB 2 L. Pedersen@196|P 4 Lindgren@201|RB 5 Lønborg@187|LW 6 Barthold*@185|CB 8 Bak@187|LB 9 Madsen@199|RW 11 L. Pedersen@190|LW 14 Hansen@192|P 15 Nielsen@197|LB 17 Wosniak*@199|CB 18 Houe@184|RB 22 Sunesen*@200|P 33 Didriksen@198|RW 66 Árason@187'},
@@ -374,35 +380,41 @@ const LG_TEAMS=[
  {c:'FHK',n:'Fredericia HK',tier:6,home:['#1c4fa0','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#1c4fa0','#1c4fa0','#1c4fa0'],
   p:'G 16 Heieren@195|G 30 Bergerud*@200|P 4 Mørch*@204|P 5 Larsen@200|LB 6 Thymann*@196|RW 7 Young@193|LW 9 Bisgaard@189|LW 11 Jørgensen@184|LB 15 Kjeldgaard@194|RW 17 Bull@175|LB 18 Hejsel@196|LB 20 Asamoah-Larsen@197|CB 31 Moberg*@183|RB 91 Palmar*@197|RB 93 Martinusen@188'},
  {c:'FLE',n:'Flensburg-Handewitt',tier:9,home:['#0a3d8f','#e30613','#0a3d8f','#ffffff'],away:['#ffffff','#0a3d8f','#ffffff','#e30613'],
-  p:'G 1 Burić*|G 16 Haidu|LW 31 E. Jakobsen*~|LW 6 Rithaphorn|RW 27 Horgen*|RW 28 Volz|LB 2 Pytlick*|LB 17 Grgić*|LB 64 L. Møller|CB 44 Minne*|CB 77 Witzke|RB 5 Kirkeløkke*|RB 23 Tønnesen|P 43 Blagotinšek*|P 41 Arnarsson|P 14 Bergholt'},
+  p:'G 1 Burić*|G 16 Haidu|G 30 S. Möller|LW 31 E. Jakobsen*~|LW 6 Rithaphorn|LW 63 Novak|RW 27 Horgen*|RW 28 Volz|LB 2 Pytlick*|LB 17 Grgić*|LB 64 L. Møller|LB 13 Buschmann|CB 44 Minne*|CB 77 Witzke|RB 5 Kirkeløkke*|RB 23 Tønnesen|P 43 Blagotinšek*|P 41 Arnarsson|P 14 Bergholt|P 18 Detlefsen|P 37 Minning'},
  {c:'THW',n:'THW Kiel',tier:9,home:['#ffffff','#111111','#111111','#111111'],away:['#111111','#ffffff','#111111','#ffffff'],
-  p:'G 33 Wolff*|G 1 Pérez de Vargas*|LW 23 Dahmke*|LW 74 Büchner|RW 24 Zerbe*|RW 32 Szilagyi|LB 7 Köster*|LB 21 E. Johansson*|LB 22 Ankermann|CB 71 Ellefsen á Skipagøtu*|CB 4 Duvnjak|CB 35 Makuc|RB 6 Reinkind*|RB 11 Madsen|P 61 Pekeler*|P 93 Načinović*|P 20 Laube'},
+  p:'G 33 Wolff*|G 1 Pérez de Vargas*|G 36 Dengler|LW 23 Dahmke*|LW 74 Büchner|RW 24 Zerbe*|RW 32 Szilagyi|RW 3 Faust|LB 7 Köster*|LB 21 E. Johansson*|LB 22 Ankermann|CB 71 Ellefsen á Skipagøtu*|CB 4 Duvnjak|CB 35 Makuc|RB 6 Reinkind*|RB 11 Madsen|P 61 Pekeler*|P 93 Načinović*|P 20 Laube'},
+ {c:'FÜC',n:'Füchse Berlin',tier:9,home:['#1f8f3a','#ffffff','#1f8f3a','#ffffff'],away:['#ffffff','#1f8f3a','#ffffff','#1f8f3a'],
+  p:'G 12 Palicka*^|G 1 Ludwig|G 6 Höler|G 16 Joppich|G 41 Lahuis|LW 20 Freihöfer*^|LW 14 Ariño|LW 36 Barth|LW 8 Kopeinigg|RW 34 av Teigum*^|RW 7 Pajaziti|LB 25 Langhoff*^|LB 3 Wiede|LB 30 Zaepfel|LB 21 Mohr|LB 37 Nowak|CB 15 Grøndahl*^|CB 17 Lichtlein|CB 32 Kusche|CB 35 Brodier|CB 24 Pichiri|RB 19 Gidsel*^@190|RB 9 Simak|RB 45 Paulicks|P 93 Marsenić*^|P 5 Darj*'},
+ {c:'SCM',n:'SC Magdeburg',tier:10,home:['#0b8a3b','#d6001c','#0b8a3b','#ffffff'],away:['#ffffff','#0b8a3b','#ffffff','#d6001c'],
+  p:'G 1 Kuzmanović*^|G 12 M. Mandić|G 16 Stemmer|LW 22 Mertens*^|LW 6 Musche|LW 3 Pakebusch|LW 49 Schöbe|RW 11 Pettersson*|RW 9 O. Rasmussen^|RW 96 Hammer|LB 19 E. Ö. Jónsson*^|LB 20 Weber|LB 53 Kretzschmar|LB 55 Bialas|CB 10 G. Kristjánsson*^|CB 7 Claar*|CB 13 Brigzinsky|CB 5 Hensen|CB 8 Thielicke|RB 14 Magnússon*^|RB 21 Lagergren*|RB 15 Serradilla|P 54 Bergendahl^|P 23 Saugstrup|P 4 Elze'},
+ {c:'MTM',n:'MT Melsungen',tier:8,home:['#d6001c','#ffffff','#d6001c','#ffffff'],away:['#ffffff','#d6001c','#ffffff','#d6001c'],
+  p:'G 32 Palasics*^|G 16 Simić|G 12 Hüter|G 80 C. Lichtlein|LW 11 Ignatow^|LW 7 D. Mandić|LW 34 Duketis|RW 31 D. García^|RW 73 Kastening|RW 18 Drosten|RW 13 Stehl|LB 33 Mensing*^|LB 19 Stefánsson|LB 24 D. Dujshebaev|LB 5 Altena|CB 28 Sigrist^|CB 25 Forsell Schefvert|CB 4 Enderleit|CB 40 Guardiola|RB 10 Krištopāns*^|RB 6 Balenciaga|P 14 Golla*^|P 2 Marchán|P 8 Sipos|P 53 Eickhoff|P 64 Wilfer'},
  {c:'HAN',n:'Hannover-Burgdorf',tier:7,home:['#d6001c','#111111','#111111','#ffffff'],away:['#ffffff','#d6001c','#ffffff','#d6001c'],
-  p:'G 35 Birlehm*|G 16 Gade|LW 17 A. Pedersen*|LW 56 Feise|RW 48 Guðjónsson|RW 8 Fielitz|LB 26 Edvardsson*|LB 9 V. Poulsen|LB 22 Michalczik|CB 7 Tissier*|CB 92 Wolf|RB 10 Uscins*|RB 39 Pöthke|P 54 J. Fischer*|P 55 Zechel|P 25 Kothe'},
+  p:'G 35 Birlehm*|G 16 Gade|G 29 Katsigiannis|LW 17 A. Pedersen*|LW 56 Feise|LW 58 D. Weber|RW 48 Guðjónsson|RW 8 Fielitz|LB 26 Edvardsson*|LB 9 V. Poulsen|LB 22 Michalczik|LB 39 Stutzke|CB 7 Tissier*|CB 92 Wolf|RB 10 Uscins*|RB 39 Pöthke|P 54 J. Fischer*|P 55 Zechel|P 25 Kothe|P 80 Rodríguez'},
  {c:'GÖP',n:'Frisch Auf Göppingen',tier:6,home:['#00843d','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#00843d','#00843d','#00843d'],
-  p:'G 12 Sæverås*|G 1 Buchele|LW 5 ten Velde*|LW 24 Schiller|RW 17 Goßner|RW 28 Lastro|LB 7 Kløve*|LB 2 Neudeck|LB 27 Sunnefeldt|CB 40 Newel|CB 42 Hanne|RB 22 E. Persson*|RB 18 Hofele|P 33 Gíslason*|P 25 Åström'},
+  p:'G 12 Sæverås*|G 1 Buchele|G 16 Lewe|LW 5 ten Velde*|LW 24 Schiller|RW 17 Goßner|RW 28 Lastro|LB 7 Kløve*|LB 2 Neudeck|LB 27 Sunnefeldt|LB 9 Beneke|CB 40 Newel|CB 42 Hanne|CB 3 Lang|RB 22 E. Persson*|RB 18 Hofele|RB 23 Pregler|P 33 Gíslason*|P 25 Åström|P 21 Brodbeck'},
  {c:'GUM',n:'VfL Gummersbach',tier:7,home:['#0a4ea2','#ffffff','#0a4ea2','#ffffff'],away:['#ffffff','#0a4ea2','#ffffff','#0a4ea2'],
   p:'G 1 Biosca*|G 16 Obling|LW 8 Blohme|LW 5 Kodrin|RW 11 Häseler*|RW 6 M. Vujović|LB 15 Schluroff*|LB 23 Roganović|CB 30 Kiesler*|CB 20 L. Hallbäck|CB 34 Sindrason|RB 31 Smits*|RB 10 A. Dujshebaev*|RB 14 Einarsson|P 4 Viðarsson*|P 27 Horžen|P 66 Zeman'},
- {c:'ERL',n:'HC Erlangen',tier:6,home:['#1a5fb4','#ffffff','#1a5fb4','#ffffff'],away:['#ffffff','#1a5fb4','#ffffff','#1a5fb4'],
-  p:'G 99 Herceg*|G 96 Ghedbane|LW 7 Y. Bialowas|LW 21 Bissel|RW 9 Senft|RW 95 Gömmel|LB 6 Nissen|LB 37 L. Bialowas|LB 39 Buck|CB 8 Øverjordet*|CB 4 Rúnarsson*|RB 73 V. Kristjánsson*|RB 44 Steinert*|P 77 M. Gębala*|P 18 Firnhaber'},
- {c:'STU',n:'TVB Stuttgart',tier:5,home:['#151515','#e30613','#151515','#ffffff'],away:['#ffffff','#151515','#ffffff','#151515'],
-  p:'G 1 Kornecki*|G 12 El Tayar|LW 25 Zieker*|LW 7 Lien|RW 20 Sprößig|RW 10 Sanz|LB 15 S. Mengon*|LB 6 Kynast|LB 39 Donker|CB 3 M. Häfner*|CB 22 Matzken|RB 34 K. Häfner*|RB 5 Ahouansou|P 17 Röthlisberger*|P 27 Meyer|P 8 Heydecke'},
- {c:'BAL',n:'Balingen-Weilstetten',tier:5,home:['#e5002b','#ffffff','#111111','#ffffff'],away:['#ffffff','#e5002b','#ffffff','#e5002b'],
-  p:'G 1 Cupara*|G 12 Rebmann|LW 20 Locher|LW 30 Pfattheicher|RW 24 Fügel*|RW 50 Zacharias|LB 21 Wente*|LB 8 Grupe|LB 23 Bänsch|CB 7 Huber*|CB 25 Selinka|RB 55 Leimeter*|RB 34 Dayan|P 99 Bauer|P 28 Heinzelmann'},
+ {c:'ERL',n:'HC Erlangen',tier:6,home:['#1d2a5a','#e3141b','#1d2a5a','#ffffff'],away:['#ffffff','#1d2a5a','#ffffff','#e3141b'],
+  p:'G 99 Herceg*|G 96 Ghedbane|G 93 Pierre|LW 7 Y. Bialowas|LW 21 Bissel|RW 9 Senft|RW 95 Gömmel|LB 6 Nissen|LB 37 L. Bialowas|LB 39 Buck|LB 32 Lochman|CB 8 Øverjordet*|CB 4 Rúnarsson*|CB 2 Bandlow|CB 3 Genz|RB 73 V. Kristjánsson*|RB 44 Steinert*|RB 34 Morante|P 77 M. Gębala*|P 18 Firnhaber|P 25 Frank|P 10 Scheerer|P 24 Willax'},
+ {c:'STU',n:'TVB Stuttgart',tier:5,home:['#ffffff','#5bb8e8','#ffffff','#5bb8e8'],away:['#5bb8e8','#ffffff','#5bb8e8','#ffffff'],
+  p:'G 1 Kornecki*|G 12 El Tayar|G 21 Pol|LW 25 Zieker*|LW 7 Lien|RW 20 Sprößig|RW 10 Sanz|RW 57 Nigg|LB 15 S. Mengon*|LB 6 Kynast|LB 39 Donker|LB 70 Darmoul|CB 3 M. Häfner*|CB 22 Matzken|CB 30 M. Mengon|CB 19 Schmid|RB 34 K. Häfner*|RB 5 Ahouansou|P 17 Röthlisberger*|P 27 Meyer|P 8 Heydecke'},
+ {c:'BAL',n:'Balingen-Weilstetten',tier:5,home:['#d71920','#1d3d8f','#1d3d8f','#ffffff'],away:['#1d3d8f','#d71920','#1d3d8f','#ffffff'],
+  p:'G 1 Cupara*|G 12 Rebmann|G 16 Bierfreund|LW 20 Locher|LW 30 Pfattheicher|LW 4 Ruggiero-Matthes|RW 24 Fügel*|RW 50 Zacharias|LB 21 Wente*|LB 8 Grupe|LB 23 Bänsch|LB 13 Fuß|CB 7 Huber*|CB 25 Selinka|CB 6 Raguse|RB 55 Leimeter*|RB 34 Dayan|RB 94 Pöhle|P 99 Bauer|P 28 Heinzelmann|P 11 Strobel'},
  {c:'RNL',n:'Rhein-Neckar Löwen',tier:8,home:['#ffd200','#0b2d6b','#0b2d6b','#0b2d6b'],away:['#0b2d6b','#ffd200','#0b2d6b','#ffd200'],
-  p:'G 29 Späth*|G 20 M. Jensen|LW 11 Mierzwa|LW 8 Nothdurft|RW 19 Steinhauser*|RW 14 Steenaerts|LB 13 Heymann*|LB 71 Krauth|LB 78 Aspenbäck|CB 77 Baijens*|CB 35 Mahé|CB 25 Þrastarson*|RB 9 J. Lassen*|RB 45 Jaganjac|P 80 Kohlbacher*|P 41 Ciudad-Benitez'},
+  p:'G 29 Späth*|G 20 M. Jensen|LW 11 Mierzwa|LW 8 Nothdurft|RW 19 Steinhauser*|RW 14 Steenaerts|LB 13 Heymann*|LB 71 Krauth|LB 78 Aspenbäck|LB 7 Timmermeister|CB 77 Baijens*|CB 35 Mahé|CB 25 Þrastarson*|RB 9 J. Lassen*|RB 45 Jaganjac|P 80 Kohlbacher*|P 41 Ciudad-Benitez'},
  {c:'LEM',n:'TBV Lemgo Lippe',tier:7,home:['#0050a0','#ffffff','#0050a0','#ffffff'],away:['#ffffff','#0050a0','#ffffff','#0050a0'],
-  p:'G 1 C. Möstl*|G 94 Ebner|LW 4 S. Zehnder|LW 21 Carstensen|RW 14 Schagen*|RW 37 Stypinski|LB 2 Hutecek*|LB 3 Theilinger|LB 44 Rubin|CB 9 O\'Sullivan*|CB 23 Suton|RB 25 Versteijnen|RB 7 Mudrow|P 22 Nyfjäll|P 24 Willecke'},
+  p:'G 1 C. Möstl*|G 94 Ebner|G 12 Borreck|LW 4 S. Zehnder|LW 21 Carstensen|LW 49 Wanner|RW 14 Schagen*|RW 37 Stypinski|LB 2 Hutecek*|LB 3 Theilinger|LB 44 Rubin|LB 41 Kehrmann|LB 39 Bröhl|CB 9 O\'Sullivan*|CB 23 Suton|CB 43 Bilanzola|CB 37 Herseklioglu|RB 25 Versteijnen|RB 7 Mudrow|RB 26 Valkovskis|RB 38 Sundermann|P 22 Nyfjäll|P 24 Willecke|P 28 H. Wagner'},
  {c:'EIS',n:'ThSV Eisenach',tier:6,home:['#c8102e','#ffffff','#c8102e','#ffffff'],away:['#ffffff','#c8102e','#ffffff','#c8102e'],
-  p:'G 12 Heinevetter*|G 1 Spikic|LW 91 Montebovi|LW 11 Attenhofer|RW 94 Stupka|RW 15 Móré|LB 22 F. Aellen*|LB 3 Joelsson|CB 41 Antonijević*|CB 4 Scholtes|RB 44 Seitz*|RB 30 Solák|P 14 Walz|P 99 Leu'},
+  p:'G 12 Heinevetter*|G 1 Spikic|G 20 Freitag|G 25 Grupe|LW 91 Montebovi|LW 11 Attenhofer|LW 21 Ende|RW 94 Stupka|RW 15 Móré|LB 22 F. Aellen*|LB 3 Joelsson|LB 66 Schneibel|CB 41 Antonijević*|CB 4 Scholtes|RB 44 Seitz*|RB 30 Solák|P 14 Walz|P 99 Leu|P 52 Kurch'},
  {c:'BIE',n:'SG BBM Bietigheim',tier:4,home:['#004f9f','#ffffff','#004f9f','#ffffff'],away:['#ffffff','#004f9f','#ffffff','#004f9f'],
-  p:'G 12 Tomovski*|G 96 Klägler|LW 31 Pfeifer|LW 6 Wucherpfennig|RW 5 Bacani*|RW 29 Strosack|LB 10 Josef|LB 7 Claus|CB 24 Orlov*|CB 23 Norrbrink|RB 3 Vlahović|RB 61 Larson|P 18 Wiederstein*|P 36 J. Fischer'},
+  p:'G 12 Tomovski*|G 96 Klägler|G 95 Hrdlička|G 97 Kanters|LW 31 Pfeifer|LW 6 Wucherpfennig|LW 41 Hermann|LW 15 J. Bader|RW 5 Bacani*|RW 29 Strosack|RW 26 Krügele|RW 16 Osswald|LB 10 Josef|LB 7 Claus|LB 14 Nicolaus|CB 24 Orlov*|CB 23 Norrbrink|CB 33 M\'Bengue|RB 3 Vlahović|RB 61 Larson|P 18 Wiederstein*|P 36 J. Fischer'},
  {c:'HAM',n:'HC Hamburg',tier:6,home:['#0059a3','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#0059a3','#0059a3','#0059a3'],
-  p:'G 16 Haug*|G 74 Nowottny|LW 17 Geenen*|LW 21 F. Andersen|RW 31 Unbehaun|RW 22 Beyer|LB 23 Ólafsson*|LB 15 Axmann|LB 33 Sauter|CB 6 E. Kofler*|CB 77 Hadžić|RB 11 N. Jørgensen|RB 24 Daling|P 81 Hovde*|P 42 J. Schmidt'},
+  p:'G 16 Haug*|G 74 Nowottny|G 32 Knaack|G 30 Pein|LW 17 Geenen*|LW 21 F. Andersen|RW 31 Unbehaun|RW 22 Beyer|LB 23 Ólafsson*|LB 15 Axmann|LB 33 Sauter|LB 5 Amnitzbøll Norlyk|CB 6 E. Kofler*|CB 77 Hadžić|CB 2 Gadža|CB 55 Valiullin|RB 11 N. Jørgensen|RB 24 Daling|RB 14 Elshobaky|P 81 Hovde*|P 42 J. Schmidt'},
  {c:'WET',n:'HSG Wetzlar',tier:5,home:['#00804a','#ffffff','#00804a','#ffffff'],away:['#ffffff','#00804a','#ffffff','#00804a'],
-  p:'G 1 Ravensbergen*|G 16 Bartucz|LW 5 Kirschner|LW 20 Akakpo|RW 79 Nafea|RW 23 Soler|LB 34 Kompenhans|LB 19 Pehlivan|CB 7 Mappes*|CB 9 Theiß|RB 13 Piroch*|RB 32 Laesø|P 10 Simić*|P 33 Löwen'},
- {c:'BHC',n:'Bergischer HC',tier:5,home:['#009a44','#111111','#111111','#ffffff'],away:['#ffffff','#009a44','#ffffff','#009a44'],
-  p:'G 1 Rudeck*|G 16 Oberosler|LW 18 Fraatz|LW 7 Becher|RW 46 Fuchs|RW 3 Viana|LB 19 Babák*|LB 10 Hangstein|CB 8 Schöttle|CB 33 Bjerneld|RB 14 Babarskas*|RB 9 Püttmann|P 28 Bergner|P 15 Kooij'}
+  p:'G 1 Ravensbergen*|G 16 Bartucz|G 12 Pantel|LW 5 Kirschner|LW 20 Akakpo|RW 79 Nafea|RW 23 Soler|LB 34 Kompenhans|LB 19 Pehlivan|LB 15 Mraz|CB 7 Mappes*|CB 9 Theiß|CB 22 Schoch|RB 13 Piroch*|RB 32 Laesø|P 10 Simić*|P 33 Löwen|P 11 Øverby'},
+ {c:'BHC',n:'Bergischer HC',tier:5,home:['#1d4fa0','#d6001c','#1d4fa0','#ffffff'],away:['#ffffff','#1d4fa0','#ffffff','#d6001c'],
+  p:'G 1 Rudeck*|G 16 Oberosler|G 94 van der Merwe|LW 18 Fraatz|LW 7 Becher|RW 46 Fuchs|RW 3 Viana|LB 19 Babák*|LB 10 Hangstein|LB 17 Hilding|LB 53 Steinhaus|CB 8 Schöttle|CB 33 Bjerneld|CB 23 Schrader|CB 6 Servos|RB 14 Babarskas*|RB 9 Püttmann|RB 77 Wasielewski|P 28 Bergner|P 15 Kooij'}
 ];
 const LEAGUES={dk:{name:'Herreligaen 2026/27',short:'Herreligaen',teams:['AAL','GOG','SAH','SHH','BSH','REH','SKH','TTH','KIF','MTH','NSH','TMS','SFH','FHK']},
   de:{name:'Bundesliga 2026/27',short:'Bundesliga',teams:['FLE','THW','FÜC','SCM','MTM','HAN','GÖP','GUM','ERL','STU','BAL','RNL','LEM','EIS','BIE','HAM','WET','BHC']}};

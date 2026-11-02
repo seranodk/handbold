@@ -2,6 +2,13 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.24.1 – 2026-11-02 – Komplette ligatrupper og trøjefarver
+- Alle 32 ligahold har nu hele den aktuelle trup (14-26 spillere), ikke kun et udvalg:
+  - Herreligaen fra tophaandbold.dk med positioner og højder, også for Aalborg, GOG og SAH (fx Lindskog, Sagosen, Norlyk hos Aalborg og Pellas, Boysen, Tonnesen hos GOG)
+  - Bundesliga fra sportschau.de (kampkader 2026/27), også for Füchse Berlin, Magdeburg og Melsungen
+- Trøjefarver fundet for klubberne, hvor de før var gættet: Skjern grøn, Bjerringbro-Silkeborg sort, KIF Kolding hvid (blå udebanetrøje), HC Erlangen mørkeblå/rød, TVB Stuttgart hvid/himmelblå, Balingen rød/blå og Bergischer HC blå/rød (før forkert grøn)
+- GOG i Champions League: nr. 79 er Emil Tonnesen (venstre back), Hjalte Lykke spiller højre back og Óli Mittún playmaker
+
 ## v0.24.0 – 2026-11-02 – Ny hovedmenu, hurtigkamp og sæson
 - Ny hovedmenu: Hurtigkamp, Venskabskamp, Turneringer, Sæson og Indstillinger (og Fuld skærm) nederst
   - Hurtigkamp: to tilfældige hold, enten landshold mod landshold eller klub mod klub, og kampen starter med det samme
