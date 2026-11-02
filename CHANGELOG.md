@@ -2,6 +2,21 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.24.0 – 2026-11-02 – Ny hovedmenu, hurtigkamp og sæson
+- Ny hovedmenu: Hurtigkamp, Venskabskamp, Turneringer, Sæson og Indstillinger (og Fuld skærm) nederst
+  - Hurtigkamp: to tilfældige hold, enten landshold mod landshold eller klub mod klub, og kampen starter med det samme
+  - Venskabskamp: vælg landshold, Champions League, Herreligaen eller Bundesliga og begge hold
+  - Turneringer: EM 2026 eller Champions League 2026/27 som før
+  - Sæson: spil en hel sæson i Herreligaen eller Bundesligaen
+- Holdvalg i gitter: landshold med flag, navn og en lille hjemmebanetrøje. Klubhold med klubmærke (et skjold i klubbens farver med forkortelsen, ikke klubbens rigtige logo), navn og hjemmebanetrøje
+- Herreligaen 2026/27: alle 14 hold med den aktuelle trup fra tophaandbold.dk, med positioner og højder. Aalborg, GOG og SAH bruger Champions League-trupperne
+- Bundesliga 2026/27: alle 18 hold med den aktuelle trup fra sportschau.de. Füchse Berlin, Magdeburg og Melsungen bruger Champions League-trupperne. Venstre/højre for bagspillere og fløje er sat ud fra kendte spillere
+- Hvert ligahold har styrke, nøglespillere, holdstil og hjemme- og udetrøje
+- Sæsontilstand:
+  - Herreligaen: 26 runder (alle mod alle, hjemme og ude) og slutspil for de 4 bedste med semifinaler og finale
+  - Bundesliga: 34 runder, flest point bliver mester
+  - Du spiller dit holds kampe, resten simuleres ud fra holdenes styrke (med lille hjemmebanefordel). Stilling, seneste runde og topscorerliste vises, og sæsonen gemmes i browseren
+
 ## v0.23.5 – 2026-11-02 – Mål tilbage på skærmen
 - MÅL! med målscorerens navn vises igen (også STOLPE IND! og OVERLIGGER IND!)
 - Frikast vises kun som "Frikast" uden forklaring

@@ -1,4 +1,4 @@
-<title>Håndbold v0.23.5</title>
+<title>Håndbold v0.24.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -49,7 +49,19 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .fl .chip{width:26px;height:26px;border-radius:5px;flex:none;position:relative;overflow:hidden}
 .fl .chip i{position:absolute;left:-6px;bottom:-14px;width:26px;height:26px;border-radius:50%}
 .fl[aria-pressed="true"]{border-color:var(--clock);box-shadow:0 0 0 1px var(--clock) inset}
-.seg{display:flex;gap:8px}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.view{display:flex;flex-direction:column;gap:12px}.view[hidden]{display:none}
+.big{display:flex;flex-direction:column;align-items:flex-start;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font:700 24px var(--f-display);letter-spacing:.04em;cursor:pointer;text-align:left}
+.big small{font:500 13px var(--f-body);color:var(--muted);letter-spacing:0;margin-top:2px}.big:active{transform:scale(.99)}
+#picker{position:fixed;inset:0;z-index:30;background:rgba(6,11,19,.86);display:flex;align-items:center;justify-content:center;padding:14px}#picker[hidden]{display:none}
+.pcard{width:100%;max-width:560px;max-height:100%;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font:600 13px var(--f-body);cursor:pointer;text-align:center;line-height:1.15}
+.tile[aria-pressed=true]{border-color:var(--clock);box-shadow:0 0 0 1px var(--clock) inset}.tile .ic{display:flex;gap:6px;align-items:center}
+.pick{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font:600 15px var(--f-body);cursor:pointer;text-align:left}
+.pick .ic{display:flex;gap:5px;align-items:center;flex:none}
+#vPlay .teams{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end}#vPlay #vsTxt{display:none}.pick{font-size:14px;line-height:1.15}
+.vtitle{font:700 22px var(--f-display);letter-spacing:.06em}.bottom{margin-top:8px}
 .seg button{flex:1;padding:9px 0;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font:700 16px var(--f-display);letter-spacing:.04em;cursor:pointer}
 .seg button[aria-pressed="true"]{border-color:var(--clock);color:var(--clock)}
 .go{padding:13px;border-radius:10px;border:0;background:var(--home);color:#fff;font:700 22px var(--f-display);letter-spacing:.06em;cursor:pointer}
@@ -112,20 +124,36 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
   <div class="abtn" id="btnFake">Finte</div>
 </div>
 
+<div id="picker" hidden><div class="pcard"><div class="vtitle" id="pickTitle"></div><div class="pgrid" id="pickGrid"></div><button class="ghost" id="pickClose">Luk</button></div></div>
 <div id="menu">
   <div class="card">
     <div class="brand">HÅNDBOLD <span class="ver" id="verTag"></span></div>
-    <div class="seg" id="modeSeg"><button data-m="friendly">Venskabskamp</button><button data-m="tour">Turnering</button></div>
-    <div class="seg" id="leagueSeg"><button data-l="em">Landshold</button><button data-l="cl">Klubhold</button></div>
-    <p class="sub" id="subTxt">Vælg hold. Du angriber opad. Hallgulv, kamptid og styring finder du under Indstillinger.</p>
-    <div class="teams">
-      <label class="tsel"><span class="lbl">Dit hold</span><select id="selA"></select></label>
-      <span class="vs" id="vsTxt">mod</span>
-      <label class="tsel" id="selBWrap"><span class="lbl">Modstander</span><select id="selB"></select></label>
+    <div id="vHome" class="view">
+      <button class="big" id="bQuick">Hurtigkamp<small>To tilfældige hold: landshold eller klubhold</small></button>
+      <button class="big" id="bFriendly">Venskabskamp<small>Vælg selv holdene</small></button>
+      <button class="big" id="bTour">Turneringer<small>EM 2026 · Champions League 2026/27</small></button>
+      <button class="big" id="bSeason">Sæson<small>Herreligaen · Bundesliga 2026/27</small></button>
+      <div id="result" hidden></div>
+      <button class="go" id="resumeBtn" hidden>Fortsæt kamp</button>
+      <div class="row bottom"><button class="ghost" id="bSettings">Indstillinger</button><button class="ghost" id="fsBtn">Fuld skærm</button></div>
     </div>
-    <div class="lineup" id="lineup"></div>
-    <div id="result" hidden></div>
-    <details id="settings"><summary>Indstillinger</summary>
+    <div id="vPlay" class="view" hidden>
+      <div class="vtitle" id="vTitle"></div>
+      <div class="seg" id="leagueSeg"></div>
+      <p class="sub" id="subTxt"></p>
+      <div class="teams">
+        <div class="tsel"><span class="lbl">Dit hold</span><button class="pick" id="pickA"></button></div>
+        <span class="vs" id="vsTxt">mod</span>
+        <div class="tsel" id="selBWrap"><span class="lbl">Modstander</span><button class="pick" id="pickB"></button></div>
+      </div>
+      <div class="lineup" id="lineup"></div>
+      <div class="actions">
+        <div class="row"><button class="ghost" id="backBtn">Tilbage</button><button class="ghost" id="newTourBtn" hidden>Ny turnering</button></div>
+        <button class="go" id="startBtn">Start kamp</button>
+      </div>
+    </div>
+    <div id="vSettings" class="view" hidden>
+      <div class="vtitle">Indstillinger</div>
       <div class="set">
         <div class="lbl">Hallgulv</div>
         <div class="floors" id="floors"></div>
@@ -133,7 +161,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
         <div class="seg" id="lenSeg">
           <button data-len="180" aria-pressed="true">2 × 3 min</button><button data-len="300">2 × 5 min</button><button data-len="600">2 × 10 min</button>
         </div>
-        <details class="sub-d"><summary>Sådan spiller du</summary>
+      <details class="sub-d"><summary>Sådan spiller du</summary>
           <div class="help">
             <b>Mobil:</b> venstre tommel styrer, <b>Skud</b> og <b>Aflever</b> til højre.<br>
             <b>Tastatur:</b> piletaster/WASD, <b>Mellemrum</b> = skud/blok, <b>X</b> eller <b>J</b> = aflever/skift, <b>P</b> = pause.<br>
@@ -152,10 +180,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
           </div>
         </details>
       </div>
-    </details>
-    <div class="actions">
-      <div class="row"><button class="ghost" id="fsBtn">Fuld skærm</button><button class="ghost" id="resumeBtn" hidden>Fortsæt</button><button class="ghost" id="newTourBtn" hidden>Ny turnering</button></div>
-      <button class="go" id="startBtn">Start kamp</button>
+      <button class="ghost" id="backBtn2">Tilbage</button>
     </div>
   </div>
 </div>
@@ -164,7 +189,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.23.5';
+const VERSION='0.24.0';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -324,6 +349,64 @@ const CL_TEAMS=[
  {c:'KLU',n:'HC Kriens-Luzern',tier:5,home:['#151515','#f28c00','#151515','#f28c00'],away:['#f28c00','#151515','#f28c00','#151515'],
   p:'G 1 Car^|G 16 Wey|LW 21 Schlumpf^|LW 4 W. Aellen|RW 13 Epp^|RW 57 Idrizi|LB 53 Bilyk*^|LB 9 Wolfisberg|RB 27 Jer. Müller^@186|CB 14 M. Milosavljević|CB 25 Schelker^|RB 10 Fuchs|RB 15 Oertli|P 22 Šipić^@190|P 24 Bader'}
 ];
+// Herreligaen (tophaandbold.dk: positioner og højder) og Bundesliga (sportschau.de: kampkader 2026/27). Hold fra Champions League genbruges
+const LG_TEAMS=[
+ {c:'SHH',n:'Sønderjyske',tier:7,home:['#3aa0dc','#ffffff','#1d3d6b','#ffffff'],away:['#ffffff','#3aa0dc','#ffffff','#3aa0dc'],
+  p:'G 1 Rex*@200|G 12 Petersen@186|G 16 Fries@196|P 2 Schmidt*@198|LB 4 Kirkegaard*@200|LW 5 Bergholt@190|CB 6 Konradsson*@190|LB 9 Skytte@190|CB 17 Szilléry@175|P 18 Bjørnshauge@198|P 23 Pedersen@197|RW 24 Augustinussen@198|RB 26 Madsen@193|CB 29 Fredriksen@190|RW 33 Stankiewicz@186|LW 43 la Cour@175|RB 48 Setterblom*@195|LB 97 Taboada@200'},
+ {c:'BSH',n:'Bjerringbro-Silkeborg',tier:7,home:['#163a7a','#f28c00','#163a7a','#ffffff'],away:['#ffffff','#163a7a','#ffffff','#163a7a'],
+  p:'G 1 Roganovic*@196|G 12 Pedersen@204|G 29 Frandsen@204|RW 4 Boldsen@188|CB 10 Knudsen@185|CB 11 Lauge*@196|RB 13 Lid*@201|P 14 Lynggaard@198|LB 17 Sagosen@186|P 19 Christensen@198|LW 20 Kjærgaard@199|RB 21 Bundgaard@191|P 22 Zachariassen*@192|LW 23 Juul*@196|LB 25 Sinding@200|LB 37 Dalgaard@188|RW 74 Lyngsø@189|LB 97 Rahbek*@197'},
+ {c:'REH',n:'Ribe-Esbjerg',tier:6,home:['#0a5cb8','#ffffff','#0a5cb8','#ffffff'],away:['#ffffff','#0a5cb8','#0a5cb8','#0a5cb8'],
+  p:'G 1 Iversen*@192|G 12 Boutaf@193|RW 2 Myrup@190|LB 3 Jørgensen@190|LB 4 Asgeirsson@199|P 5 Meyer@198|LW 7 Krogh@189|CB 8 Sundtoft@183|RW 9 Aarhus@190|LW 10 Tollbring*@182|CB 14 Käll*@186|CB 15 Legér@195|P 18 Karlsen@196|RB 19 Hallgren*@190|P 24 Sjursen@194|RB 26 Termansen@197|LB 49 Wallinius*@199'},
+ {c:'SKH',n:'Skjern Håndbold',tier:7,home:['#d01f2f','#ffffff','#111111','#ffffff'],away:['#ffffff','#d01f2f','#ffffff','#d01f2f'],
+  p:'G 1 Rughave*@200|G 12 Zetterlund@185|LB 2 Bjergfelt|RB 4 Lindenchrone*@195|LB 5 Holm*@194|P 7 Buric@197|P 11 Møller@200|LW 19 Christensen@190|RW 20 Arnelin@185|RW 21 Rasmussen@180|CB 22 Larsen*@190|LB 23 Midtgaard@190|LB 26 Würtz*@200|CB 27 Månsson@180|P 36 Raaholt@201|LW 70 Kristensen@178'},
+ {c:'TTH',n:'TTH Holstebro',tier:6,home:['#151515','#e3141b','#151515','#ffffff'],away:['#ffffff','#151515','#ffffff','#151515'],
+  p:'G 1 Schatzl@192|G 41 Capdeville*@190|LW 2 Als@200|P 4 Povlsgaard*@204|P 5 Arnoldsen@201|LB 7 Aar*@199|RB 8 Grønbech@197|LW 10 Bramming@182|CB 11 Damgaard*@190|CB 14 Hansen@196|RW 17 Amby@184|RW 19 Pedersen@183|RB 21 Smed*@198|RB 33 Andrason@191|LB 42 Reitan@191|P 79 Rasmussen@195'},
+ {c:'KIF',n:'KIF Kolding',tier:5,home:['#0b2f6b','#ffffff','#0b2f6b','#ffffff'],away:['#ffffff','#0b2f6b','#ffffff','#0b2f6b'],
+  p:'G 1 Bang*@196|G 12 Jensen@194|P 2 Thomsen@202|LW 4 Skaarup@186|P 6 Hermansen@192|CB 7 Langmack*@189|LB 9 Jørgensen@190|LB 11 C. Kragh*@196|P 18 Pedersen@198|RB 21 Vestergaard@195|LW 22 Larsson@170|CB 23 Ahlstrand@185|RB 25 Bugge*@200|RW 27 Bertelsen@178|RW 28 Aagreen@192|LW 29 M. Kragh@196'},
+ {c:'MTH',n:'Mors-Thy',tier:5,home:['#1e8f4e','#ffffff','#1e8f4e','#ffffff'],away:['#ffffff','#1e8f4e','#ffffff','#1e8f4e'],
+  p:'G 1 Henriksen*@186|G 12 Dalsgaard@196|LB 2 L. Pedersen@196|P 4 Lindgren@201|RB 5 Lønborg@187|LW 6 Barthold*@185|CB 8 Bak@187|LB 9 Madsen@199|RW 11 L. Pedersen@190|LW 14 Hansen@192|P 15 Nielsen@197|LB 17 Wosniak*@199|CB 18 Houe@184|RB 22 Sunesen*@200|P 33 Didriksen@198|RW 66 Árason@187'},
+ {c:'NSH',n:'Nordsjælland',tier:5,home:['#f2c200','#0a3b7a','#0a3b7a','#0a3b7a'],away:['#0a3b7a','#f2c200','#0a3b7a','#f2c200'],
+  p:'G 12 Imsgard*@198|G 16 Hvenfelt@195|RW 3 Haunstrup@185|P 6 Björkman@197|CB 7 I. Larsson@184|P 9 Storbugt@192|CB 10 Andreasen@184|LW 14 Madsbøll@194|LB 17 Hald*@193|RB 20 Dahl*@190|P 33 Tiedje@198|LW 37 M. Jensen@182|RW 38 H. Jensen@182|CB 42 Campbell*@197|RB 57 N. Larsson@186'},
+ {c:'TMS',n:'TMS Ringsted',tier:4,home:['#c8102e','#ffffff','#111111','#ffffff'],away:['#ffffff','#c8102e','#ffffff','#c8102e'],
+  p:'G 29 Eichhorst@197|G 71 Mizera*@190|CB 4 Graffe@188|RB 5 Rasmussen@195|RW 11 Helqvist@187|RB 13 Inselseth@194|LB 17 Elovson*@190|P 19 Landvad@200|LW 20 Egholm@187|LB 23 Bertelsen@190|LW 27 Wolf@191|CB 35 Sameh@180|RW 37 Albert@183|P 41 Pevnov*@198|LB 43 Tesgaard@200'},
+ {c:'SFH',n:'Skive fH',tier:4,home:['#f28c00','#111111','#111111','#111111'],away:['#111111','#f28c00','#111111','#f28c00'],
+  p:'G 1 Larsen*@193|G 12 Toft@194|P 2 Jakobsen@190|RW 3 Ilsøe@180|CB 4 Laursen@188|CB 5 Hyldgaard@184|RB 6 Spanggaard*@194|LB 7 Pytlick*@193|LW 8 Bangshøi@183|LB 9 Plougstrup@193|RW 10 Dyring@188|LW 11 Skøtt@186|RB 14 Olsen@187|LB 20 Nikolajsen@194|P 21 Langerhuus*@200|CB 47 Jensen@190'},
+ {c:'FHK',n:'Fredericia HK',tier:6,home:['#1c4fa0','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#1c4fa0','#1c4fa0','#1c4fa0'],
+  p:'G 16 Heieren@195|G 30 Bergerud*@200|P 4 Mørch*@204|P 5 Larsen@200|LB 6 Thymann*@196|RW 7 Young@193|LW 9 Bisgaard@189|LW 11 Jørgensen@184|LB 15 Kjeldgaard@194|RW 17 Bull@175|LB 18 Hejsel@196|LB 20 Asamoah-Larsen@197|CB 31 Moberg*@183|RB 91 Palmar*@197|RB 93 Martinusen@188'},
+ {c:'FLE',n:'Flensburg-Handewitt',tier:9,home:['#0a3d8f','#e30613','#0a3d8f','#ffffff'],away:['#ffffff','#0a3d8f','#ffffff','#e30613'],
+  p:'G 1 Burić*|G 16 Haidu|LW 31 E. Jakobsen*~|LW 6 Rithaphorn|RW 27 Horgen*|RW 28 Volz|LB 2 Pytlick*|LB 17 Grgić*|LB 64 L. Møller|CB 44 Minne*|CB 77 Witzke|RB 5 Kirkeløkke*|RB 23 Tønnesen|P 43 Blagotinšek*|P 41 Arnarsson|P 14 Bergholt'},
+ {c:'THW',n:'THW Kiel',tier:9,home:['#ffffff','#111111','#111111','#111111'],away:['#111111','#ffffff','#111111','#ffffff'],
+  p:'G 33 Wolff*|G 1 Pérez de Vargas*|LW 23 Dahmke*|LW 74 Büchner|RW 24 Zerbe*|RW 32 Szilagyi|LB 7 Köster*|LB 21 E. Johansson*|LB 22 Ankermann|CB 71 Ellefsen á Skipagøtu*|CB 4 Duvnjak|CB 35 Makuc|RB 6 Reinkind*|RB 11 Madsen|P 61 Pekeler*|P 93 Načinović*|P 20 Laube'},
+ {c:'HAN',n:'Hannover-Burgdorf',tier:7,home:['#d6001c','#111111','#111111','#ffffff'],away:['#ffffff','#d6001c','#ffffff','#d6001c'],
+  p:'G 35 Birlehm*|G 16 Gade|LW 17 A. Pedersen*|LW 56 Feise|RW 48 Guðjónsson|RW 8 Fielitz|LB 26 Edvardsson*|LB 9 V. Poulsen|LB 22 Michalczik|CB 7 Tissier*|CB 92 Wolf|RB 10 Uscins*|RB 39 Pöthke|P 54 J. Fischer*|P 55 Zechel|P 25 Kothe'},
+ {c:'GÖP',n:'Frisch Auf Göppingen',tier:6,home:['#00843d','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#00843d','#00843d','#00843d'],
+  p:'G 12 Sæverås*|G 1 Buchele|LW 5 ten Velde*|LW 24 Schiller|RW 17 Goßner|RW 28 Lastro|LB 7 Kløve*|LB 2 Neudeck|LB 27 Sunnefeldt|CB 40 Newel|CB 42 Hanne|RB 22 E. Persson*|RB 18 Hofele|P 33 Gíslason*|P 25 Åström'},
+ {c:'GUM',n:'VfL Gummersbach',tier:7,home:['#0a4ea2','#ffffff','#0a4ea2','#ffffff'],away:['#ffffff','#0a4ea2','#ffffff','#0a4ea2'],
+  p:'G 1 Biosca*|G 16 Obling|LW 8 Blohme|LW 5 Kodrin|RW 11 Häseler*|RW 6 M. Vujović|LB 15 Schluroff*|LB 23 Roganović|CB 30 Kiesler*|CB 20 L. Hallbäck|CB 34 Sindrason|RB 31 Smits*|RB 10 A. Dujshebaev*|RB 14 Einarsson|P 4 Viðarsson*|P 27 Horžen|P 66 Zeman'},
+ {c:'ERL',n:'HC Erlangen',tier:6,home:['#1a5fb4','#ffffff','#1a5fb4','#ffffff'],away:['#ffffff','#1a5fb4','#ffffff','#1a5fb4'],
+  p:'G 99 Herceg*|G 96 Ghedbane|LW 7 Y. Bialowas|LW 21 Bissel|RW 9 Senft|RW 95 Gömmel|LB 6 Nissen|LB 37 L. Bialowas|LB 39 Buck|CB 8 Øverjordet*|CB 4 Rúnarsson*|RB 73 V. Kristjánsson*|RB 44 Steinert*|P 77 M. Gębala*|P 18 Firnhaber'},
+ {c:'STU',n:'TVB Stuttgart',tier:5,home:['#151515','#e30613','#151515','#ffffff'],away:['#ffffff','#151515','#ffffff','#151515'],
+  p:'G 1 Kornecki*|G 12 El Tayar|LW 25 Zieker*|LW 7 Lien|RW 20 Sprößig|RW 10 Sanz|LB 15 S. Mengon*|LB 6 Kynast|LB 39 Donker|CB 3 M. Häfner*|CB 22 Matzken|RB 34 K. Häfner*|RB 5 Ahouansou|P 17 Röthlisberger*|P 27 Meyer|P 8 Heydecke'},
+ {c:'BAL',n:'Balingen-Weilstetten',tier:5,home:['#e5002b','#ffffff','#111111','#ffffff'],away:['#ffffff','#e5002b','#ffffff','#e5002b'],
+  p:'G 1 Cupara*|G 12 Rebmann|LW 20 Locher|LW 30 Pfattheicher|RW 24 Fügel*|RW 50 Zacharias|LB 21 Wente*|LB 8 Grupe|LB 23 Bänsch|CB 7 Huber*|CB 25 Selinka|RB 55 Leimeter*|RB 34 Dayan|P 99 Bauer|P 28 Heinzelmann'},
+ {c:'RNL',n:'Rhein-Neckar Löwen',tier:8,home:['#ffd200','#0b2d6b','#0b2d6b','#0b2d6b'],away:['#0b2d6b','#ffd200','#0b2d6b','#ffd200'],
+  p:'G 29 Späth*|G 20 M. Jensen|LW 11 Mierzwa|LW 8 Nothdurft|RW 19 Steinhauser*|RW 14 Steenaerts|LB 13 Heymann*|LB 71 Krauth|LB 78 Aspenbäck|CB 77 Baijens*|CB 35 Mahé|CB 25 Þrastarson*|RB 9 J. Lassen*|RB 45 Jaganjac|P 80 Kohlbacher*|P 41 Ciudad-Benitez'},
+ {c:'LEM',n:'TBV Lemgo Lippe',tier:7,home:['#0050a0','#ffffff','#0050a0','#ffffff'],away:['#ffffff','#0050a0','#ffffff','#0050a0'],
+  p:'G 1 C. Möstl*|G 94 Ebner|LW 4 S. Zehnder|LW 21 Carstensen|RW 14 Schagen*|RW 37 Stypinski|LB 2 Hutecek*|LB 3 Theilinger|LB 44 Rubin|CB 9 O\'Sullivan*|CB 23 Suton|RB 25 Versteijnen|RB 7 Mudrow|P 22 Nyfjäll|P 24 Willecke'},
+ {c:'EIS',n:'ThSV Eisenach',tier:6,home:['#c8102e','#ffffff','#c8102e','#ffffff'],away:['#ffffff','#c8102e','#ffffff','#c8102e'],
+  p:'G 12 Heinevetter*|G 1 Spikic|LW 91 Montebovi|LW 11 Attenhofer|RW 94 Stupka|RW 15 Móré|LB 22 F. Aellen*|LB 3 Joelsson|CB 41 Antonijević*|CB 4 Scholtes|RB 44 Seitz*|RB 30 Solák|P 14 Walz|P 99 Leu'},
+ {c:'BIE',n:'SG BBM Bietigheim',tier:4,home:['#004f9f','#ffffff','#004f9f','#ffffff'],away:['#ffffff','#004f9f','#ffffff','#004f9f'],
+  p:'G 12 Tomovski*|G 96 Klägler|LW 31 Pfeifer|LW 6 Wucherpfennig|RW 5 Bacani*|RW 29 Strosack|LB 10 Josef|LB 7 Claus|CB 24 Orlov*|CB 23 Norrbrink|RB 3 Vlahović|RB 61 Larson|P 18 Wiederstein*|P 36 J. Fischer'},
+ {c:'HAM',n:'HC Hamburg',tier:6,home:['#0059a3','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#0059a3','#0059a3','#0059a3'],
+  p:'G 16 Haug*|G 74 Nowottny|LW 17 Geenen*|LW 21 F. Andersen|RW 31 Unbehaun|RW 22 Beyer|LB 23 Ólafsson*|LB 15 Axmann|LB 33 Sauter|CB 6 E. Kofler*|CB 77 Hadžić|RB 11 N. Jørgensen|RB 24 Daling|P 81 Hovde*|P 42 J. Schmidt'},
+ {c:'WET',n:'HSG Wetzlar',tier:5,home:['#00804a','#ffffff','#00804a','#ffffff'],away:['#ffffff','#00804a','#ffffff','#00804a'],
+  p:'G 1 Ravensbergen*|G 16 Bartucz|LW 5 Kirschner|LW 20 Akakpo|RW 79 Nafea|RW 23 Soler|LB 34 Kompenhans|LB 19 Pehlivan|CB 7 Mappes*|CB 9 Theiß|RB 13 Piroch*|RB 32 Laesø|P 10 Simić*|P 33 Löwen'},
+ {c:'BHC',n:'Bergischer HC',tier:5,home:['#009a44','#111111','#111111','#ffffff'],away:['#ffffff','#009a44','#ffffff','#009a44'],
+  p:'G 1 Rudeck*|G 16 Oberosler|LW 18 Fraatz|LW 7 Becher|RW 46 Fuchs|RW 3 Viana|LB 19 Babák*|LB 10 Hangstein|CB 8 Schöttle|CB 33 Bjerneld|RB 14 Babarskas*|RB 9 Püttmann|P 28 Bergner|P 15 Kooij'}
+];
+const LEAGUES={dk:{name:'Herreligaen 2026/27',short:'Herreligaen',teams:['AAL','GOG','SAH','SHH','BSH','REH','SKH','TTH','KIF','MTH','NSH','TMS','SFH','FHK']},
+  de:{name:'Bundesliga 2026/27',short:'Bundesliga',teams:['FLE','THW','FÜC','SCM','MTM','HAN','GÖP','GUM','ERL','STU','BAL','RNL','LEM','EIS','BIE','HAM','WET','BHC']}};
+
 
 // værdier ud fra position, holdstyrke og nøglespillere (*)
 const TPL={G:{fart:4,reaktion:6,placering:6,aflevering:5,skud:3,praecision:4,vinkel:2,forsvar:3,styrke:6},
@@ -343,17 +426,21 @@ function buildTeam(T){
 }
 // holdstil: kontra (hurtige fløje og anden bølge), tempo (bolden kører hurtigt), taktisk (tålmodigt angreb, aggressivt forsvar), fysisk (stregspil og hårdt forsvar)
 const STYLE={DEN:'kontra',SWE:'kontra',NOR:'tempo',ISL:'tempo',SLO:'tempo',POR:'tempo',FRA:'taktisk',ESP:'taktisk',CRO:'taktisk',GER:'fysisk',HUN:'fysisk',MKD:'fysisk',SRB:'fysisk',MNE:'fysisk',POL:'fysisk',AUT:'fysisk',
-  AAL:'kontra',GOG:'kontra',SAH:'kontra','FÜC':'kontra',KRI:'kontra',BAR:'taktisk',PSG:'taktisk',VES:'taktisk',MON:'taktisk',NAN:'tempo',SCM:'tempo',SCP:'tempo',KOL:'tempo',KIE:'fysisk',PLO:'fysisk',MTM:'fysisk',SZE:'fysisk',VAR:'fysisk',ZAG:'fysisk',PAR:'fysisk',DIN:'fysisk',CEL:'tempo',KLU:'tempo'};
+  AAL:'kontra',GOG:'kontra',SAH:'kontra','FÜC':'kontra',KRI:'kontra',BAR:'taktisk',PSG:'taktisk',VES:'taktisk',MON:'taktisk',NAN:'tempo',SCM:'tempo',SCP:'tempo',KOL:'tempo',KIE:'fysisk',PLO:'fysisk',MTM:'fysisk',SZE:'fysisk',VAR:'fysisk',ZAG:'fysisk',PAR:'fysisk',DIN:'fysisk',CEL:'tempo',KLU:'tempo',
+  SHH:'fysisk',BSH:'tempo',REH:'kontra',SKH:'taktisk',TTH:'kontra',KIF:'fysisk',MTH:'fysisk',NSH:'tempo',TMS:'fysisk',SFH:'fysisk',FHK:'kontra',
+  FLE:'kontra',THW:'taktisk',HAN:'tempo',GÖP:'fysisk',GUM:'tempo',ERL:'fysisk',STU:'fysisk',BAL:'fysisk',RNL:'taktisk',LEM:'tempo',EIS:'fysisk',BIE:'fysisk',HAM:'tempo',WET:'fysisk',BHC:'fysisk'};
 const STYLE_NAME={kontra:'Kontra',tempo:'Højt tempo',taktisk:'Taktisk',fysisk:'Fysisk',balance:'Balanceret'};
 const sty=t=>(TEAMDATA&&TEAMDATA[t]&&TEAMDATA[t].style)||'balance';
 const lineupScore=d=>(d.start?1000:0)+(d.star?100:0)+d.key.reduce((a,k)=>a+d.r[k],0);
 const hexRgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
 const colDist=(a,b)=>{ const A=hexRgb(a),B=hexRgb(b); return Math.hypot(A[0]-B[0],A[1]-B[1],A[2]-B[2]); };
 // landshold (EM 2026) eller klubhold (Champions League 2026/27)
-let league='em'; const teamSels={em:['DEN','SWE'],cl:['AAL','SCM']};
-const curTeams=()=>league==='cl'?CL_TEAMS:EM_TEAMS;
-try{ const L0=localStorage.getItem('hb_league'); if(L0==='em'||L0==='cl') league=L0;
-  for(const k of ['em','cl']){ const t=JSON.parse(localStorage.getItem('hb_teams_'+k)||(k==='em'?localStorage.getItem('hb_teams'):'null')||'null'); const list=k==='cl'?CL_TEAMS:EM_TEAMS;
+let league='em'; const teamSels={em:['DEN','SWE'],cl:['AAL','SCM'],dk:['AAL','GOG'],de:['THW','FLE']};
+const findTeam=c=>LG_TEAMS.find(t=>t.c===c)||CL_TEAMS.find(t=>t.c===c);
+const LGLIST={}; const lgTeams=k=>LGLIST[k]||(LGLIST[k]=LEAGUES[k].teams.map(findTeam));
+const curTeams=()=>league==='cl'?CL_TEAMS:league==='em'?EM_TEAMS:lgTeams(league);
+try{ const L0=localStorage.getItem('hb_league'); if(['em','cl','dk','de'].includes(L0)) league=L0;
+  for(const k of ['em','cl','dk','de']){ const t=JSON.parse(localStorage.getItem('hb_teams_'+k)||(k==='em'?localStorage.getItem('hb_teams'):'null')||'null'); const list=k==='cl'?CL_TEAMS:k==='em'?EM_TEAMS:lgTeams(k);
     if(t&&t.length===2&&t[0]!==t[1]&&t.every(c=>list.some(x=>x.c===c))) teamSels[k]=t; } }catch(e){}
 let teamSel=teamSels[league];
 function setupTeams(){
@@ -583,6 +670,7 @@ function restart(kind,team,x,y,text,who){
 function scoreGoal(team,text,x,z,gy){
   if(ball.shooter){ const d0=Math.hypot(ball.shooter.x-10,ball.shooter.y-gy); const k0=d0>20?'mål egen halvdel':d0>12?'mål 12-20m':'mål <12m'; STATS[k0]=(STATS[k0]||0)+1; }
   const b=ball; score[team]++; if(tourMatch&&tour&&b.shooter&&b.shooter.team===team) addScorer(teamSel[team],b.shooter.name,b.shooter.num);
+  if(seasonMatch&&season&&b.shooter&&b.shooter.team===team) sAddScorer(teamSel[team],b.shooter.name,b.shooter.num);
   const g=goals[gy===0?0:1];
   g.bulge={x,z,t:0.6};
   b.mode='net'; b.x=x; b.y=gy+(gy===0?-0.75:0.75); b.z=Math.max(0.15,z*0.7); b.vx=b.vy=0; b.vz=0;
@@ -1760,9 +1848,10 @@ function endMatch(){
 function endMatch2(){
   paused=true;
   if(tourMatch&&tour){ endTourMatch(); return; }
+  if(seasonMatch&&season){ endSeasonMatch(); return; }
   const r=$('result'); r.hidden=false;
   r.textContent=`Slutresultat: ${TEAMDATA[0].name} ${score[0]} – ${score[1]} ${TEAMDATA[1].name}`+(score[0]>score[1]?' · Sejr!':score[0]<score[1]?' · Nederlag':' · Uafgjort');
-  $('resumeBtn').hidden=true; $('startBtn').textContent='Ny kamp'; $('menu').hidden=false;
+  $('resumeBtn').hidden=true; showView('vHome'); $('menu').hidden=false;
 }
 /* ================= TURNERING =================
    EM og Champions League spilles i samme format: grupper af 4 (3 kampe), mellemrunde/hovedrunde i to grupper
@@ -1875,7 +1964,7 @@ function showTour(){
   const last=tour.results.slice(-12).filter(r=>r.stage===tour.results[tour.results.length-1]?.stage); if(last.length) html+=`<div class="tsec">Seneste resultater</div><div class="tres">${last.slice(-8).map(resLine).join('')}</div>`;
   const top=Object.values(tour.scorers).sort((a,b)=>b.g-a.g).slice(0,8);
   if(top.length) html+=`<div class="tsec">Topscorere</div><div class="tres">${top.map((x,i)=>`<div class="${x.code===tour.team?'me':''}">${i+1}. ${x.name} (${x.code}) <b style="float:right">${x.g}</b></div>`).join('')}</div>`;
-  $('tStage').textContent=stage; $('tBody').innerHTML=html; $('tPlay').hidden=tour.done;
+  $('tStage').textContent=stage; $('tBody').innerHTML=html; $('tPlay').hidden=tour.done; $('tNew').textContent='Ny turnering';
   $('menu').hidden=true; $('tour').hidden=false; paused=true;
 }
 function playTourMatch(){
@@ -1890,34 +1979,97 @@ function endTourMatch(){
   const res={a:tourMatch.a,b:tourMatch.b,ga:st.ga,gb:st.gb,so:st.so,note:st.so?'e. straffekast':''};
   tourMatch=null; recordRound(res); started=false; showTour();
 }
+/* ================= FLAG, KLUBMÆRKE OG MINITRØJE ================= */
+const FLAGS={GER:['h','#000000','#dd0000','#ffce00'],AUT:['h','#c8102e','#ffffff','#c8102e'],NED:['h','#ae1c28','#ffffff','#21468b'],HUN:['h','#ce2939','#ffffff','#477050'],
+  SRB:['h','#c6363c','#0c4076','#ffffff'],SLO:['h','#ffffff','#005ce5','#ed1c24'],CRO:['h','#ff0000','#ffffff','#171796'],UKR:['h2','#0057b7','#ffd700'],POL:['h2','#ffffff','#dc143c'],
+  ESP:['es','#aa151b','#f1bf00'],ROU:['v','#002b7f','#fcd116','#ce1126'],FRA:['v','#0055a4','#ffffff','#ef4135'],ITA:['v','#009246','#ffffff','#ce2b37'],POR:['pt','#006600','#ff0000'],
+  DEN:['nx','#c8102e','#ffffff'],NOR:['nx2','#ba0c2f','#ffffff','#00205b'],SWE:['nx','#006aa7','#fecc00'],ISL:['nx2','#02529c','#ffffff','#dc1e35'],FRO:['nx2','#ffffff','#0065bd','#ef303e'],
+  SUI:['ch','#da291c','#ffffff'],GEO:['geo','#ffffff','#ff0000'],CZE:['cz','#ffffff','#d7141a','#11457e'],MKD:['sun','#d20000','#ffe600'],MNE:['mne','#c40308','#d4af3a']};
+function flagSVG(c,w=34){ const f=FLAGS[c]; const h=Math.round(w*0.68); if(!f) return '';
+  const r=(x,y,ww,hh,col)=>`<rect x="${x}" y="${y}" width="${ww}" height="${hh}" fill="${col}"/>`; let b='';
+  const [t,a,b2,c3]=f;
+  if(t==='h') b=r(0,0,30,7,a)+r(0,7,30,6,b2)+r(0,13,30,7,c3);
+  else if(t==='h2') b=r(0,0,30,10,a)+r(0,10,30,10,b2);
+  else if(t==='v') b=r(0,0,10,20,a)+r(10,0,10,20,b2)+r(20,0,10,20,c3);
+  else if(t==='es') b=r(0,0,30,20,a)+r(0,5,30,10,b2);
+  else if(t==='pt') b=r(0,0,12,20,a)+r(12,0,18,20,b2)+'<circle cx="12" cy="10" r="3.6" fill="#ffd700"/>';
+  else if(t==='nx') b=r(0,0,30,20,a)+r(9,0,4,20,b2)+r(0,8,30,4,b2);
+  else if(t==='nx2') b=r(0,0,30,20,a)+r(8,0,6,20,b2)+r(0,7,30,6,b2)+r(9.5,0,3,20,c3)+r(0,8.5,30,3,c3);
+  else if(t==='ch') b=r(0,0,30,20,a)+r(13,4,4,12,b2)+r(9,8,12,4,b2);
+  else if(t==='geo') b=r(0,0,30,20,a)+r(13,0,4,20,b2)+r(0,8,30,4,b2);
+  else if(t==='cz') b=r(0,0,30,10,a)+r(0,10,30,10,b2)+`<path d="M0 0 L14 10 L0 20 Z" fill="${c3}"/>`;
+  else if(t==='sun') b=r(0,0,30,20,a)+`<circle cx="15" cy="10" r="3.4" fill="${b2}"/><path d="M15 10 L0 0 M15 10 L30 0 M15 10 L0 20 M15 10 L30 20 M15 10 L15 0 M15 10 L15 20 M15 10 L0 10 M15 10 L30 10" stroke="${b2}" stroke-width="2"/>`;
+  else if(t==='mne') b=r(0,0,30,20,b2)+r(1.5,1.5,27,17,a)+`<circle cx="15" cy="10" r="3.5" fill="${b2}"/>`;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 30 20" style="border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.18)">${b}</svg>`; }
+// klubmærke: et skjold i klubbens farver med forkortelsen (ikke klubbens rigtige logo)
+function badgeSVG(T,w=30){ const k=T.home, txt=T.c.replace('Ü','U').replace('Ö','O');
+  return `<svg width="${w}" height="${Math.round(w*1.15)}" viewBox="0 0 30 34"><path d="M15 1 L28 5 L27 19 Q25 28 15 33 Q5 28 3 19 L2 5 Z" fill="${k[0]}" stroke="${k[1]}" stroke-width="2.2"/><path d="M15 4 L25 7 L24.4 18 Q23 25 15 29.5 Z" fill="rgba(0,0,0,.12)"/><text x="15" y="20.5" text-anchor="middle" font-family="Barlow Condensed,Arial" font-weight="700" font-size="${txt.length>3?8:9.5}" fill="${k[3]}">${txt}</text></svg>`; }
+// minitrøje i hjemmebanefarver
+function kitSVG(T,w=26){ const k=T.home;
+  return `<svg width="${w}" height="${w}" viewBox="0 0 30 30"><path d="M9 3 L3 7 L5 13 L8 12 L8 27 L22 27 L22 12 L25 13 L27 7 L21 3 Q15 7 9 3 Z" fill="${k[0]}" stroke="${k[1]}" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 24 L22 24" stroke="${k[1]}" stroke-width="2"/><rect x="8" y="27" width="14" height="2.5" fill="${k[2]}"/><text x="15" y="20" text-anchor="middle" font-family="Barlow Condensed,Arial" font-weight="700" font-size="9" fill="${k[3]}">${T.c==='DEN'?19:7}</text></svg>`; }
+const teamIcon=T=>(league==='em'?flagSVG(T.c):badgeSVG(T))+kitSVG(T);
+
+/* ================= MENU ================= */
+const LEAGUE_NAME={em:'Landshold',cl:'Champions League',dk:'Herreligaen',de:'Bundesliga'};
+const LEAGUE_SUB={em:'EM 2026, herrer.',cl:'EHF Champions League 2026/27.',dk:'Herreligaen 2026/27.',de:'Handball-Bundesliga 2026/27.'};
+const MODE_LEAGUES={friendly:['em','cl','dk','de'],tour:['em','cl'],season:['dk','de']};
+const MODE_TITLE={friendly:'Venskabskamp',tour:'Turneringer',season:'Sæson'};
+function showView(v){ for(const id of ['vHome','vPlay','vSettings']) $(id).hidden=id!==v; }
+function setLeague(l){
+  league=l; teamSel=teamSels[league]; floorKey=league==='cl'?'cl':league==='em'?'landskamp':'klub';
+  try{ localStorage.setItem('hb_floor',floorKey); localStorage.setItem('hb_league',league); }catch(e){}
+  [...$('floors').children].forEach((c,i)=>c.setAttribute('aria-pressed',Object.keys(FLOORS)[i]===floorKey));
+  fillSelects(); if(!started){ newMatch(); paused=true; } else updateTeamsUI(); refreshMode();
+}
 function updateTeamsUI(){
   const A=curTeams().find(t=>t.c===teamSel[0]), B=curTeams().find(t=>t.c===teamSel[1]);
   if(TEAMS.length&&TEAMDATA[0]&&TEAMDATA[0].short===teamSel[0]){ $('swA').style.background=TEAMS[0].shirt; $('swB').style.background=TEAMS[1].shirt; }
   $('nA').textContent=teamSel[0]; $('nB').textContent=teamSel[1];
-  $('subTxt').textContent=(league==='cl'?'EHF Champions League 2026/27.':'EM 2026, herrer.')+' Du angriber opad. Hallgulv, kamptid og styring finder du under Indstillinger.';
-  const show=(T,sel)=>{ const bt=buildTeam(T), xi=['GK','LW','LB','CB','RB','RW','PV'].map(r=>bt.roster.filter(x=>x.pos===r).sort((a,b)=>lineupScore(b)-lineupScore(a))[0]).filter(Boolean);
-    return `<div><span class="kit" style="background:${T.home[0]}"></span><b>${T.n}</b><br><span style="opacity:.7">Stil: ${STYLE_NAME[STYLE[T.c]||'balance']}</span><br>${xi.map(x=>`${x.pos.replace('PV','ST')} ${x.num} ${x.name}`).join('<br>')}</div>`; };
-  $('lineup').innerHTML=show(A)+((typeof gameMode!=='undefined'&&gameMode==='tour')?'':show(B));
+  $('subTxt').textContent=LEAGUE_SUB[league]+' Du angriber opad.';
+  for(const [id,T] of [['pickA',A],['pickB',B]]) if(T) $(id).innerHTML=`<span class="ic">${teamIcon(T)}</span><span>${T.n}</span>`;
+  const show=(T)=>{ const bt=buildTeam(T), xi=['GK','LW','LB','CB','RB','RW','PV'].map(r=>bt.roster.filter(x=>x.pos===r).sort((a,b)=>lineupScore(b)-lineupScore(a))[0]).filter(Boolean);
+    return `<div><b>${T.n}</b><br><span style="opacity:.7">Stil: ${STYLE_NAME[STYLE[T.c]||'balance']}</span><br>${xi.map(x=>`${x.pos.replace('PV','ST')} ${x.num} ${x.name}`).join('<br>')}</div>`; };
+  $('lineup').innerHTML=(A?show(A):'')+(gameMode==='friendly'&&B?show(B):'');
 }
-function fillSelects(){
-  for(const [id,i] of [['selA',0],['selB',1]]){ const el=$(id); el.innerHTML=curTeams().slice().sort((a,b)=>a.n.localeCompare(b.n,'da')).map(t=>`<option value="${t.c}">${t.n}</option>`).join(''); el.value=teamSel[i];
-    el.onchange=()=>{ teamSel[i]=el.value; if(teamSel[0]===teamSel[1]){ teamSel[1-i]=curTeams().find(t=>t.c!==el.value).c; $(i?'selA':'selB').value=teamSel[1-i]; }
-      try{ localStorage.setItem('hb_teams_'+league,JSON.stringify(teamSel)); }catch(e){} if(!started){ newMatch(); paused=true; } else updateTeamsUI(); refreshMode(); }; }
+function openPicker(i){
+  $('pickTitle').textContent=i?'Vælg modstander':'Vælg dit hold';
+  const list=curTeams().slice().sort((a,b)=>a.n.localeCompare(b.n,'da'));
+  $('pickGrid').innerHTML=list.map(T=>`<button class="tile" data-c="${T.c}" aria-pressed="${T.c===teamSel[i]}"><span class="ic">${teamIcon(T)}</span><span>${T.n}</span></button>`).join('');
+  [...$('pickGrid').children].forEach(b=>b.onclick=()=>{ const c=b.dataset.c; teamSel[i]=c;
+    if(teamSel[0]===teamSel[1]) teamSel[1-i]=curTeams().find(t=>t.c!==c).c;
+    try{ localStorage.setItem('hb_teams_'+league,JSON.stringify(teamSel)); }catch(e){}
+    $('picker').hidden=true; if(!started){ newMatch(); paused=true; } else updateTeamsUI(); refreshMode(); });
+  $('picker').hidden=false;
 }
+function fillSelects(){ updateTeamsUI(); }
 function refreshMode(){
-  [...$('modeSeg').children].forEach(c=>c.setAttribute('aria-pressed',c.dataset.m===gameMode));
-  const T=gameMode==='tour'; updateTeamsUI(); $('selBWrap').style.visibility=T?'hidden':''; $('vsTxt').style.visibility=T?'hidden':'';
-  const cont=T&&tour&&tour.league===league&&tour.team===teamSel[0]&&!tour.done;
-  $('startBtn').textContent=T?(cont?'Fortsæt turnering':'Start turnering'):(started?'Start ny kamp':'Start kamp');
+  const seg=$('leagueSeg'); seg.innerHTML=MODE_LEAGUES[gameMode].map(l=>`<button data-l="${l}" aria-pressed="${l===league}">${gameMode==='tour'?(l==='em'?'EM 2026':'Champions League'):LEAGUE_NAME[l]}</button>`).join('');
+  [...seg.children].forEach(b=>b.onclick=()=>setLeague(b.dataset.l));
+  $('vTitle').textContent=MODE_TITLE[gameMode];
+  const one=gameMode!=='friendly'; updateTeamsUI(); $('selBWrap').style.visibility=one?'hidden':''; $('vsTxt').style.visibility=one?'hidden':'';
+  let cont=false;
+  if(gameMode==='tour'){ cont=!!(tour&&tour.league===league&&tour.team===teamSel[0]&&!tour.done); $('startBtn').textContent=cont?'Fortsæt turnering':'Start turnering'; $('newTourBtn').textContent='Ny turnering'; }
+  else if(gameMode==='season'){ cont=!!(season&&season.lg===league&&season.team===teamSel[0]&&!season.done); $('startBtn').textContent=cont?'Fortsæt sæson':'Start sæson'; $('newTourBtn').textContent='Ny sæson'; }
+  else $('startBtn').textContent='Start kamp';
   $('newTourBtn').hidden=!cont;
+}
+function enterMode(m){
+  gameMode=m; try{ localStorage.setItem('hb_mode',m); }catch(e){}
+  if(!MODE_LEAGUES[m].includes(league)) setLeague(MODE_LEAGUES[m][0]); else { fillSelects(); refreshMode(); }
+  if(m==='season'&&season&&!season.done&&season.lg!==league) setLeague(season.lg);
+  if(m==='season'&&season&&!season.done&&season.lg===league&&teamSel[0]!==season.team){ teamSel[0]=season.team; if(teamSel[1]===season.team) teamSel[1]=curTeams().find(t=>t.c!==season.team).c; updateTeamsUI(); refreshMode(); }
+  if(m==='tour'&&tour&&!tour.done&&tour.league===league&&teamSel[0]!==tour.team){ teamSel[0]=tour.team; updateTeamsUI(); refreshMode(); }
+  showView('vPlay');
+}
+function startFriendly(){ tourMatch=null; seasonMatch=null; $('result').hidden=true; newMatch(); started=true; paused=false; $('menu').hidden=true; }
+function quickMatch(){ // to tilfældige hold: landshold mod landshold eller klub mod klub
+  gameMode='friendly'; const pools=['em','cl','dk','de'], l=pools[Math.floor(rnd()*pools.length)];
+  league=l; floorKey=l==='cl'?'cl':l==='em'?'landskamp':'klub';
+  const list=curTeams(), a=list[Math.floor(rnd()*list.length)]; let b=a; while(b===a) b=list[Math.floor(rnd()*list.length)];
+  teamSel=[a.c,b.c]; startFriendly();
 }
 function buildMenu(){
   $('verTag').textContent='v'+VERSION;
-  fillSelects();
-  [...$('leagueSeg').children].forEach(b=>{ b.setAttribute('aria-pressed',b.dataset.l===league);
-    b.onclick=()=>{ league=b.dataset.l; teamSel=teamSels[league]; floorKey=league==='cl'?'cl':'landskamp'; try{ localStorage.setItem('hb_floor',floorKey); }catch(e){} [...$('floors').children].forEach((c,i)=>c.setAttribute('aria-pressed',Object.keys(FLOORS)[i]===floorKey)); try{ localStorage.setItem('hb_league',league); }catch(e){}
-      [...$('leagueSeg').children].forEach(c=>c.setAttribute('aria-pressed',c===b)); fillSelects(); if(!started){ newMatch(); paused=true; } else updateTeamsUI(); refreshMode(); }; });
-  updateTeamsUI();
   const fl=$('floors'); fl.innerHTML='';
   for(const [k,F] of Object.entries(FLOORS)){
     const b=document.createElement('button'); b.className='fl'; b.setAttribute('aria-pressed',k===floorKey);
@@ -1927,20 +2079,93 @@ function buildMenu(){
   }
   [...$('lenSeg').children].forEach(b=>{ b.setAttribute('aria-pressed',+b.dataset.len===matchLen);
     b.onclick=()=>{ matchLen=+b.dataset.len; try{localStorage.setItem('hb_len2',matchLen);}catch(e){} [...$('lenSeg').children].forEach(c=>c.setAttribute('aria-pressed',c===b)); }; });
+  $('bQuick').onclick=quickMatch;
+  $('bFriendly').onclick=()=>enterMode('friendly');
+  $('bTour').onclick=()=>enterMode('tour');
+  $('bSeason').onclick=()=>enterMode('season');
+  $('bSettings').onclick=()=>showView('vSettings');
+  $('backBtn').onclick=()=>showView('vHome'); $('backBtn2').onclick=()=>showView('vHome');
+  $('pickA').onclick=()=>openPicker(0); $('pickB').onclick=()=>openPicker(1); $('pickClose').onclick=()=>{ $('picker').hidden=true; };
   $('startBtn').onclick=()=>{
     if(gameMode==='tour'){ if(!(tour&&tour.league===league&&tour.team===teamSel[0]&&!tour.done)) newTour(league,teamSel[0]); showTour(); return; }
-    tourMatch=null; $('result').hidden=true; newMatch(); started=true; paused=false; $('menu').hidden=true; $('startBtn').textContent='Start ny kamp'; };
-  $('newTourBtn').onclick=()=>{ newTour(league,teamSel[0]); showTour(); };
-  $('tPlay').onclick=playTourMatch;
-  $('tNew').onclick=()=>{ newTour(tour.league,tour.team); showTour(); };
-  $('tMenu').onclick=()=>{ $('tour').hidden=true; $('menu').hidden=false; refreshMode(); };
-  [...$('modeSeg').children].forEach(b=>{ b.onclick=()=>{ gameMode=b.dataset.m; try{ localStorage.setItem('hb_mode',gameMode); }catch(e){} refreshMode(); }; });
-  refreshMode();
+    if(gameMode==='season'){ if(!(season&&season.lg===league&&season.team===teamSel[0]&&!season.done)) newSeason(league,teamSel[0]); showSeason(); return; }
+    startFriendly(); };
+  $('newTourBtn').onclick=()=>{ if(gameMode==='season'){ newSeason(league,teamSel[0]); showSeason(); } else { newTour(league,teamSel[0]); showTour(); } };
+  $('tPlay').onclick=()=>gameMode==='season'?playSeasonMatch():playTourMatch();
+  $('tNew').onclick=()=>{ if(gameMode==='season'){ newSeason(season.lg,season.team); showSeason(); } else { newTour(tour.league,tour.team); showTour(); } };
+  $('tMenu').onclick=()=>{ $('tour').hidden=true; $('menu').hidden=false; showView('vPlay'); refreshMode(); };
+  fillSelects(); refreshMode(); showView('vHome');
   $('resumeBtn').onclick=()=>{ paused=false; $('menu').hidden=true; };
   $('fsBtn').onclick=()=>{ const d=document.documentElement; try{ if(document.fullscreenElement) document.exitFullscreen(); else (d.requestFullscreen||d.webkitRequestFullscreen).call(d).catch?.(()=>{}); }catch(e){} };
   $('pauseBtn').onclick=openMenu;
 }
-function openMenu(){ if(phase==='over') return; paused=true; $('resumeBtn').hidden=!started; $('menu').hidden=false; }
+function openMenu(){ if(phase==='over') return; paused=true; $('resumeBtn').hidden=!started; showView('vHome'); $('menu').hidden=false; }
+
+/* ================= SÆSON =================
+   Herreligaen (14 hold, 26 runder + slutspil med semifinaler og finale for de 4 bedste) og
+   Bundesliga (18 hold, 34 runder, flest point vinder). Du spiller dit holds kampe, resten simuleres. */
+let season=null, seasonMatch=null;
+try{ season=JSON.parse(localStorage.getItem('hb_season')||'null'); if(season&&season.v!==1) season=null; if(localStorage.getItem('hb_mode')==='season') gameMode='season'; }catch(e){}
+const saveSeason=()=>{ try{ localStorage.setItem('hb_season',JSON.stringify(season)); }catch(e){} };
+const sName=c=>findTeam(c).n, sTier=c=>findTeam(c).tier;
+function rrSchedule(teams){ const arr=teams.slice(); if(arr.length%2) arr.push(null); const m=arr.length, rounds=[];
+  for(let r=0;r<m-1;r++){ const rd=[]; for(let i=0;i<m/2;i++){ const a=arr[i], b=arr[m-1-i]; if(a&&b) rd.push((r+i)%2?[b,a]:[a,b]); } rounds.push(rd); arr.splice(1,0,arr.pop()); }
+  return rounds.concat(rounds.map(rd=>rd.map(([a,b])=>[b,a]))); }
+function newSeason(lg,team){ const t=LEAGUES[lg].teams.slice(); for(let i=t.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [t[i],t[j]]=[t[j],t[i]]; }
+  season={v:1,lg,team,rounds:rrSchedule(t),round:0,results:[],scorers:{},stage:'league',po:null,done:false,champion:null,result:null}; saveSeason(); }
+function sAddScorer(code,name,num,n=1){ const k=code+'|'+name; const x=season.scorers[k]||(season.scorers[k]={code,name,num,g:0}); x.g+=n; }
+function sSimScorers(code,goals){ const ro=buildTeam(findTeam(code)).roster.filter(e=>e.pos!=='GK'), w=ro.map(e=>e.r.skud*1.3+e.r.praecision+(e.pos==='LW'||e.pos==='RW'?1:0)+(e.star?4:0)+(e.pos==='PV'?2:0)), tot=w.reduce((a,b)=>a+b,0);
+  for(let i=0;i<goals;i++){ let r=rnd()*tot,j=0; while(r>w[j]){ r-=w[j]; j++; } sAddScorer(code,ro[j].name,ro[j].num); } }
+function sSettle(a,b,ga,gb,ko){ if(!ko||ga!==gb) return {ga,gb,so:null}; const w=rnd()<0.5+(sTier(a)-sTier(b))*0.04?a:b; return {ga:ga+(w===a?1:0),gb:gb+(w===b?1:0),so:w}; }
+function sSim(a,b,ko){ const ta=sTier(a)+0.4, tb=sTier(b); // lille hjemmebanefordel
+  const ga=Math.round(clamp(28+(ta-tb)*1.3+gauss()*3.2,17,42)), gb=Math.round(clamp(28+(tb-ta)*1.3+gauss()*3.2,17,42));
+  sSimScorers(a,ga); sSimScorers(b,gb); const st=sSettle(a,b,ga,gb,ko); return {a,b,ga:st.ga,gb:st.gb,so:st.so,note:st.so?'e. straffekast':''}; }
+function sTable(){ const T={}; LEAGUES[season.lg].teams.forEach(c=>T[c]={c,k:0,v:0,u:0,t:0,gf:0,ga:0,p:0});
+  for(const r of season.results){ if(r.stage!=='league') continue; const A=T[r.a],B=T[r.b]; A.k++;B.k++; A.gf+=r.ga;A.ga+=r.gb;B.gf+=r.gb;B.ga+=r.ga;
+    if(r.ga>r.gb){A.v++;B.t++;A.p+=2;} else if(r.ga<r.gb){B.v++;A.t++;B.p+=2;} else {A.u++;B.u++;A.p++;B.p++;} }
+  return Object.values(T).sort((a,b)=>b.p-a.p||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf); }
+function sMyMatch(){ if(season.done) return null;
+  if(season.stage==='league') return season.rounds[season.round].find(m=>m.includes(season.team))||null;
+  return season.po.matches.find(m=>m.includes(season.team)&&!season.results.some(r=>r.stage===season.stage&&r.a===m[0]&&r.b===m[1]))||null; }
+function sAdvance(myRes){
+  if(season.stage==='league'){
+    for(const m of season.rounds[season.round]){ const mine=myRes&&m[0]===myRes.a&&m[1]===myRes.b; season.results.push({...(mine?myRes:sSim(m[0],m[1],false)),stage:'league',round:season.round}); }
+    season.round++;
+    if(season.round>=season.rounds.length){ const tb=sTable();
+      if(season.lg==='dk'){ season.stage='semi'; season.po={matches:[[tb[0].c,tb[3].c],[tb[1].c,tb[2].c]]}; }
+      else { season.done=true; season.champion=tb[0].c; const pl=tb.findIndex(r=>r.c===season.team)+1; season.result=pl===1?'Tysk mester!':`Nr. ${pl} i Bundesligaen`; } }
+  } else {
+    for(const m of season.po.matches){ if(season.results.some(r=>r.stage===season.stage&&r.a===m[0]&&r.b===m[1])) continue; const mine=myRes&&m[0]===myRes.a&&m[1]===myRes.b; season.results.push({...(mine?myRes:sSim(m[0],m[1],true)),stage:season.stage}); }
+    const res=season.results.filter(r=>r.stage===season.stage), win=r=>r.ga>r.gb?r.a:r.b;
+    if(season.stage==='semi'){ season.stage='final'; season.po={matches:[[win(res[0]),win(res[1])]]}; }
+    else { season.done=true; season.champion=win(res[0]); const pl=sTable().findIndex(r=>r.c===season.team)+1;
+      season.result=season.champion===season.team?'Danske mestre!':res[0].a===season.team||res[0].b===season.team?'Sølv – tabt finale':season.results.some(r=>r.stage==='semi'&&(r.a===season.team||r.b===season.team))?'Ude i semifinalen':`Nr. ${pl} i grundspillet`; } }
+  myRes=null; let guard=0; while(!season.done&&!sMyMatch()&&guard++<60) sAdvance(null);   // dit hold er ude: resten simuleres
+  saveSeason(); }
+function playSeasonMatch(){ const m=sMyMatch(); if(!m) return; const opp=m[0]===season.team?m[1]:m[0];
+  league=season.lg; teamSel=teamSels[league]=[season.team,opp]; seasonMatch={a:m[0],b:m[1],ko:season.stage!=='league'}; tourMatch=null;
+  $('tour').hidden=true; $('result').hidden=true; newMatch(); started=true; paused=false; }
+function endSeasonMatch(){ const meA=seasonMatch.a===teamSel[0], ga0=meA?score[0]:score[1], gb0=meA?score[1]:score[0];
+  const st=sSettle(seasonMatch.a,seasonMatch.b,ga0,gb0,seasonMatch.ko), res={a:seasonMatch.a,b:seasonMatch.b,ga:st.ga,gb:st.gb,so:st.so,note:st.so?'e. straffekast':''};
+  seasonMatch=null; sAdvance(res); started=false; showSeason(); }
+function showSeason(){
+  const L=LEAGUES[season.lg], tb=sTable(), nr=season.rounds.length;
+  $('tTitle').textContent=L.short+' 26/27 · '+sName(season.team);
+  const stage=season.done?'Sæsonen er slut':season.stage==='league'?`Runde ${season.round+1} af ${nr}`:season.stage==='semi'?'Slutspil · semifinale':'Slutspil · finale';
+  let html='';
+  if(season.done){ html+=`<div class="tbig">${season.result||''}</div><div class="tres" style="text-align:center">${season.lg==='dk'?'Danske mestre':'Tyske mestre'}: <b>${sName(season.champion)}</b></div>`; }
+  else { const m=sMyMatch(); if(m) html+=`<div class="tsec">Næste kamp${season.stage==='league'?'':' · '+(season.stage==='semi'?'semifinale':'finale')}</div><div class="tnext"><span>${sName(m[0])}</span><span>–</span><span>${sName(m[1])}</span></div><div class="tres" style="text-align:center;opacity:.7">${m[0]===season.team?'Hjemmekamp':'Udekamp'}</div>`; }
+  const po=season.results.filter(r=>r.stage!=='league'); if(po.length) html+=`<div class="tsec">Slutspil</div><div class="tres">${po.map(r=>`<div class="${r.a===season.team||r.b===season.team?'me':''}">${sName(r.a)} ${r.ga}–${r.gb} ${sName(r.b)}${r.note?` <small>(${r.note})</small>`:''}</div>`).join('')}</div>`;
+  const q=season.lg==='dk'?4:1;
+  html+=`<div class="tsec">Stilling${season.lg==='dk'?' · nr. 1-4 går i slutspil':''}</div><table class="tbl"><tr><th>#</th><th>Hold</th><th>K</th><th>V</th><th>U</th><th>T</th><th>Mål</th><th>P</th></tr>`+
+    tb.map((r,i)=>`<tr class="${r.c===season.team?'me':''} ${i<q?'q':''}"><td>${i+1}</td><td>${sName(r.c)}</td><td>${r.k}</td><td>${r.v}</td><td>${r.u}</td><td>${r.t}</td><td>${r.gf}-${r.ga}</td><td>${r.p}</td></tr>`).join('')+'</table>';
+  const lastR=season.results.filter(r=>r.stage==='league'&&r.round===season.round-1);
+  if(lastR.length&&season.stage==='league') html+=`<div class="tsec">Runde ${season.round}</div><div class="tres">${lastR.map(r=>`<div class="${r.a===season.team||r.b===season.team?'me':''}">${sName(r.a)} ${r.ga}–${r.gb} ${sName(r.b)}</div>`).join('')}</div>`;
+  const top=Object.values(season.scorers).sort((a,b)=>b.g-a.g).slice(0,10);
+  if(top.length) html+=`<div class="tsec">Topscorere</div><div class="tres">${top.map((x,i)=>`<div class="${x.code===season.team?'me':''}">${i+1}. ${x.name} (${sName(x.code)}) <b style="float:right">${x.g}</b></div>`).join('')}</div>`;
+  $('tStage').textContent=stage; $('tBody').innerHTML=html; $('tPlay').hidden=season.done; $('tNew').textContent='Ny sæson';
+  $('menu').hidden=true; $('tour').hidden=false; paused=true;
+}
 
 /* ================= INPUT ================= */
 const joy={x:0,y:0}, btn={shot:false,pass:false,fake:false,shotEdge:false,passEdge:false,fakeEdge:false};
