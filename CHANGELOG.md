@@ -2,6 +2,10 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.23.3 – 2026-11-02 – Kamera og straffekast-besked
+- Kameraet kan gå ca. 12 % længere op, så scoretavlen ikke længere dækker det øverste mål og målmanden
+- Ved straffekast står der nu kun STRAFFEKAST (ikke længere hvem der blev fældet, eller hvem der skal skyde)
+
 ## v0.23.2 – 2026-11-02 – Hurtigere boldhentning og automatisk hjemløb
 - Målmanden henter bolden hurtigere ved målkast: han løber hurtigere, griber bolden på længere afstand og får en ny bold fra siden, hvis den er trillet langt væk. Tid fra bolden går ud, til målkastet tages: ca. 0,9 sek. mod ca. 2,8 før
 - Din spiller løber nu også selv tilbage i forsvar, når modstanderen får målkast, eller når modstanderens målmand griber bolden (ligesom efter et mål). Han stopper, når han er hjemme, eller når dit hold får bolden
