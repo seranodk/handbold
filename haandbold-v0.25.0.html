@@ -1,4 +1,4 @@
-<title>Håndbold v0.24.1</title>
+<title>Håndbold v0.25.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -189,7 +189,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.24.1';
+const VERSION='0.25.0';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -968,7 +968,8 @@ function doPass(p,q){
     tx=clamp(q.x+q.vx*tt,0.8,19.2); ty=clamp(q.y+q.vy*tt,0.8,39.2);
   }
   b.mode='pass'; b.holder=null; b.x=p.x; b.y=p.y; b.z=rz; b.tx=tx; b.ty=ty; b.lob=lob;
-  b.vx=(tx-p.x)/tt; b.vy=(ty-p.y)/tt; b.vz=(tz-rz+0.5*G*tt*tt)/tt;
+  b.vx=(tx-p.x)/tt; b.vy=(ty-p.y)/tt; b.vz=(tz-rz+0.5*G*tt*tt)/tt; b.bounce=null;
+  if(pvLow&&d0>2.5){ const t1=tt*0.58; b.vz=(0.1-rz+0.5*G*t1*t1)/t1; b.bounce={done:false}; }  // stødaflevering i gulvet til stregspilleren
   b.passTo=q; b.passer=p; b.lastTeam=p.team; b.age=0; b.checked=new Set(); b.safe=!!p.kick&&rnd()<0.95; // opgiverkast: ca. 95 % sikker
   p.thr=0.22; p.passT=time; if(Math.abs(tx-p.x)>0.2) p.face=Math.sign(tx-p.x);
   if(p.throwIn){ p.throwIn=false; } p.gt=false; if(p.kick){ p.kick=false; kickoffTeam=null; } for(const o of players) o.offer=null;
@@ -1170,6 +1171,7 @@ function updPlayer(p,dt,att){
   else {
     let dvx=0,dvy=0;
     let vmax=speedOf(p)*(ball.holder===p?0.9:1);
+    if(p.burst>0){ p.burst-=dt; vmax*=1.12; }                                  // efter et gennembrud
     // hjemløb: spillere på vej tilbage i forsvar (og efter mål) løber ca. 15 % hurtigere for et bedre flow
     if(p.role!=='GK'&&ball.holder!==p&&(phase==='goal'||(att!==p.team&&L(1-p.team,p.x,p.y).d>13))) vmax*=1.15;
     if(phase==='fetch'&&fetch&&p.role==='GK'&&p.team===fetch.team) vmax=9.0; // løber hurtigt ud efter bolden
@@ -1200,7 +1202,15 @@ function updPlayer(p,dt,att){
     let acc=p.role==='GK'?30:24; { const vs=Math.hypot(p.vx,p.vy), ds=Math.hypot(dvx,dvy); if(p.role!=='GK'&&vs>3.5&&ds>0.5&&(p.vx*dvx+p.vy*dvy)/(vs*ds)<0.3) acc=9; if(p===ctrl&&!AUTO) acc*=1.1; } // din spiller er 10 % kvikkere // retningsskift i fart koster et øjeblik
     if(!(p.role==='GK'&&p.plan)) steer(p,dvx,dvy,dt,acc);
     // kropskontakt bremser
-    if(ball.holder===p&&p.role!=='GK') for(const o of players){ if(o.team!==p.team&&o.role!=='GK'&&dist(o,p)<0.62){ p.vx*=0.94; p.vy*=0.94; } }
+    if(ball.holder===p&&p.role!=='GK'){ let touch=null;                          // kropskontakt: forsvareren spærrer vejen, angriberen glider langs ham
+      for(const o of players){ if(o.team===p.team||o.role==='GK'||o.down>0||o.fooled) continue; const dx=p.x-o.x, dy=p.y-o.y, d=Math.hypot(dx,dy);
+        if(d<0.58&&d>0.001){ const nx=dx/d, ny=dy/d, ov=0.58-d, w=clamp(0.55+(rv(o,'styrke')-rv(p,'styrke'))*0.05+(rv(o,'forsvar')-5)*0.02,0.25,0.85);
+          p.x+=nx*ov*w; p.y+=ny*ov*w; o.x-=nx*ov*(1-w)*0.6; o.y-=ny*ov*(1-w)*0.6;
+          const vn=p.vx*nx+p.vy*ny; if(vn<0){ p.vx-=vn*nx*0.85; p.vy-=vn*ny*0.85; } touch=o; } }
+      if(touch){ p.contact={o:touch,t:time}; p.vx*=0.97; p.vy*=0.97; }
+      else if(p.contact&&time-p.contact.t<0.45){ const o=p.contact.o, lp=L(p.team,p.x,p.y), lo=L(p.team,o.x,o.y);
+        if(lo.d>lp.d+0.25&&dist(o,p)<1.3){ p.burst=0.6; p.contact=null; } }              // gennembrud: forsvareren er passeret – et øjeblik med fri bane
+      else p.contact=null; }
   }
   p.x+=p.vx*dt; p.y+=p.vy*dt;
   if(!p.shot&&(p.z>0||p.vz>0)){ p.z+=p.vz*dt; p.vz-=G*dt; if(p.z<=0){p.z=0;p.vz=0;} }
@@ -1271,8 +1281,9 @@ function updBall(dt){
   }
   if(b.curve){ (b.trail=b.trail||[]).push([b.x,b.y,b.z]); if(b.trail.length>14) b.trail.shift(); if(b.age>b.curve.t+0.15) b.curve=null; } else if(b.trail) b.trail=null;
   if(b.z<0.1){ b.z=0.1; b.curve=null;
-    if(b.vz<-1){ b.vz=-b.vz*0.55; b.vx*=0.84; b.vy*=0.84; if(b.mode==='pass') b.mode='loose'; }
-    else { b.vz=0; const f=Math.max(0,1-1.4*dt); b.vx*=f; b.vy*=f; if(b.mode==='shot'&&Math.hypot(b.vx,b.vy)<4) b.mode='loose'; }
+    if(b.mode==='pass'&&b.bounce&&!b.bounce.done&&b.vz<-1&&b.passTo){ b.bounce.done=true; const q=b.passTo, hs=Math.hypot(b.vx,b.vy)||1, rt=Math.max(0.12,Math.hypot(q.x-b.x,q.y-b.y)/hs); b.vz=(1.0-b.z+0.5*G*rt*rt)/rt; } // stødaflevering: hopper op i gulvet til modtageren
+    else if(b.vz<-1){ b.vz=-b.vz*0.4; b.vx*=0.72; b.vy*=0.72; if(b.mode==='pass') b.mode='loose'; }   // en håndbold hopper lavt og dødt
+    else { b.vz=0; const f=Math.max(0,1-3.2*dt); b.vx*=f; b.vy*=f; if(b.mode==='shot'&&Math.hypot(b.vx,b.vy)<4) b.mode='loose'; }
   }
   // mållinjer
   if(b.mode==='shot'||b.mode==='loose') for(const gy of [0,40]) for(const postX of [8.5,11.5]){
@@ -1297,7 +1308,7 @@ function updBall(dt){
     if(rd>0.35&&hs>1){
       const rt=rd/hs, px=q.x+q.vx*rt, py=q.y+q.vy*rt, dx=px-b.x, dy=py-b.y, dn=Math.hypot(dx,dy)||1, k=Math.min(1,dt*8*(0.6+rv(b.passer||q,'aflevering')*0.08));
       b.vx+=(dx/dn*hs-b.vx)*k; b.vy+=(dy/dn*hs-b.vy)*k;
-      const rt2=Math.hypot(dx,dy)/hs; if(rt2>0.05) b.vz=(1.3-b.z+0.5*G*rt2*rt2)/rt2;
+      const rt2=Math.hypot(dx,dy)/hs; if(rt2>0.05&&!(b.bounce&&!b.bounce.done)) b.vz=(1.3-b.z+0.5*G*rt2*rt2)/rt2;
     }
   }
   if(b.mode==='pass'){
@@ -1667,8 +1678,12 @@ function drawPlayer(p){
   let rot=0, lift=p.z, ox=0, oy=0;
   const s=Math.sin(p.phase), c=Math.cos(p.phase), run=p.run;
   let lf=[-0.09+s*0.26*run,-Math.max(0,c)*0.13*run], rf=[0.09-s*0.26*run,-Math.max(0,-c)*0.13*run];
-  let lh=[-0.3-s*0.17*run,-0.88], rh=[0.3+s*0.17*run,-0.88], bl=null;
+  let lh=[-0.22-s*0.3*run,-0.95-Math.max(0,-s)*0.28*run], rh=[0.22+s*0.3*run,-0.95-Math.max(0,s)*0.28*run], bl=null; // armene svinger modsat benene, albuen bøjet
   const holding=ball.holder===p&&ball.mode==='held';
+  if(!gk&&!p.ref){ rot=f*0.11*run; lift+=Math.abs(s)*0.045*run;                      // læner sig frem i løbet og "hopper" let i skridtet
+    const at=attTeam();
+    if(at!==p.team&&!holding&&phase==='play'&&L(1-p.team,p.x,p.y).d<11){             // forsvarsstilling: bred, bøjet i knæene, armene oppe, sidelæns skridt
+      const sh=s*0.1*run; rot=0; oy=0.07; lf=[-0.3+sh,0]; rf=[0.3+sh*0.6,-Math.max(0,c)*0.06*run]; lh=[-0.44,-1.52+Math.abs(s)*0.05]; rh=[0.44,-1.55-Math.abs(c)*0.05]; } }
   if(gk){
     lf=[-0.27+s*0.1*run,0]; rf=[0.27-s*0.1*run,0]; lh=[-0.55,-1.42]; rh=[0.55,-1.42];
     const pl=p.plan;
@@ -1778,7 +1793,7 @@ function render(){
   drawFloor();
   // boldskygge
   const bx=flip?20-ball.x:ball.x, by=flip?40-ball.y:ball.y;
-  if(ball.mode!=='held'){ ctx.fillStyle='rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(bx,by,0.14,0.07,0,0,7); ctx.fill(); }
+  if(ball.mode!=='held'){ const zz=Math.max(0,ball.z-0.1), sk=1-Math.min(0.55,zz*0.14); ctx.fillStyle=`rgba(0,0,0,${0.32*(1-Math.min(0.6,zz*0.16))})`; ctx.beginPath(); ctx.ellipse(bx,by,0.15*sk,0.075*sk,0,0,7); ctx.fill(); } // skyggen skrumper, når bolden er højt oppe
   const ents=players.concat(refs).map(p=>({y:flip?40-p.y:p.y,f:()=>drawPlayer(p)}));
   ents.push({y:-0.001,f:()=>drawGoal(0)},{y:40.001,f:()=>drawGoal(1)});
   // det nederste mål er nærmest kameraet: bolden foran mållinjen skal tegnes oven på nettet, bolden inde i nettet bagved
@@ -1786,7 +1801,7 @@ function render(){
   if(ball.mode!=='held') ents.push({y:bKey,f:()=>{ drawTrail();
     const bsp=Math.hypot(ball.vx,ball.vy); if(bsp>13&&(ball.mode==='shot'||ball.mode==='pass')){ const ux=(flip?-ball.vx:ball.vx)/bsp, uy=(flip?-ball.vy:ball.vy)/bsp, k=Math.min(1,(bsp-13)/10); // fartslør ved hårde skud
       for(let i=3;i>=1;i--){ ctx.fillStyle=`rgba(246,242,228,${0.16*k*(4-i)/3})`; ctx.beginPath(); ctx.arc(bx-ux*i*0.13,by-uy*i*0.13-(ball.z-ball.vz*i*0.006)*ZF,0.13,0,7); ctx.fill(); } }
-    drawBallAt(bx,by-ball.z*ZF,0.14); }});
+    drawBallAt(bx,by-ball.z*ZF,0.14*(1+Math.min(0.35,Math.max(0,ball.z-0.1)*0.07))); }}); // bolden bliver lidt større, jo højere den er
   ents.sort((a,b)=>a.y-b.y); for(const e of ents) e.f();
   // redningseffekt
   for(const p of players){ const h=p.plan&&p.plan.hit; if(!h) continue; const a=(time-h.t)/0.3; if(a<0||a>1) continue;

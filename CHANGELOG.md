@@ -2,6 +2,13 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.25.0 – 2026-11-02 – Løbeanimation, bolden i luften, boldfysik og kropskontakt
+- Løbeanimation: armene svinger modsat benene med bøjede albuer, spillerne læner sig frem og hopper let i skridtet
+- Forsvarsstilling: tæt på eget mål står forsvarerne bredt og bøjet i knæene med armene oppe og bevæger sig sidelæns
+- Bolden i luften: bolden bliver lidt større, jo højere den er, og skyggen bliver mindre og svagere, så høje afleveringer og hopskud er lettere at aflæse
+- Boldfysik: en håndbold hopper lavt og dødt, så løse bolde og returbolde bliver liggende tættere på. Stødafleveringen til stregspilleren hopper nu i gulvet og op til ham
+- Kropskontakt: forsvarerne spærrer fysisk vejen for boldholderen, som glider langs dem i stedet for at løbe igennem. Styrke og forsvar afgør, hvem der giver sig. Kommer angriberen forbi forsvareren efter kontakt (gennembrud), får han et kort øjeblik med ekstra fart
+
 ## v0.24.1 – 2026-11-02 – Komplette ligatrupper og trøjefarver
 - Alle 32 ligahold har nu hele den aktuelle trup (14-26 spillere), ikke kun et udvalg:
   - Herreligaen fra tophaandbold.dk med positioner og højder, også for Aalborg, GOG og SAH (fx Lindskog, Sagosen, Norlyk hos Aalborg og Pellas, Boysen, Tonnesen hos GOG)
