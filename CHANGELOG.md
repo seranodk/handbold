@@ -2,6 +2,11 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.23.5 – 2026-11-02 – Mål tilbage på skærmen
+- MÅL! med målscorerens navn vises igen (også STOLPE IND! og OVERLIGGER IND!)
+- Frikast vises kun som "Frikast" uden forklaring
+- Scoretavlen markerer diskret, at der er scoret: det scorende holds tal lyser kort op i gult og vokser en anelse
+
 ## v0.23.4 – 2026-11-02 – Færre tekster på skærmen
 - Alle statusbeskeder på banen er fjernet undtagen frikast, straffekast og halvleg med stillingen
 - Når kampen er slut, står SLUT og resultatet på banen i ca. 2,5 sekunder, før menuen kommer frem
