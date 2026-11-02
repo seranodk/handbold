@@ -1,4 +1,4 @@
-<title>Håndbold v0.23.1</title>
+<title>Håndbold v0.23.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -162,7 +162,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.23.1';
+const VERSION='0.23.2';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -562,7 +562,7 @@ function restart(kind,team,x,y,text,who){
     const spots=[[3.2,side*3.5],[4.6,0],[3.0,-side*3.2]];
     cand.forEach((q,i)=>{ const o=pushOut(team,clamp(p.x+inw*spots[i][0],1,19),clamp(p.y+spots[i][1],1,39),6.3); q.offer=pushOut(1-team,o.x,o.y,6.3); });
   }
-  if(kind==='goalthrow'){ p.aiT=0.2; p.gt=true; }
+  if(kind==='goalthrow'){ p.aiT=0.2; p.gt=true; if(team===1) autoHome=true; }
   if(kind==='seven'){ // 7-meter: skytten på 7-meter-stregen, målmanden på linjen, resten uden for 9 m
     const w=W(team,10,7.0); p.x=w.x; p.y=w.y; p.seven=true; p.aiT=1.3+rnd()*0.8; p.face=1; p.sevenFake=rnd()<0.3; p.down=0; p.fallT=null;
     const k=gkOf(1-team), kw=W(team,10,0.6); k.x=kw.x; k.y=kw.y; k.plan=null;
@@ -703,7 +703,7 @@ function keeperPlan(k,shooter){
 }
 function saveBall(k,catchIt){
   const b=ball; msg('REDNING!',false,'#9fe3b0');
-  if(catchIt){ give(k); k.aiT=1.0; return; }
+  if(catchIt){ give(k); k.aiT=1.0; if(k.team===1) autoHome=true; return; } // modstanderens målmand griber: din spiller løber hjem
   b.mode='loose'; b.lastTeam=k.team; trans=newTrans(k.team,true); b.age=0; b.noPick=null;
   const pl=k.plan||{diff:0.5,cz:1,cx:b.x}, toGoal=Math.sign(b.vy)||1;            // retning mod mållinjen
   const angle=Math.min(1,Math.abs(b.vx)/(Math.abs(b.vy)||1));                      // skrå skud (fx fra fløjen)
@@ -1066,7 +1066,7 @@ function updPlayer(p,dt,att){
     let vmax=speedOf(p)*(ball.holder===p?0.9:1);
     // hjemløb: spillere på vej tilbage i forsvar (og efter mål) løber ca. 15 % hurtigere for et bedre flow
     if(p.role!=='GK'&&ball.holder!==p&&(phase==='goal'||(att!==p.team&&L(1-p.team,p.x,p.y).d>13))) vmax*=1.15;
-    if(phase==='fetch'&&fetch&&p.role==='GK'&&p.team===fetch.team) vmax=8.0; // løber hurtigt ud efter bolden
+    if(phase==='fetch'&&fetch&&p.role==='GK'&&p.team===fetch.team) vmax=9.0; // løber hurtigt ud efter bolden
     const ld=L(p.team,p.x,p.y).d;
     if(phase==='play'&&ld<13&&posAtt(p.team)&&att===p.team&&ball.holder!==p&&ball.passTo!==p&&p.role!=='GK'&&(p!==ctrl||AUTO)&&!(p.passT&&time-p.passT<0.9)) vmax*=0.6; // jogger i positionsspillet (først når han er oppe ved 13 m)
     if(isWing(p)&&att===p.team&&ld>11&&ball.holder!==p&&(p!==ctrl||AUTO)) vmax*=1.1;   // fløjene er blandt de første oppe, også efter opgiverkast
@@ -1123,6 +1123,7 @@ function clampArea(p){
 function startFetch(t){
   const k=gkOf(t); k.plan=null; k.shot=null;
   fetch={team:t,t:0}; phase='fetch'; ball.mode='out'; ball.holder=null; trans=null;
+  if(t===1) autoHome=true;                                                  // modstanderens målkast: din spiller løber selv hjem
   msg('Målkast');
 }
 function fetchTarget(k){
@@ -1141,10 +1142,12 @@ function updFetch(dt){
     const gl=goalY(1-fetch.team); if(Math.abs(b.y-gl)>1.8){ b.y=gl+Math.sign(b.y-gl)*1.8; b.vy=0; } // stopper kort bag baglinjen
     if(b.x<-0.8||b.x>20.8){ b.x=clamp(b.x,-0.8,20.8); b.vx=0; }
     if(b.y<-2.4||b.y>42.4){ b.y=clamp(b.y,-2.4,42.4); b.vy=0; }
-    if(dist(k,b)<0.5&&b.z<1.4){ b.mode='held'; b.holder=k; b.vx=b.vy=b.vz=0; }
+    if(dist(k,b)<0.75&&b.z<1.4){ b.mode='held'; b.holder=k; b.vx=b.vy=b.vz=0; }
+    else if(fetch.t>0.85&&dist(k,b)>1.5){ b.mode='held'; b.holder=k; b.vx=b.vy=b.vz=0; } // langt væk: målmanden får en ny bold fra siden
   }
-  const back=b.holder===k&&L(1-fetch.team,k.x,k.y).d>0.3&&L(1-fetch.team,k.x,k.y).d<5.5&&k.x>0.5&&k.x<19.5;
-  if(back||fetch.t>5){ fetch=null; restart('goalthrow',k.team,0,0,null); }
+  const kl=L(1-fetch.team,k.x,k.y), back=b.holder===k&&kl.d>-0.6&&kl.d<5.8&&k.x>0.3&&k.x<19.7;
+  if(b.holder===k&&!back&&fetch.t>1.4){ const w=W(1-fetch.team,clamp(kl.lx,7,13),1.2); k.x=w.x; k.y=w.y; } // står han langt ude, stilles han ind i feltet
+  if(back||b.holder===k&&fetch.t>1.4||fetch.t>4){ fetch=null; restart('goalthrow',k.team,0,0,null); }
 }
 function updBall(dt){
   const b=ball; b.age+=dt;

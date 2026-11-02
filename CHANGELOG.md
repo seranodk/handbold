@@ -2,6 +2,10 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.23.2 – 2026-11-02 – Hurtigere boldhentning og automatisk hjemløb
+- Målmanden henter bolden hurtigere ved målkast: han løber hurtigere, griber bolden på længere afstand og får en ny bold fra siden, hvis den er trillet langt væk. Tid fra bolden går ud, til målkastet tages: ca. 0,9 sek. mod ca. 2,8 før
+- Din spiller løber nu også selv tilbage i forsvar, når modstanderen får målkast, eller når modstanderens målmand griber bolden (ligesom efter et mål). Han stopper, når han er hjemme, eller når dit hold får bolden
+
 ## v0.23.1 – 2026-11-02 – Hurtigere målkast
 - Målmanden sætter bolden hurtigere i gang ved målkast: pausen før spillet går i gang er kortere (0,25 sek. mod 0,9), og målmanden venter kortere på et fløjløb. Fra målkastet gives, til målmanden kaster ud: ca. 0,5 sek. mod ca. 1,2 før
 - Din målmand: du kan kaste ud med Skud (langt) eller Aflever (kort) med det samme ved målkast
