@@ -2,6 +2,10 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.23.1 – 2026-11-02 – Hurtigere målkast
+- Målmanden sætter bolden hurtigere i gang ved målkast: pausen før spillet går i gang er kortere (0,25 sek. mod 0,9), og målmanden venter kortere på et fløjløb. Fra målkastet gives, til målmanden kaster ud: ca. 0,5 sek. mod ca. 1,2 før
+- Din målmand: du kan kaste ud med Skud (langt) eller Aflever (kort) med det samme ved målkast
+
 ## v0.23.0 – 2026-11-02 – Alle CL-hold, højde og målmandens navn
 - Champions League: også de sidste 12 hold (Porto, Partizan, Nantes, Vardar, Zagreb, Celje, Szeged, Kristianstad, Montpellier, SAH, Kriens-Luzern, Kolstad) har startere ud fra de seneste kampe og EHF's spillerprofiler
   - Rettede positioner: Lumbroso (playmaker), Bialiauski (playmaker), Llamazares og Jerome Müller (højre back)

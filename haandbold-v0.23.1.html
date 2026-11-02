@@ -1,4 +1,4 @@
-<title>Håndbold v0.23.0</title>
+<title>Håndbold v0.23.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -162,7 +162,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.23.0';
+const VERSION='0.23.1';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -562,14 +562,14 @@ function restart(kind,team,x,y,text,who){
     const spots=[[3.2,side*3.5],[4.6,0],[3.0,-side*3.2]];
     cand.forEach((q,i)=>{ const o=pushOut(team,clamp(p.x+inw*spots[i][0],1,19),clamp(p.y+spots[i][1],1,39),6.3); q.offer=pushOut(1-team,o.x,o.y,6.3); });
   }
-  if(kind==='goalthrow'){ p.aiT=0.35; p.gt=true; }
+  if(kind==='goalthrow'){ p.aiT=0.2; p.gt=true; }
   if(kind==='seven'){ // 7-meter: skytten på 7-meter-stregen, målmanden på linjen, resten uden for 9 m
     const w=W(team,10,7.0); p.x=w.x; p.y=w.y; p.seven=true; p.aiT=1.3+rnd()*0.8; p.face=1; p.sevenFake=rnd()<0.3; p.down=0; p.fallT=null;
     const k=gkOf(1-team), kw=W(team,10,0.6); k.x=kw.x; k.y=kw.y; k.plan=null;
     for(const q of players){ if(q===p||q.role==='GK') continue; const o=pushOut(team,q.x,q.y,9.3); q.x=o.x; q.y=o.y; q.vx=q.vy=0; }
   }
   if(kind==='kickoff'){ p.throwIn=true; p.kick=true; p.aiT=team===0?0.3+rnd()*0.3:0.15+rnd()*0.2; } // hurtigt opgiverkast // står på midten, indtil han har kastet op
-  phase='dead'; phaseT=kind==='kickoff'?0.15:0.9; // ingen kunstig pause: hurtigt opgiverkast er muligt
+  phase='dead'; phaseT=kind==='kickoff'?0.15:kind==='goalthrow'?0.25:0.9; // målkast går hurtigt i gang // ingen kunstig pause: hurtigt opgiverkast er muligt
   if(text) msg(text);
 }
 
@@ -911,7 +911,7 @@ function aiCarrier(p,dt){
   if(p.role==='GK'&&p.longPlan&&p.holdT>0.25&&!p.throwIn){ // langt udkast: vent på, at en fløj er fri
     const w=players.filter(q=>q.team===p.team&&isWing(q)&&wingOpen(p,q)).sort((a,b)=>L(a.team,a.x,a.y).d-L(b.team,b.x,b.y).d)[0];
     if(w){ longThrow(p,w); return; }
-    if(p.holdT<2.4) return;
+    if(p.holdT<(p.gt?0.9:1.4)) return;                                       // venter kun kort på fløjløbet, især ved målkast
     p.longPlan=false;
   }
   p.aiT-=dt; if(p.aiT>0) return;
@@ -1317,7 +1317,7 @@ function step(dt){
     possT=h.team; }
   if(shotLock>0&&ball.holder===ctrl) btn.shotEdge=false;
   const gkB=ball.holder&&ball.holder.team===0&&ball.holder.role==='GK'?ball.holder:null;
-  if(gkB&&!AUTO&&phase==='play'&&!gkB.plan&&gkB.holdT>0.15){            // din målmand har bolden: Skud = langt udkast til fløjen, Aflever = kort
+  if(gkB&&!AUTO&&(phase==='play'||(phase==='dead'&&gkB.gt))&&!gkB.plan&&(gkB.holdT>0.15||gkB.gt)){ if(phase==='dead'&&(btn.shotEdge||btn.passEdge)) phase='play'; // målkast: du kan kaste med det samme            // din målmand har bolden: Skud = langt udkast til fløjen, Aflever = kort
     if(btn.shotEdge){ const jx=joy.x*FS(), ws=players.filter(q=>q.team===0&&isWing(q));
       const w=Math.abs(jx)>0.3?ws.find(q=>Math.sign(q.x-10)===Math.sign(jx)):ws.sort((a,b)=>openness(b)-openness(a))[0];
       if(w){ longThrow(gkB,w); btn.shotEdge=false; } }
