@@ -2,6 +2,12 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.25.2 – 2026-11-03 – Klogere modstander på Normal og Svær
+- Modstanderen rammer bedre: skyder sikrere ind i hjørnet væk fra målmanden, spreder mindre og slår oftere målmanden. Hans egen målmand læser dine skud bedre
+- Bedre skudvalg: tager de åbne chancer og venter med de dårlige, og spiller oftere bolden til den mest frie medspiller
+- Tættere forsvar: forskyder mere mod bolden, naboen hjælper mere, stregspilleren dækkes på målsiden, fløjene dækkes tæt, forsvareren træder længere ud, blokerer oftere og løber hurtigere hjem
+- Testet med computer mod computer: Let ca. lige, Normal ca. 3 mål bedre og Svær ca. 7 mål bedre pr. kamp (før ca. 2 og 4)
+
 ## v0.25.1 – 2026-11-02 – Sværhedsgrader
 - Ny indstilling: Sværhedsgrad med Let (som hidtil), Normal og Svær. Den valgte sværhedsgrad vises på forsiden
 - På Normal og Svær bliver modstanderen bedre (højere værdier i skud, præcision, forsvar, fart og målmandens reaktion), tænker hurtigere med bolden, tackler oftere og opsnapper flere afleveringer
