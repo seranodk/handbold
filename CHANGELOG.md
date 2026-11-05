@@ -2,6 +2,9 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.25.4 – 2026-11-05 – Ingen utilsigtet zoom på mobil
+- Dobbelttryk og knib med to fingre zoomer ikke længere ind på siden, heller ikke i Safari på iPhone, som ignorerer den almindelige zoomlås. Hurtige tryk på knapperne virker stadig
+
 ## v0.25.3 – 2026-11-05 – Rigtig størrelse på mobil
 - GitHub-udgaven manglede viewport-indstillingen, så mobilen viste spillet som en lille desktopside med bittesmå spillere og tekst. Nu fylder banen, spillerne og menuerne skærmen
 
