@@ -2,6 +2,9 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.25.3 – 2026-11-05 – Rigtig størrelse på mobil
+- GitHub-udgaven manglede viewport-indstillingen, så mobilen viste spillet som en lille desktopside med bittesmå spillere og tekst. Nu fylder banen, spillerne og menuerne skærmen
+
 ## v0.25.2 – 2026-11-03 – Klogere modstander på Normal og Svær
 - Modstanderen rammer bedre: skyder sikrere ind i hjørnet væk fra målmanden, spreder mindre og slår oftere målmanden. Hans egen målmand læser dine skud bedre
 - Bedre skudvalg: tager de åbne chancer og venter med de dårlige, og spiller oftere bolden til den mest frie medspiller
