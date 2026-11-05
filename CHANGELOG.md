@@ -2,6 +2,9 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.26.2 – 2026-11-06 – Faldskud ca. 10 %
+- Faldskud udgør nu ca. 10 % af skuddene (før ca. 5 %): stregspilleren, fløjene, gennembrud og spillere med plads foran sig tæt på 6 m falder oftere ind over stregen
+
 ## v0.26.1 – 2026-11-05 – Underhåndsskud, faldskud og målmandsredninger
 - Underhåndsskud er lette at se: skytten går dybt i knæ med et bredt udfald, lægger sig ind over og trækker armen lavt bagud, før den piskes frem i hoftehøjde. Bolden slippes lavere og flyver lavt mod mål. Bagspillerne bruger det nu også selv af og til, når en forsvarer står foran
 - Færre faldskud (ca. 5 % af skuddene mod før ca. 15 %): kun stregspilleren, fløjene og gennembrud tæt på 6 m falder. Bagspillere tæt på stregen hopper i stedet. Faldskuddet ender på maven med armene strakt frem, og spilleren glider lidt hen ad gulvet

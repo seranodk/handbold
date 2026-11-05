@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1422">
-<title>Håndbold v0.26.1</title>
+<title>Håndbold v0.26.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -200,7 +200,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.26.1';
+const VERSION='0.26.2';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -727,7 +727,7 @@ function chooseShot(p){
   if((l.lx<4.3||l.lx>15.7)&&l.d<8.5) return 'wing';
   if(defendersAhead(p)===0&&Math.hypot(p.vx,p.vy)>3) return 'jump';
   const fd=frontDef(p), sp=Math.hypot(p.vx,p.vy);
-  if(l.d<sixLine(l.lx)+1.2&&(p.role==='PV'||isWing(p)||defendersAhead(p)===0)&&rnd()<0.6) return 'fall'; // faldskud: kun tæt på 6 m for streg, fløj og gennembrud
+  if(l.d<sixLine(l.lx)+2.1&&(p.role==='PV'||isWing(p)||defendersAhead(p)===0||frontDef(p)>1.2)&&rnd()<0.65) return 'fall'; // faldskud: kun tæt på 6 m for streg, fløj og gennembrud
   if(l.d<sixLine(l.lx)+1.7) return 'jump';                                    // ellers hopper man ind over stregen
   if(p.role.endsWith('B')&&fd<2.6&&fd>1.0&&rnd()<0.1) return 'under';          // underhåndsskud forbi forsvarerens hofte
   if(fd<1.9) return 'jump';
