@@ -2,6 +2,11 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.26.1 – 2026-11-05 – Underhåndsskud, faldskud og målmandsredninger
+- Underhåndsskud er lette at se: skytten går dybt i knæ med et bredt udfald, lægger sig ind over og trækker armen lavt bagud, før den piskes frem i hoftehøjde. Bolden slippes lavere og flyver lavt mod mål. Bagspillerne bruger det nu også selv af og til, når en forsvarer står foran
+- Færre faldskud (ca. 5 % af skuddene mod før ca. 15 %): kun stregspilleren, fløjene og gennembrud tæt på 6 m falder. Bagspillere tæt på stregen hopper i stedet. Faldskuddet ender på maven med armene strakt frem, og spilleren glider lidt hen ad gulvet
+- Målmanden dykker oftere og længere ud efter skud i hjørnerne, griber bolden ind til brystet, når han holder den, og står med hænderne i siden efter et mål
+
 ## v0.26.0 – 2026-11-05 – Mere rigtig håndbold: målmænd, frikast, fejl, kontra og streg
 - Målmændene redder flere skud, mest dér hvor de også gør det i virkeligheden: flere redninger på langskud (ca. 44 % mod før 39 %) og lidt flere på fløjskud. Skud fra 6 m og stregspilleren er uændrede
 - Målmanden holder oftere bolden efter en redning (ca. halvdelen mod før hver femte), især på skud i kroppen og højt. Lave skud i siden giver stadig returbolde
