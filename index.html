@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1422">
-<title>Håndbold v0.26.2</title>
+<title>Håndbold v0.26.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -200,7 +200,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.26.2';
+const VERSION='0.26.3';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -812,7 +812,7 @@ function keeperPlan(k,shooter){
   const onTarget=Math.abs(cx-10)<1.62&&cz<2.12;
   // stjernen: ved hopskud/fløjskud/faldskud tæt på springer målmanden op med arme og ben spredt
   const star=!!(shooter&&shooter.shot&&shooter.shot.type!=='stand'&&shooter.shot.type!=='under'&&dist(shooter,k)<7.8);
-  const SAVE_CLS={L:1.22,W:1.2,N:1,P:1,K:0.55};                // som i virkeligheden: flest redninger på langskud og fløjskud, få på kontra
+  const SAVE_CLS={L:1.11,W:1.1,N:1,P:1,K:0.55};                // som i virkeligheden: flest redninger på langskud og fløjskud, få på kontra
   let save; const sm=(SAVE_CLS[ball.cls]||1)*(1-0.16*dk(shooter?shooter.team:0))*(1+0.1*dk(k.team)); // modstanderen skyder smartere forbi målmanden – og hans målmand læser skuddene bedre
   if(shooter&&shooter.wasSeven){ save=onTarget&&rnd()<(k.faked&&time-k.faked<0.8?0.07:0.14+(rv(k,'reaktion')-5)*0.03); } // 7-meter: ca. 3 ud af 4 går ind
   else if(star) save=onTarget&&diff<(avail>0.2?1.1:0.95)&&rnd()<(shooter.shot.legs?0.25:0.45)*sm;
@@ -825,7 +825,7 @@ function keeperPlan(k,shooter){
       return;
     }
     const far=Math.max(0,sd-10);                              // meter ud over 10 m
-    const r2=(reach*hf+Math.min(0.6,far*0.08))*(ball.cls==='L'?1.15:ball.cls==='W'?1.06:1); // langskud: målmanden når flere                 // mere tid til at nå bolden
+    const r2=(reach*hf+Math.min(0.6,far*0.08))*(ball.cls==='L'?1.07:ball.cls==='W'?1.03:1); // langskud: målmanden når flere                 // mere tid til at nå bolden
     const pS=Math.min(0.97,(diff<0.4?0.72:0.45)+far*0.06);     // og lettere at læse skuddet
     save=onTarget&&diff<r2&&rnd()<pS*sm*(shooter&&shooter.shot&&shooter.shot.legs?0.6:1); // mellem benene er svær at læse
   }

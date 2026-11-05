@@ -2,6 +2,9 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.26.3 – 2026-11-06 – Målmændene redder lidt færre
+- Målmændenes ekstra redninger fra v0.26.0 er halveret: de redder stadig lidt flere langskud og fløjskud end før v0.26.0, men det er ikke længere så let for dem. Kontra er stadig næsten sikre mål
+
 ## v0.26.2 – 2026-11-06 – Faldskud ca. 10 %
 - Faldskud udgør nu ca. 10 % af skuddene (før ca. 5 %): stregspilleren, fløjene, gennembrud og spillere med plads foran sig tæt på 6 m falder oftere ind over stregen
 
