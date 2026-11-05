@@ -2,6 +2,14 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.26.0 – 2026-11-05 – Mere rigtig håndbold: målmænd, frikast, fejl, kontra og streg
+- Målmændene redder flere skud, mest dér hvor de også gør det i virkeligheden: flere redninger på langskud (ca. 44 % mod før 39 %) og lidt flere på fløjskud. Skud fra 6 m og stregspilleren er uændrede
+- Målmanden holder oftere bolden efter en redning (ca. halvdelen mod før hver femte), især på skud i kroppen og højt. Lave skud i siden giver stadig returbolde
+- Kontra er næsten sikre mål (ca. 80 %), så det betaler sig at løbe hjem
+- Lidt flere frikast: når en forsvarer står tæt på boldholderen, bliver angrebet oftere stoppet. Ca. 6 pr. kamp mod før 5
+- Tekniske fejl: i tætte dueller kan bolden blive slået eller glide ud af hånden. I alt ca. 4-5 tekniske fejl pr. kamp
+- Stregspilleren trækker oftere frikast og straffekast, når han bliver holdt, og står for ca. hvert femte mål
+
 ## v0.25.4 – 2026-11-05 – Ingen utilsigtet zoom på mobil
 - Dobbelttryk og knib med to fingre zoomer ikke længere ind på siden, heller ikke i Safari på iPhone, som ignorerer den almindelige zoomlås. Hurtige tryk på knapperne virker stadig
 
