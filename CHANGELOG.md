@@ -2,6 +2,10 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.26.5 – 2026-11-06 – Computeren går mod mål i kontra, Normal er standard
+- Har computerens boldholder fri eller rimelig fri bane (ingen forsvarer foran, eller én langt væk), løber han direkte mod mål og afslutter i stedet for at spille bolden tilbage. Han spiller kun frem til en medspiller, der er længere fremme og fri
+- Normal er nu standard-sværhedsgrad. Har du selv valgt en sværhedsgrad, huskes den stadig
+
 ## v0.26.4 – 2026-11-06 – Mere retfærdige straffekast
 - Straffekast dømmes kun, når angriberen er på vej igennem mod mål (i fart mod mål, i skudhop eller i skud) og har en fri chance
 - Retningen betyder noget: en forseelse bagfra giver næsten altid straffekast, fra siden ca. hver anden gang og forfra kun sjældent (ellers frikast)

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1422">
-<title>Håndbold v0.26.4</title>
+<title>Håndbold v0.26.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -200,7 +200,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.26.4';
+const VERSION='0.26.5';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -552,8 +552,8 @@ function sixLine(lx,r=6){ if(lx>=8.5&&lx<=11.5) return r; const dx=lx<8.5?8.5-lx
 function inArea(x,y){ for(const t of [0,1]){ const l=L(t,x,y); if(l.d>-0.3&&l.d<sixLine(l.lx)) return true; } return false; }
 
 /* ================= TILSTAND ================= */
-let floorKey='landskamp', matchLen=180, half=1, diff=0;
-try{ const f=localStorage.getItem('hb_floor'); if(f&&FLOORS[f]) floorKey=f; const m=+localStorage.getItem('hb_len2'); if(m===180||m===300||m===600) matchLen=m; const dv=+localStorage.getItem('hb_diff'); if(dv===1||dv===2) diff=dv; }catch(e){}
+let floorKey='landskamp', matchLen=180, half=1, diff=1;                 // Normal er standard
+try{ const f=localStorage.getItem('hb_floor'); if(f&&FLOORS[f]) floorKey=f; const m=+localStorage.getItem('hb_len2'); if(m===180||m===300||m===600) matchLen=m; const dv=localStorage.getItem('hb_diff'); if(dv==='0'||dv==='1'||dv==='2') diff=+dv; }catch(e){}
 let players=[], ball=null, score=[0,0], clock=0, phase='menu', phaseT=0, time=0, ctrl=null, poss=0, passCount=0;
 let passive=null, atkT=0; // passivt spil
 let trans=null, celebTeam=-1, celebBy=null, autoHome=false, fetch=null;
@@ -641,6 +641,10 @@ function frontDef(p){ // afstand til nærmeste forsvarer mellem spiller og mål
   for(const o of players){ if(o.team===p.team||o.role==='GK') continue; const ol=L(p.team,o.x,o.y);
     if(ol.d<l.d+0.2&&Math.abs(ol.lx-l.lx)<2.4) m=Math.min(m,dist(o,p)); }
   return m;
+}
+function freeRun(p){ // (rimelig) fri bane mod mål: ingen forsvarer foran, eller én der står langt væk
+  if(p.role==='GK'||p.throwIn||p.kick||p.seven) return false; const l=L(p.team,p.x,p.y); if(l.d<6.5) return false;
+  const n=defendersAhead(p); return n===0||(n===1&&frontDef(p)>3.2&&l.d>9.5);
 }
 function defendersAhead(p){ const l=L(p.team,p.x,p.y); let n=0; for(const o of players){ if(o.team===p.team||o.role==='GK') continue; if(L(p.team,o.x,o.y).d<l.d-0.3) n++; } return n; }
 
@@ -1048,6 +1052,9 @@ function aiCarrier(p,dt){
     if(p.aiT<=0&&!p.feint) startShot(p,true,'stand'); return; }
   if(p.feint) return;
   if(p.role!=='GK'&&!p.throwIn&&defendersAhead(p)===0&&l.d<(isWing(p)?6.9:8.8)){ startShot(p,true); return; } // fri: fløjene løber helt ind, før de hopper
+  if(freeRun(p)&&l.d>=(isWing(p)?6.9:8.8)&&!p.feint){ // fri bane: løb mod mål, spil kun bolden frem til en medspiller, der er længere fremme og fri
+    p.holdT=(p.holdT||0)+dt; const fwd=players.find(q=>q.team===p.team&&q!==p&&q.role!=='GK'&&defendersAhead(q)===0&&L(q.team,q.x,q.y).d<l.d-3.5&&!laneBlocked(p,q));
+    if(fwd&&p.holdT>0.2&&rnd()<dt*2.5) doPass(p,fwd); return; }
   p.holdT=(p.holdT||0)+dt;
   if(p.role==='GK'&&p.longPlan&&p.holdT>0.25&&!p.throwIn){ // langt udkast: vent på, at en fløj er fri
     const w=players.filter(q=>q.team===p.team&&isWing(q)&&wingOpen(p,q)).sort((a,b)=>L(a.team,a.x,a.y).d-L(b.team,b.x,b.y).d)[0];
@@ -1077,6 +1084,7 @@ function aiCarrier(p,dt){
 function attackTarget(p){
   const t=p.team; let [lx,d]=ATT[p.role];
   const bl=L(t,ball.x,ball.y), wing=p.role==='LW'||p.role==='RW', back=p.role.endsWith('B');
+  if(ball.holder===p&&freeRun(p)){ const pl=L(t,p.x,p.y); return W(t,pl.lx+(10-pl.lx)*0.45,6.2); } // fri bane: boldholderen går direkte mod mål
   // kontra: fløjene løber langs sidelinjen mod hjørnet, resten følger i anden bølge
   if(back&&secondWave(t)){ // anden bølge: bagspillerne stormer op i deres baner, boldholderen mod 9 m
     if(ball.holder===p) return W(t,clamp(L(t,p.x,p.y).lx,5.5,14.5),8.0);
