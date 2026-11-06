@@ -2,6 +2,12 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.27.0 – 2026-11-06 – Balance, afleveringer, vægt i løbet og målmandens placering
+- Balance afgør præcisionen: skud i fart mod mål og på toppen af hoppet er mere præcise, skud i et sving, væk fra mål eller med en forsvarer hængende på spreder mere (gælder både dig og computeren)
+- Afleveringer: lukket bane giver en høj aflevering hen over forsvarerens arme; under pres kan afleveringen blive upræcis og lande bag modtageren eller ved fødderne; modtageren vender sig mod bolden og griber med armene frem
+- Vægt i løbet: spillerne tager et par skridt om at komme op i fart og bremse, en vending i fuld fart koster mere, og forsvarerne flytter sig med tydelige sideskridt
+- Målmanden placerer sig bedre: træder frem mod langskud for at mindske vinklen, står tættere på stregen ved skud tæt på, og på kontra 1 mod 1 går han ud tidligt og trækker sig tilbage, når skytten kommer tæt på
+
 ## v0.26.6 – 2026-11-06 – Pause ved halvleg og slut, opstilling til 2. halvleg
 - Ved halvleg og når kampen er slut, stopper spillet: spillerne går i stå, der skydes og afleveres ikke, og resultatet vises
 - 2. halvleg starter med det angribende hold stillet op ved midterlinjen og forsvaret ved 9 m, ligesom ved en rigtig kampstart

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1422">
-<title>Håndbold v0.26.6</title>
+<title>Håndbold v0.27.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -200,7 +200,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.26.6';
+const VERSION='0.27.0';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -753,6 +753,13 @@ function startShot(p,ai,forceType){
     if(d<3.3&&L(p.team,q.x,q.y).d<L(p.team,p.x,p.y).d+0.3){ q.block=0.75; if(q!==ctrl&&d<jd){jd=d;jumper=q;} } }
   if(jumper&&type!=='fall'&&jumper.z<0.01){ jumper.vz=3.1; }
 }
+function balanceOf(p){
+  const g=W(p.team,10,0), gx=g.x-p.x, gy=g.y-p.y, gn=Math.hypot(gx,gy)||1, v=Math.hypot(p.vx,p.vy); let b=1;
+  if(v>1.2){ const fw=(p.vx*gx+p.vy*gy)/(gn*v); b*=fw>0.6?0.9:fw<-0.2?1.3:1.12; }                 // i fart mod mål / på tværs / væk fra mål
+  if(p.z>0.05&&p.shot){ const sp=SHOT[p.shot.type]; if(sp.air>0){ const top=sp.air*0.5, u=Math.abs(p.shot.t-top)/Math.max(0.05,top); b*=u<0.35?0.92:u>0.8?1.1:1; } } // på toppen af hoppet
+  for(const o of players){ if(o.team!==p.team&&o.role!=='GK'&&dist(o,p)<0.75){ b*=1.18; break; } }   // en forsvarer hænger på
+  return clamp(b,0.82,1.4);
+}
 function launchShot(p){
   p.wasSeven=p.seven; p.seven=false; passive=null; atkT=0;
   { const d0=Math.hypot(p.x-10,p.y-goalY(p.team)); const k0=d0>20?'skud egen halvdel':d0>12?'skud 12-20m':'skud <12m'; STATS[k0]=(STATS[k0]||0)+1; }
@@ -784,7 +791,8 @@ function launchShot(p){
   const lob=false; // hængning er slået fra (v0.19.1)
   if(lob){ ax=clamp((k.x-10)/1.32*0.4+(rnd()-0.5)*0.6,-0.8,0.8); zl=1.55; p.shot.lob=true; p.shot.legs=false; }
   const lp=L(t,p.x,p.y), angled=p.shot.type==='wing'||(Math.abs(lp.lx-10)>6&&lp.d<7);
-  let err=(1-0.15*dk(t))*(lob?0.6:1)*(p.wasSeven?0.9:1)*(p.shot.sig?0.88:1)*sp.err+(frontDef(p)<1.2?0.22:0)+(Math.abs(lp.lx-10)>7?0.06:0)
+  const bal=balanceOf(p);                                                       // i balance: præcist – i sving, væk fra mål eller med en forsvarer på: spreder mere
+  let err=bal*(1-0.15*dk(t))*(lob?0.6:1)*(p.wasSeven?0.9:1)*(p.shot.sig?0.88:1)*sp.err+(frontDef(p)<1.2?0.22:0)+(Math.abs(lp.lx-10)>7?0.06:0)
     +Math.max(0,sd-9.5)*0.07*(1.6-rv(p,'skud')*0.12);           // langskud: kun gode skytter rammer langt fra
   err*=(1.5-rv(p,'praecision')*0.1)*(1+(1-(p.sta??1))*0.35);    // præcision (og træthed)
   if(angled) err+=(10-rv(p,'vinkel'))*0.04;                      // fløjskud og spidse vinkler: fløjene er bedst
@@ -997,16 +1005,19 @@ function longThrow(k,q){ k.hardThrow=true; doPass(k,q); k.hardThrow=false; msg('
 function doPass(p,q){
   const pvLow=q.role==='PV'&&posAtt(p.team)&&p.role!=='GK'&&!p.kick;          // lav stødaflevering til stregen
   const b=ball, rz=1.45, d0=dist(p,q), tz=pvLow?0.55:1.35;
-  const lob=!p.hardThrow&&d0>16&&(p.role==='GK'?laneBlocked(p,q)&&rnd()<0.6:rnd()<0.18); // lang aflevering går af og til højt (målmanden kaster fladt, når banen er fri)
-  let tx=q.x, ty=q.y, tt=0.3;
+  const lob=!p.hardThrow&&d0>16&&(p.role==='GK'?laneBlocked(p,q)&&rnd()<0.6:rnd()<0.18);
+  const over=!lob&&!pvLow&&!p.kick&&p.role!=='GK'&&d0>3.5&&d0<13&&laneBlocked(p,q)&&rnd()<0.6;   // lukket bane: højt over forsvarerens arme // lang aflevering går af og til højt (målmanden kaster fladt, når banen er fri)
+  let tx=q.x, ty=q.y, tt=0.3; const press=p.role!=='GK'&&!p.kick&&!p.throwIn&&(frontDef(p)<1.0||!!p.contact);
   for(let i=0;i<3;i++){ // løs for hvor modtageren er, når bolden når frem
     const d=Math.hypot(tx-p.x,ty-p.y);
     const sp=clamp(16+d*0.52,16,d>18?25:23)*(lob?0.62:1)*(0.9+rv(p,'aflevering')*0.02)*(posAtt(p.team)&&d<9?1.15:1)*(p.hardThrow?1.2:1); // langt udkast er hårdt // korte afleveringer i positionsspil er hurtigere
     tt=Math.max(0.1,d/sp);
     tx=clamp(q.x+q.vx*tt,0.8,19.2); ty=clamp(q.y+q.vy*tt,0.8,39.2);
   }
+  let tz2=tz; if(over){ tz2=1.95; tt*=1.12; }
+  if(press&&rnd()<0.09*(1.3-rv(p,'aflevering')*0.05)){ const a=rnd()<0.5?Math.atan2(-q.vy,-q.vx):rnd()*6.28, o=0.9+rnd()*0.5; tx=clamp(tx+Math.cos(a)*o,0.8,19.2); ty=clamp(ty+Math.sin(a)*o,0.8,39.2); tz2=rnd()<0.5?0.35:tz2; } // under pres: afleveringen bliver upræcis – bag ham eller ved fødderne
   b.mode='pass'; b.holder=null; b.x=p.x; b.y=p.y; b.z=rz; b.tx=tx; b.ty=ty; b.lob=lob;
-  b.vx=(tx-p.x)/tt; b.vy=(ty-p.y)/tt; b.vz=(tz-rz+0.5*G*tt*tt)/tt; b.bounce=null;
+  b.vx=(tx-p.x)/tt; b.vy=(ty-p.y)/tt; b.vz=(tz2-rz+0.5*G*tt*tt)/tt; b.bounce=null;
   if(pvLow&&d0>2.5){ const t1=tt*0.58; b.vz=(0.1-rz+0.5*G*t1*t1)/t1; b.bounce={done:false}; }  // stødaflevering i gulvet til stregspilleren
   b.passTo=q; b.passer=p; b.lastTeam=p.team; b.age=0; b.checked=new Set(); b.safe=!!p.kick&&rnd()<0.95; // opgiverkast: ca. 95 % sikker
   p.thr=0.22; p.passT=time; if(Math.abs(tx-p.x)>0.2) p.face=Math.sign(tx-p.x);
@@ -1151,11 +1162,12 @@ function keeperTarget(p,att){
   if(ball.mode==='loose'&&chaser[p.team]===p) return {x:ball.x,y:ball.y};
   const h=ball.holder;
   if(h&&h.team===o&&h.role!=='GK'&&!h.seven){
-    if(trans&&trans.team===o&&defendersAhead(h)===0&&bl.d<17&&bl.d>3){ const dx=bl.lx-10, n=Math.hypot(dx,bl.d)||1, out=clamp(1+(17-bl.d)*0.14,1,2.5); return W(o,10+dx/n*out,bl.d/n*out); } // fri kontra: målmanden går ud mod skytten
+    if(trans&&trans.team===o&&defendersAhead(h)===0&&bl.d<17&&bl.d>3){ const dx=bl.lx-10, n=Math.hypot(dx,bl.d)||1, out=bl.d>8?clamp(1+(17-bl.d)*0.14,1,2.2):1.3; return W(o,10+dx/n*out,bl.d/n*out); } // fri kontra: målmanden går ud mod skytten
     if(isWing(h)&&Math.abs(bl.lx-10)>5.5&&bl.d<9) return W(o,10+Math.sign(bl.lx-10)*1.05,0.7);  // fløjskud: dæk den nærmeste stolpe
   }
   const dx=bl.lx-10, dy=Math.max(bl.d,0.5), n=Math.hypot(dx,dy);
-  return W(o,clamp(10+dx/n*1.0,8.8,11.2),clamp(dy/n*1.0,0.45,1.2));
+  const out=bl.d>8.5&&bl.d<13.5?1.35:bl.d<7.5?0.8:1.0;                             // træder frem mod langskud (mindre vinkel), bliver tættere på stregen ved skud tæt på
+  return W(o,clamp(10+dx/n*out,8.7,11.3),clamp(dy/n*out,0.45,1.45));
 }
 function focusFor(t){ // modstanderens spiller med bold (eller modtager)
   const b=ball, o=1-t;
@@ -1246,7 +1258,9 @@ function updPlayer(p,dt,att){
       if(d>0.05){ const sp=Math.min(vmax*(d>3?1:0.85),d*(d>3?3:2.6)); dvx=dx/d*sp; dvy=dy/d*sp; }
     }
     if((phase==='dead'||p.throwIn||p.seven)&&ball.holder===p){ dvx=dvy=0; p.vx*=0.5; p.vy*=0.5; }
-    let acc=p.role==='GK'?30:24; { const vs=Math.hypot(p.vx,p.vy), ds=Math.hypot(dvx,dvy); if(p.role!=='GK'&&vs>3.5&&ds>0.5&&(p.vx*dvx+p.vy*dvy)/(vs*ds)<0.3) acc=9; if(p===ctrl&&!AUTO) acc*=1.1; } // din spiller er 10 % kvikkere // retningsskift i fart koster et øjeblik
+    let acc=p.role==='GK'?30:24; { const vs=Math.hypot(p.vx,p.vy), ds=Math.hypot(dvx,dvy), dot=vs>0.1&&ds>0.1?(p.vx*dvx+p.vy*dvy)/(vs*ds):1;
+      if(p.role!=='GK'){ if(vs<2&&ds>3) acc=17; else if(ds<vs-1.5&&dot>0.5) acc=17; }          // vægt: tager et par skridt at komme op i fart og at bremse
+      if(p.role!=='GK'&&vs>3.5&&ds>0.5&&dot<0.3) acc=dot<-0.3?6.5:9; if(p===ctrl&&!AUTO) acc*=1.1; } // din spiller er 10 % kvikkere // retningsskift i fart koster et øjeblik
     if(!(p.role==='GK'&&p.plan)) steer(p,dvx,dvy,dt,acc);
     // kropskontakt bremser
     if(ball.holder===p&&p.role!=='GK'){ let touch=null;                          // kropskontakt: forsvareren spærrer vejen, angriberen glider langs ham
@@ -1265,6 +1279,7 @@ function updPlayer(p,dt,att){
   p.run+=(clamp(sp/6.5,0,1)-p.run)*Math.min(1,dt*10);
   p.phase+=sp*dt*5.4;
   if(p.grab||p.hold){ /* vend mod den man holder */ }
+  else if(ball.mode==='pass'&&ball.passTo===p&&!p.shot&&Math.abs(ball.x-p.x)>0.3&&Math.hypot(ball.x-p.x,ball.y-p.y)<5) p.face=Math.sign(ball.x-p.x); // vender sig mod bolden for at gribe den
   else if(Math.abs(p.vx)>0.5&&!p.shot&&!(p.role==='GK'&&p.plan)) p.face=Math.sign(p.vx);
   else if(sp<0.5&&!p.shot&&p.role!=='GK'){ const fx=ball.x-p.x; if(Math.abs(fx)>0.6) p.face=Math.sign(fx); }
 }
@@ -1744,7 +1759,7 @@ function drawPlayer(p){
   if(!gk&&!p.ref){ rot=f*0.11*run; lift+=Math.abs(s)*0.045*run;                      // læner sig frem i løbet og "hopper" let i skridtet
     const at=attTeam();
     if(at!==p.team&&!holding&&phase==='play'&&L(1-p.team,p.x,p.y).d<11){             // forsvarsstilling: bred, bøjet i knæene, armene oppe, sidelæns skridt
-      const sh=s*0.1*run; rot=0; oy=0.07; lf=[-0.3+sh,0]; rf=[0.3+sh*0.6,-Math.max(0,c)*0.06*run]; lh=[-0.44,-1.52+Math.abs(s)*0.05]; rh=[0.44,-1.55-Math.abs(c)*0.05]; } }
+      const sh=s*0.06*run, wd=0.32-0.16*Math.abs(c)*run; rot=0; oy=0.07+0.03*Math.abs(s)*run; lf=[-wd+sh,-Math.max(0,c)*0.05*run]; rf=[wd+sh,-Math.max(0,-c)*0.05*run]; lh=[-0.44,-1.52+Math.abs(s)*0.05]; rh=[0.44,-1.55-Math.abs(c)*0.05]; } }
   if(gk){
     lf=[-0.27+s*0.1*run,0]; rf=[0.27-s*0.1*run,0]; lh=[-0.55,-1.42]; rh=[0.55,-1.42];
     const pl=p.plan;
@@ -1790,6 +1805,7 @@ function drawPlayer(p){
   }
   if(holding&&p.shot&&!p.shot.released) bl=[rh[0],rh[1]-0.06];
   if(gk&&holding&&p.catchT&&time-p.catchT<0.55){ const u=(time-p.catchT)/0.55; oy=0.12*(1-u); rot=-f*0.1*(1-u); lh=[0.18,-1.25]; rh=[0.26,-1.18]; bl=[0.3,-1.2]; } // griber bolden ind til brystet
+  if(!holding&&ball.mode==='pass'&&ball.passTo===p&&!gk&&!p.shot){ const bd=Math.hypot(ball.x-p.x,ball.y-p.y); if(bd<4.5){ const u=1-bd/4.5, hz=-clamp(ball.z,0.4,2.0); lh=[0.3+0.25*u,(-1.25+hz)/2-0.1]; rh=[0.36+0.28*u,(-1.25+hz)/2-0.15]; } } // modtageren griber bolden med armene frem
   if(holding&&p.feint){ bl=p.feint.type==='shot'?[rh[0],rh[1]-0.06]:[0.4,-1.12]; if(p.feint.type==='side') rh=[0.38,-1.08]; }
   // 7-meter-forseelser: offeret og forsvareren
   const fa=foulAnim, fk=fa&&fa.kind;
