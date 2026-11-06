@@ -2,6 +2,13 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.26.4 – 2026-11-06 – Mere retfærdige straffekast
+- Straffekast dømmes kun, når angriberen er på vej igennem mod mål (i fart mod mål, i skudhop eller i skud) og har en fri chance
+- Retningen betyder noget: en forseelse bagfra giver næsten altid straffekast, fra siden ca. hver anden gang og forfra kun sjældent (ellers frikast)
+- Forseelser på fri chance uden straffekast fløjtes ikke længere som frikast, så spillet flyder
+- Animationen: forsvareren og angriberen er i kontakt hele vejen – han hænger på, river ned, sparker benene væk eller skubber i luften, og forfra går han ind i ham, så han falder bagover
+- Lidt færre frikast fra tætte dueller (ca. 7 pr. kamp)
+
 ## v0.26.3 – 2026-11-06 – Målmændene redder lidt færre
 - Målmændenes ekstra redninger fra v0.26.0 er halveret: de redder stadig lidt flere langskud og fløjskud end før v0.26.0, men det er ikke længere så let for dem. Kontra er stadig næsten sikre mål
 

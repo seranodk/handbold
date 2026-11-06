@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1422">
-<title>Håndbold v0.26.3</title>
+<title>Håndbold v0.26.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -200,7 +200,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.26.3';
+const VERSION='0.26.4';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -833,7 +833,7 @@ function keeperPlan(k,shooter){
   const dive=!star&&(diff>0.85?rnd()<0.7:diff>0.6?rnd()<0.25:rnd()<0.03);   // skud i hjørnet: oftere et rigtigt dyk
   k.plan={sd:shooter&&shooter.shot&&shooter.shot.dist||9,t:0,react:star?react*0.6:react,tk,cx,cz,save,dir:Math.sign(cx-k.x)||1,diff,x0:k.x,done:false,star,dive};
 }
-const FREE_RATE=0.65, FUMBLE_RATE=0.5;
+const FREE_RATE=0.25, FUMBLE_RATE=0.5;
 function fumble(c,o){ // teknisk fejl: bolden bliver slået/glider ud af hånden i duellen
   const b=ball, a=Math.atan2(o.y-c.y,o.x-c.x)+(rnd()-0.5)*1.6, v=1.5+rnd()*2;
   b.holder=null; b.mode='loose'; b.x=c.x; b.y=c.y; b.z=1.0; b.vx=Math.cos(a)*v; b.vy=Math.sin(a)*v; b.vz=1+rnd()*1.2;
@@ -943,22 +943,25 @@ function clearChance(c,fouler){ // fri chance: inden for 9 m og ingen anden fors
     if(ol.d<l.d+0.2&&Math.abs(ol.lx-l.lx)<2.2) return false; }
   return true;
 }
-function foul(c,fouler,text){
+function foul(c,fouler,text,onlySeven){
   const sp=c.shot&&SHOT[c.shot.type], inAir=c.z>0.05||!!(sp&&sp.air>0&&c.shot.t<sp.air), shooting=!!c.shot;
-  if(clearChance(c,fouler)){ // 7-meter: vis i slowmotion hvorfor, så en kort overgang til opstillingen
-    const kind=/holdt/.test(text)?'pull':/arm/.test(text)?'arm':/bagfra/.test(text)?'trip':inAir?'push':shooting?'arm':(rnd()<0.5?'pull':'trip');
-    const fc=c.face||1; fouler.face=kind==='arm'?-fc:fc;
-    if(kind==='pull'){ fouler.x=c.x-fc*0.45; fouler.y=c.y; }             // bag ham med armene om ham
-    else if(kind==='trip'){ fouler.x=c.x-fc*0.75; fouler.y=c.y+0.1; }    // glider ind med benet
-    else if(kind==='arm'){ fouler.x=c.x+fc*0.62; fouler.y=c.y; }         // slår ned på kastearmen
-    else { fouler.x=c.x-fc*0.55; fouler.y=c.y; }                         // skubber ham i luften
-    foulAnim={c,f:fouler,t:0,kind,z0:inAir?Math.max(c.z,0.4):0};
-    c.shot=null; c.feint=null; c.fallT=0; c.vx=kind==='push'?fc*2.2:kind==='trip'?fc*1.6:0; c.vy=0;
+  // hvor kommer forsvareren fra? forfra (mellem ham og målet), fra siden eller bagfra
+  const g=W(c.team,10,0), gx=g.x-c.x, gy=g.y-c.y, gn=Math.hypot(gx,gy)||1, rx=fouler.x-c.x, ry=fouler.y-c.y, rn=Math.hypot(rx,ry)||1;
+  const cos=(rx*gx+ry*gy)/(rn*gn), dir=cos>0.45?'front':cos<-0.3?'back':'side';
+  const through=shooting||inAir||(c.vx*gx+c.vy*gy)/gn>1.0;                // kun straffe, når han er på vej igennem mod mål
+  if(through&&clearChance(c,fouler)&&rnd()<({front:0.2,side:0.6,back:0.95})[dir]){ // 7-meter: vis hvorfor, så en kort overgang til opstillingen
+    const kind=dir==='back'?(inAir?'push':rnd()<0.5?'pull':'trip'):dir==='front'?(inAir||rnd()<0.5?'block':'arm'):(inAir?'push':shooting||rnd()<0.5?'arm':'pull');
+    const fc=c.face||1; fouler.face=(kind==='arm'||kind==='block')?-fc:fc;
+    const off=kind==='pull'?-0.34:kind==='trip'?-0.5:kind==='arm'?0.42:kind==='block'?0.4:-0.38; // tæt på: de har kontakt
+    fouler.x=c.x+fc*off; fouler.y=c.y+(kind==='trip'?0.08:0);
+    foulAnim={c,f:fouler,t:0,kind,off:fouler.x-c.x,offy:fouler.y-c.y,z0:inAir?Math.max(c.z,0.4):0};
+    c.shot=null; c.feint=null; c.fallT=0; c.vx=kind==='push'?fc*1.1:kind==='trip'?fc*0.9:kind==='block'?-fc*0.8:0; c.vy=0;
     fouler.foulPose=kind; fouler.grab=null; fouler.tack=null; fouler.vx=fouler.vy=0;
     phase='foul'; phaseT=1.15;
     const nm=c.name||'Spilleren', fn=fouler.name||'forsvareren';
     msg('STRAFFEKAST',true,'#ff6b5b');
     return; }
+  if(onlySeven) return false;                                              // ingen straffe her: spillet kører videre
   c.shot=null; c.z=0; c.vx=c.vy=0;
   const w=pushOut(c.team,c.x,c.y,9); restart('free',c.team,w.x,w.y,text,c);
 }
@@ -1424,6 +1427,7 @@ function step(dt){
   if(phase==='dead'){ phaseT-=dt; if(phaseT<=0){ phase='play'; } }
   if(phase==='foul'){ // forseelsen afspilles, så stilles der op til 7-meter
     phaseT-=dt; const fa=foulAnim; if(fa){ fa.t+=dt; fa.c.fallT=fa.t; fa.c.z=fa.z0*Math.max(0,1-fa.t/0.4); }
+    if(fa&&fa.t<0.75){ fa.f.x=fa.c.x+fa.off*(fa.kind==='push'||fa.kind==='block'?1+fa.t*0.3:1); fa.f.y=fa.c.y+fa.offy; fa.f.vx=fa.f.vy=0; } // forsvareren hænger på – de har kontakt
     fadeA=phaseT<0.3?Math.min(0.85,(0.3-phaseT)/0.3*0.85):0;             // overgang: skærmen tones ned
     for(const p of players){ p.x+=p.vx*dt; p.y+=p.vy*dt; const k=Math.pow(0.08,dt); p.vx*=k; p.vy*=k; p.run*=k; }
     if(phaseT<=0){ const c=fa.c; c.fallT=null; c.z=0; fa.f.foulPose=null; foulAnim=null; fadeOut=true; const tk=penaltyTaker(c.team);
@@ -1455,7 +1459,7 @@ function step(dt){
   if(phase==='play'&&ball.holder&&ball.holder.role!=='GK'){ const c=ball.holder;
     if(!c.throwIn&&!c.seven&&!c.kick&&!c.gt&&L(c.team,c.x,c.y).d<9.5) for(const o of players){
       if(o.team===c.team||o.role==='GK'||(o===ctrl&&!AUTO)||o.down>0||o.tack||dist(o,c)>1.15) continue;
-      if(rnd()<(c.shot?0.4:0.14)*(sty(o.team)==='fysisk'?1.4:1)*dt&&clearChance(c,o)){ foul(c,o,c.shot?(c.z>0.05?'Frikast':'Frikast – arm'):(rnd()<0.55?'Frikast – holdt fast':'Frikast – takling bagfra')); break; } } }
+      if(rnd()<(c.shot?0.6:0.24)*(sty(o.team)==='fysisk'?1.4:1)*dt&&clearChance(c,o)){ if(foul(c,o,'Frikast',true)!==false) break; } } }
   // stepper & chasers
   for(const t of [0,1]){
     const f=focusFor(t); stepper[t]=null; helper[t]=null; pvGuard[t]=null;
@@ -1777,7 +1781,7 @@ function drawPlayer(p){
   // 7-meter-forseelser: offeret og forsvareren
   const fa=foulAnim, fk=fa&&fa.kind;
   if(fa&&p===fa.c){ const u=Math.min(1,fa.t/0.45), e=u*u;
-    if(fk==='pull'){ rot=-f*1.35*e; lh=[-0.45,-1.75+0.5*u]; rh=[0.4,-1.85+0.6*u]; lf=[0.2,-0.25*u]; rf=[0.35,-0.4*u]; }          // hevet bagover
+    if(fk==='pull'||fk==='block'){ rot=-f*1.35*e; lh=[-0.45,-1.75+0.5*u]; rh=[0.4,-1.85+0.6*u]; lf=[0.2,-0.25*u]; rf=[0.35,-0.4*u]; }          // hevet bagover
     else if(fk==='trip'){ rot=f*1.45*e; ox=f*0.35*u; lh=[0.6,-1.25]; rh=[0.72,-1.1]; lf=[-0.35,-0.3*u]; rf=[-0.2,-0.5*u]; }   // falder forover og tager fra med armene
     else if(fk==='arm'){ rot=-f*0.3*Math.sin(Math.min(1,fa.t/0.3)*Math.PI*0.5); rh=[0.12,-1.2]; lh=[0.18,-1.15]; oy=u>0.6?(u-0.6)*0.6:0; lf=[-0.25,0]; rf=[0.3,-0.1]; } // tager sig til armen og går i knæ
     else { rot=f*1.3*e; lh=[-0.55,-1.7]; rh=[0.55,-1.8]; lf=[-0.3,-0.2]; rf=[0.25,-0.3]; }                                  // skubbet i luften, lander på siden
@@ -1786,6 +1790,7 @@ function drawPlayer(p){
     if(fk==='pull'){ rot=-f*0.22*u; lh=[0.48,-1.15]; rh=[0.58,-1.22]; lf=[-0.3,0]; rf=[0.15,-0.05]; }
     else if(fk==='trip'){ rot=f*0.55*u; lift=0; oy=0.25*u; lf=[-0.3,0]; rf=[0.35+0.45*u,-0.05]; lh=[-0.45,-0.9]; rh=[-0.3,-0.85]; }
     else if(fk==='arm'){ rh=[0.3+0.25*u,-2.05+1.0*u]; lh=[-0.3,-0.95]; rot=f*0.12*u; }
+    else if(fk==='block'){ lh=[0.6,-1.35]; rh=[0.66,-1.42]; rot=f*0.22*u; lf=[-0.4,0]; rf=[0.25,-0.05]; } // går ind i ham forfra
     else { lh=[0.62,-1.3]; rh=[0.68,-1.36]; rot=f*0.18*u; lf=[-0.35,0]; rf=[0.2,-0.05]; }
   }
   if(p.ref){ if(p.gest==='arm') rh=[0.12,-2.28]; else if(p.gest==='point') rh=[0.78,-1.36]; }   // dommertegn
