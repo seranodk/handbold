@@ -2,6 +2,15 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.28.0 – 2026-11-06 – Smarte skud og fløjene bliver i forsvarskæden
+- Smarte skud (kan slås fra under Indstillinger → Smarte skud): du vælger stadig skudtype med tryk og placering med joysticket, men skuddet får den teknik, situationen kræver
+  - Lavt med en forsvarer foran: hofteskud forbi blokken (sjældnere blokeret)
+  - Lavt tæt på mål: gulvskud, der rammer gulvet foran målmanden og springer op (svært at redde)
+  - Højt med en forsvarer foran: skud over blokken med armen helt strakt (sjældnere blokeret)
+  - Kontra alene, målmanden er løbet ud, og du sigter højt: hurtig lobning over ham
+- Rettet: fløjene stormede frem fra forsvarskæden ved hvert skud og blev ved, selv om skuddet blev blokeret, eller angriberne fik returbolden. Nu starter de kun kontraløbet, mens skuddet er i luften, når målmanden har bolden, ved målkast, eller når en returbold er på vej til eget hold – ellers bliver de i kæden
+- Tilbagerulning: v0.27.0 (commit 6af0e82) er sidste version før smarte skud
+
 ## v0.27.0 – 2026-11-06 – Balance, afleveringer, vægt i løbet og målmandens placering
 - Balance afgør præcisionen: skud i fart mod mål og på toppen af hoppet er mere præcise, skud i et sving, væk fra mål eller med en forsvarer hængende på spreder mere (gælder både dig og computeren)
 - Afleveringer: lukket bane giver en høj aflevering hen over forsvarerens arme; under pres kan afleveringen blive upræcis og lande bag modtageren eller ved fødderne; modtageren vender sig mod bolden og griber med armene frem

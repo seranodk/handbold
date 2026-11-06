@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1422">
-<title>Håndbold v0.27.0</title>
+<title>Håndbold v0.28.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -168,6 +168,8 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
         <div class="floors" id="floors"></div>
         <div class="lbl">Sværhedsgrad</div>
         <div class="seg" id="diffSeg"><button data-d="0">Let</button><button data-d="1">Normal</button><button data-d="2">Svær</button></div>
+        <div class="lbl">Smarte skud</div>
+        <div class="seg" id="ctxSeg"><button data-c="1">Til</button><button data-c="0">Fra</button></div>
         <div class="lbl">Kamptid</div>
         <div class="seg" id="lenSeg">
           <button data-len="180" aria-pressed="true">2 × 3 min</button><button data-len="300">2 × 5 min</button><button data-len="600">2 × 10 min</button>
@@ -200,7 +202,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.27.0';
+const VERSION='0.28.0';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -552,8 +554,8 @@ function sixLine(lx,r=6){ if(lx>=8.5&&lx<=11.5) return r; const dx=lx<8.5?8.5-lx
 function inArea(x,y){ for(const t of [0,1]){ const l=L(t,x,y); if(l.d>-0.3&&l.d<sixLine(l.lx)) return true; } return false; }
 
 /* ================= TILSTAND ================= */
-let floorKey='landskamp', matchLen=180, half=1, diff=1;                 // Normal er standard
-try{ const f=localStorage.getItem('hb_floor'); if(f&&FLOORS[f]) floorKey=f; const m=+localStorage.getItem('hb_len2'); if(m===180||m===300||m===600) matchLen=m; const dv=localStorage.getItem('hb_diff'); if(dv==='0'||dv==='1'||dv==='2') diff=+dv; }catch(e){}
+let floorKey='landskamp', matchLen=180, half=1, diff=1, ctxShots=true;   // smarte skud: kan slås fra i Indstillinger                 // Normal er standard
+try{ const f=localStorage.getItem('hb_floor'); if(f&&FLOORS[f]) floorKey=f; const m=+localStorage.getItem('hb_len2'); if(m===180||m===300||m===600) matchLen=m; const dv=localStorage.getItem('hb_diff'); if(dv==='0'||dv==='1'||dv==='2') diff=+dv; if(localStorage.getItem('hb_ctx')==='0') ctxShots=false; }catch(e){}
 let players=[], ball=null, score=[0,0], clock=0, phase='menu', phaseT=0, time=0, ctrl=null, poss=0, passCount=0;
 let passive=null, atkT=0; // passivt spil
 let trans=null, celebTeam=-1, celebBy=null, autoHome=false, fetch=null;
@@ -642,6 +644,11 @@ function frontDef(p){ // afstand til nærmeste forsvarer mellem spiller og mål
     if(ol.d<l.d+0.2&&Math.abs(ol.lx-l.lx)<2.4) m=Math.min(m,dist(o,p)); }
   return m;
 }
+function earlyOK(p){ // fløjens tyvstart holder kun, så længe bolden er på vej til eget hold: skud i luften, egen bold, eller en returbold eget hold er nærmest
+  if(ball.mode==='shot') return true; if(phase==='fetch'&&fetch) return fetch.team===p.team;   // forbi mål: målkast til os
+  if(ball.holder) return ball.holder.team===p.team;
+  if(ball.mode==='loose'){ let bd=1e9, bt=-1; for(const q of players){ const d=Math.hypot(q.x-ball.x,q.y-ball.y); if(d<bd){bd=d;bt=q.team;} } return bt===p.team; }
+  return false; }
 function freeRun(p){ // (rimelig) fri bane mod mål: ingen forsvarer foran, eller én der står langt væk
   if(p.role==='GK'||p.throwIn||p.kick||p.seven) return false; const l=L(p.team,p.x,p.y); if(l.d<6.5) return false;
   const n=defendersAhead(p); return n===0||(n===1&&frontDef(p)>3.2&&l.d>9.5);
@@ -770,7 +777,7 @@ function launchShot(p){
     ax=(k.x<10?1:-1)*(0.5+rnd()*0.45); if(t===1) ax=(k.x<10?1:-1)*(0.5+rnd()*0.45);
     if(dk(t)){ ax=(k.x<10?1:-1)*(0.6+rnd()*0.28); }                           // klogere skytter: sikkert inden for stolpen, væk fra målmanden
     if(rnd()<0.25-0.1*dk(t)) ax=-ax; const hr=rnd(); zl=hr<0.45?0.35:hr<0.9?1.65:1.0;
-    if(p.role.endsWith('B')&&p.shot.type!=='fall') zl=frontDef(p)<1.6?1.75:0.4; // tæt forsvarer: over blokken, ellers lavt forbi ham ved hoften
+    if(p.role.endsWith('B')&&p.shot.type!=='fall') zl=frontDef(p)<1.6?(rnd()<0.55?1.75:0.4):0.4; // tæt forsvarer: over blokken, ellers lavt forbi ham ved hoften
     const sg=sigOf(p);
     if(sg&&!p.wasSeven&&rnd()<(p.rid.star?0.55:0.3)){ const far=Math.sign(10-p.x)||1; p.shot.sig=sg;   // spillerens eget skud
       if(sg==='langt'){ ax=far*(0.75+rnd()*0.2); zl=rnd()<0.5?0.4:1.6; }
@@ -787,24 +794,35 @@ function launchShot(p){
   }
   const sd=Math.hypot(p.x-10,p.y-gy); p.shot.dist=sd;
   const kOut=Math.abs(k.y-gy), human=!(p.shot.ai||p!==ctrl||AUTO);
-  // hængning: målmanden er gået ud – bolden løftes over ham (computeren selv, du ved at sigte højt)
-  const lob=false; // hængning er slået fra (v0.19.1)
-  if(lob){ ax=clamp((k.x-10)/1.32*0.4+(rnd()-0.5)*0.6,-0.8,0.8); zl=1.55; p.shot.lob=true; p.shot.legs=false; }
+  // smarte skud: du vælger type (tryk) og placering (joystick) – spillet giver skuddet den teknik, situationen kræver
+  let ctx=null;
+  if(ctxShots&&!p.wasSeven&&!p.shot.sig&&!p.shot.legs&&p.shot.type!=='wing'&&p.shot.type!=='fall'&&p.role!=='PV'&&!(isWing(p)&&angled0(p))){
+    const fd=frontDef(p);
+    if(b.cls==='K'&&kOut>1.6&&zl>1.2&&sd<10) ctx='lob';                        // kontra 1 mod 1, målmanden er ude, du sigter højt: lobning
+    else if(zl<1&&fd<1.6&&sd>7.5) ctx='hip';                                    // lavt med en forsvarer foran: hofteskud forbi blokken
+    else if(zl<1&&sd<8.8&&p.shot.type!=='under') ctx='bounce';                  // lavt tæt på: gulvskud
+    else if(zl>1.2&&fd<1.6) ctx='over';                                         // højt med en forsvarer foran: over blokken
+  }
+  p.shot.ctx=ctx; b.ctx=ctx;
+  const lob=ctx==='lob';
+  if(lob){ ax=clamp(ax*0.6+(rnd()-0.5)*0.4,-0.8,0.8); zl=1.6; p.shot.lob=true; p.shot.legs=false; }   // lobningen følger stadig din retning
   const lp=L(t,p.x,p.y), angled=p.shot.type==='wing'||(Math.abs(lp.lx-10)>6&&lp.d<7);
   const bal=balanceOf(p);                                                       // i balance: præcist – i sving, væk fra mål eller med en forsvarer på: spreder mere
   let err=bal*(1-0.15*dk(t))*(lob?0.6:1)*(p.wasSeven?0.9:1)*(p.shot.sig?0.88:1)*sp.err+(frontDef(p)<1.2?0.22:0)+(Math.abs(lp.lx-10)>7?0.06:0)
     +Math.max(0,sd-9.5)*0.07*(1.6-rv(p,'skud')*0.12);           // langskud: kun gode skytter rammer langt fra
   err*=(1.5-rv(p,'praecision')*0.1)*(1+(1-(p.sta??1))*0.35);    // præcision (og træthed)
   if(angled) err+=(10-rv(p,'vinkel'))*0.04;                      // fløjskud og spidse vinkler: fløjene er bedst
+  if(ctx==='hip') err*=1.05; else if(ctx==='over') err*=1.04;
   const tx=10+ax*1.32+gauss()*err, tz=Math.max(0.15,zl+gauss()*err*0.7);
-  const rx=p.x+p.face*0.15, ry=p.y, rz=p.z+(p.shot.type==='fall'?1.45:p.shot.type==='under'?0.8:2.05)+(hgt(p)-190)/100; // høje skytter slipper bolden højere
-  const speed=lob?7.2+rnd()*1.2:(p.shot.sig==='kraft'?1.1:1)*sp.spd*(0.85+rv(p,'skud')*0.03)*(0.93+rnd()*0.12)*(sd>12?Math.max(0.78,1-(sd-12)*0.02):1);
+  const rx=p.x+p.face*0.15, ry=p.y, rz=p.z+(p.shot.type==='fall'?1.45:p.shot.type==='under'?0.8:ctx==='hip'?1.25:ctx==='over'?2.3:2.05)+(hgt(p)-190)/100; // høje skytter slipper bolden højere
+  const speed=lob?9.5+rnd()*1.5:(ctx==='bounce'?1.05:1)*(p.shot.sig==='kraft'?1.1:1)*sp.spd*(0.85+rv(p,'skud')*0.03)*(0.93+rnd()*0.12)*(sd>12?Math.max(0.78,1-(sd-12)*0.02):1);
   const dd=Math.hypot(tx-rx,gy-ry), tt=dd/speed;
   b.mode='shot'; b.holder=null; b.x=rx; b.y=ry; b.z=rz;
-  b.vx=(tx-rx)/tt; b.vy=(gy-ry)/tt; b.vz=(tz-rz+0.5*G*tt*tt)/tt;
+  b.vx=(tx-rx)/tt; b.vy=(gy-ry)/tt; b.vz=(tz-rz+0.5*G*tt*tt)/tt; b.bounce=null;
+  if(ctx==='bounce'){ const t1=tt*0.68; b.vz=(0.1-rz+0.5*G*t1*t1)/t1; b.bounce={done:false,tz:clamp(tz+0.35,0.5,1.1)}; } // gulvskud: rammer gulvet lige foran målmanden og springer op
   b.lastTeam=t; b.shooter=p; b.passer=null; b.age=0; b.checked=new Set([p]);
   b.curve=null; b.trail=null; b.frame=null;
-  if(lob) msg('Hængning!'); else if(p.shot.sig&&p.rid&&p.rid.star&&rnd()<0.5) msg(`${p.name}: ${SIG_NAME[p.shot.sig]}`); else if(p.shot.legs) msg('Mellem benene!');
+  if(lob) msg('Lobning!'); else if(p.shot.sig&&p.rid&&p.rid.star&&rnd()<0.5) msg(`${p.name}: ${SIG_NAME[p.shot.sig]}`); else if(p.shot.legs) msg('Mellem benene!');
   if(!lob&&!p.shot.legs&&p.shot.type==='wing'&&rv(p,'vinkel')>=7&&rnd()<0.14){ // skrueskud: bolden starter udad og drejer ind mod målet
     const sp=Math.hypot(b.vx,b.vy), nx=-b.vy/sp, ny=b.vx/sp, s0=Math.sign(nx*(10-p.x))||1, D=0.5, a=2*D/(tt*tt);
     const ax2=tx-s0*D*nx, ay2=gy-s0*D*ny; b.vx=(ax2-rx)/tt; b.vy=(ay2-ry)/tt;
@@ -816,7 +834,7 @@ function launchShot(p){
 function keeperPlan(k,shooter){
   const b=ball; if(Math.abs(b.vy)<0.1){ k.plan=null; return; }
   const tk=(k.y-b.y)/b.vy; if(tk<=0){ k.plan=null; return; }
-  const cx=b.x+b.vx*tk, cz=b.z+b.vz*tk-0.5*G*tk*tk;
+  const cx=b.x+b.vx*tk, cz=b.bounce&&b.mode==='shot'?b.bounce.tz:b.z+b.vz*tk-0.5*G*tk*tk;
   const react=(0.13+rnd()*0.12)*(1.3-rv(k,'reaktion')*0.06)+(k.faked&&time-k.faked<0.7?0.28:0), avail=Math.max(0,tk-react);
   const reach=0.36+Math.min(1.0,avail*4.5)+(rv(k,'placering')-5)*0.04;
   const hf=0.93; // samme rækkevidde uanset højde, så redningsprocenten ikke ændres af højden
@@ -825,7 +843,8 @@ function keeperPlan(k,shooter){
   // stjernen: ved hopskud/fløjskud/faldskud tæt på springer målmanden op med arme og ben spredt
   const star=!!(shooter&&shooter.shot&&shooter.shot.type!=='stand'&&shooter.shot.type!=='under'&&dist(shooter,k)<7.8);
   const SAVE_CLS={L:1.11,W:1.1,N:1,P:1,K:0.55};                // som i virkeligheden: flest redninger på langskud og fløjskud, få på kontra
-  let save; const sm=(SAVE_CLS[ball.cls]||1)*(1-0.16*dk(shooter?shooter.team:0))*(1+0.1*dk(k.team)); // modstanderen skyder smartere forbi målmanden – og hans målmand læser skuddene bedre
+  const CTX_SAVE={hip:0.95,bounce:0.85,over:1,lob:Math.abs(k.y-goalY(1-k.team))>1.6?0.3:1.2}; // gulvskud og lobning over en udestående målmand er svære
+  let save; const sm=(CTX_SAVE[ball.ctx]||1)*(SAVE_CLS[ball.cls]||1)*(1-0.16*dk(shooter?shooter.team:0))*(1+0.1*dk(k.team)); // modstanderen skyder smartere forbi målmanden – og hans målmand læser skuddene bedre
   if(shooter&&shooter.wasSeven){ save=onTarget&&rnd()<(k.faked&&time-k.faked<0.8?0.07:0.14+(rv(k,'reaktion')-5)*0.03); } // 7-meter: ca. 3 ud af 4 går ind
   else if(star) save=onTarget&&diff<(avail>0.2?1.1:0.95)&&rnd()<(shooter.shot.legs?0.25:0.45)*sm;
   else {
@@ -854,13 +873,14 @@ function fumble(c,o){ // teknisk fejl: bolden bliver slået/glider ud af hånden
 function saveBall(k,catchIt){
   const b=ball; msg('REDNING!',false,'#9fe3b0'); k.catchT=catchIt?time:-9;
   if(catchIt){ give(k); k.aiT=1.0; if(k.team===1) autoHome=true; return; } // modstanderens målmand griber: din spiller løber hjem
-  b.mode='loose'; b.lastTeam=k.team; trans=newTrans(k.team,true); b.age=0; b.noPick=null;
+  b.mode='loose'; b.lastTeam=k.team; trans=null; b.age=0; b.noPick=null; b.earlyChk=k.team;   // fløjene tyvstarter først, når det er sikkert, at returbolden er deres
   const pl=k.plan||{diff:0.5,cz:1,cx:b.x}, toGoal=Math.sign(b.vy)||1;            // retning mod mållinjen
   const angle=Math.min(1,Math.abs(b.vx)/(Math.abs(b.vy)||1));                      // skrå skud (fx fra fløjen)
   const stretch=Math.min(1,pl.diff/1.1);                                           // hvor langt målmanden måtte strække sig
   const pWide=pl.star?0.3:clamp(0.25+0.35*stretch+0.3*angle+(pl.cz>1.5?0.1:0),0.15,0.85);
   if(!pl.star&&pl.cz<1.5&&rnd()<0.22){ // dæmpet: bolden falder næsten død ned foran målmanden, som samler den op
     b.vx=b.vx*0.05+(rnd()-0.5)*0.6; b.vy=-toGoal*(0.3+rnd()*0.5); b.vz=0.4+rnd()*0.6; b.y=k.y-toGoal*0.25; b.x=clamp(pl.cx,8.8,11.2);
+    trans=newTrans(k.team,true);                                                // bolden falder død for målmanden: nu må fløjene tyvstarte
     return;
   }
   if(rnd()<pWide){ // styret ud til siden af målet: ryger over baglinjen -> målkast
@@ -874,6 +894,8 @@ function saveBall(k,catchIt){
     b.vy=-toGoal*(2.2+rnd()*3.3); b.vx=-b.vx*0.25+(rnd()-0.5)*4; b.vz=1+rnd()*2;
     b.y=k.y-toGoal*0.3;
   }
+  { const px=b.x+b.vx*0.45, py=b.y+b.vy*0.45; let bd=1e9, bt=-1;                 // returbolden: tyvstart kun, hvis det er målmandens hold, der er nærmest
+    for(const q of players){ const d=Math.hypot(q.x-px,q.y-py); if(d<bd){bd=d;bt=q.team;} } if(bt===k.team) trans=newTrans(k.team,true); }
 }
 
 /* ================= TAKLING ================= */
@@ -1019,7 +1041,7 @@ function doPass(p,q){
   b.mode='pass'; b.holder=null; b.x=p.x; b.y=p.y; b.z=rz; b.tx=tx; b.ty=ty; b.lob=lob;
   b.vx=(tx-p.x)/tt; b.vy=(ty-p.y)/tt; b.vz=(tz2-rz+0.5*G*tt*tt)/tt; b.bounce=null;
   if(pvLow&&d0>2.5){ const t1=tt*0.58; b.vz=(0.1-rz+0.5*G*t1*t1)/t1; b.bounce={done:false}; }  // stødaflevering i gulvet til stregspilleren
-  b.passTo=q; b.passer=p; b.lastTeam=p.team; b.age=0; b.checked=new Set(); b.safe=!!p.kick&&rnd()<0.95; // opgiverkast: ca. 95 % sikker
+  b.ctx=null; b.passTo=q; b.passer=p; b.lastTeam=p.team; b.age=0; b.checked=new Set(); b.safe=!!p.kick&&rnd()<0.95; // opgiverkast: ca. 95 % sikker
   p.thr=0.22; p.passT=time; if(Math.abs(tx-p.x)>0.2) p.face=Math.sign(tx-p.x);
   if(p.throwIn){ p.throwIn=false; } p.gt=false; if(p.kick){ p.kick=false; kickoffTeam=null; } for(const o of players) o.offer=null;
 }
@@ -1194,7 +1216,7 @@ function targetFor(p,att){
   else if(ball.mode==='loose'&&chaser[p.team]===p) tg=inArea(ball.x,ball.y)?outOfArea(ball.x,ball.y):{x:ball.x+ball.vx*0.15,y:ball.y+ball.vy*0.15};
   else if(trans&&trans.early&&trans.team===p.team&&isWing(p)&&trans[p.role]) tg=attackTarget(p); // starter kontraløbet før bolden er sikret
   else if(p.offer) tg=p.offer;
-  else if(p.early&&isWing(p)&&att!==p.team&&!(ball.holder&&ball.holder.team!==p.team)&&time-p.early<2.6) tg=W(p.team,p.role==='LW'?1.2:18.8,20.5); // tyvstart langs sidelinjen
+  else if(p.early&&isWing(p)&&time-p.early<2.6&&earlyOK(p)) tg=W(p.team,p.role==='LW'?1.2:18.8,20.5); // tyvstart langs sidelinjen – kun mens skuddet er i luften, eller når eget hold har bolden
   else if(att===p.team) tg=attackTarget(p);
   else tg=defenseTarget(p);
   if(kickoffTeam!==null&&p.team===kickoffTeam&&ball.holder!==p&&p.role!=='GK'){ const lim=isWing(p)?2.6:-0.6; tg={x:tg.x,y:up(p.team)?Math.max(tg.y,20-lim):Math.min(tg.y,20+lim)}; } // fløjene må stå lidt over midten
@@ -1344,6 +1366,7 @@ function updBall(dt){
   if(b.curve){ (b.trail=b.trail||[]).push([b.x,b.y,b.z]); if(b.trail.length>14) b.trail.shift(); if(b.age>b.curve.t+0.15) b.curve=null; } else if(b.trail) b.trail=null;
   if(b.z<0.1){ b.z=0.1; b.curve=null;
     if(b.mode==='pass'&&b.bounce&&!b.bounce.done&&b.vz<-1&&b.passTo){ b.bounce.done=true; const q=b.passTo, hs=Math.hypot(b.vx,b.vy)||1, rt=Math.max(0.12,Math.hypot(q.x-b.x,q.y-b.y)/hs); b.vz=(1.0-b.z+0.5*G*rt*rt)/rt; } // stødaflevering: hopper op i gulvet til modtageren
+    else if(b.mode==='shot'&&b.bounce&&!b.bounce.done&&b.vz<-1){ b.bounce.done=true; b.vx*=0.9; b.vy*=0.9; const rt=Math.max(0.06,Math.abs(goalY(b.lastTeam)-b.y)/(Math.abs(b.vy)||1)); b.vz=(b.bounce.tz-b.z+0.5*G*rt*rt)/rt; } // gulvskud: springer op mod målet
     else if(b.vz<-1){ b.vz=-b.vz*0.4; b.vx*=0.72; b.vy*=0.72; if(b.mode==='pass') b.mode='loose'; }   // en håndbold hopper lavt og dødt
     else { b.vz=0; const f=Math.max(0,1-3.2*dt); b.vx*=f; b.vy*=f; if(b.mode==='shot'&&Math.hypot(b.vx,b.vy)<4) b.mode='loose'; }
   }
@@ -1363,7 +1386,7 @@ function updBall(dt){
     for(const q of players){ if(q.team===b.lastTeam||q.role==='GK'||b.checked.has(q)) continue;
       if(Math.abs(b.y-q.y)<0.4&&Math.abs(b.x-q.x)<(q.block>0?0.7:0.35)){ b.checked.add(q);
         const hq=hgt(q), top=q.z+(q.block>0?2.5:1.9)+(hq-190)/100;           // høje forsvarere dækker mere
-        if(b.z<top&&b.z>0.3&&rnd()<(q.block>0?0.2:0.06)*(0.6+rv(q,'forsvar')*0.08)*clamp(1+(hq-190)/60,0.75,1.3)*(1+0.35*dk(q.team))){ b.mode='loose'; b.vy*=-0.25; b.vx=(rnd()-0.5)*6; b.vz=2.5; b.lastTeam=q.team; k.plan=null; msg('Blokeret!'); return; } } }
+        if(b.z<top&&b.z>0.3&&rnd()<(q.block>0?0.2:0.06)*(0.6+rv(q,'forsvar')*0.08)*clamp(1+(hq-190)/60,0.75,1.3)*(1+0.35*dk(q.team))*(b.ctx==='hip'?0.55:b.ctx==='over'?0.6:1)){ b.mode='loose'; b.vy*=-0.25; b.vx=(rnd()-0.5)*6; b.vz=2.5; b.lastTeam=q.team; k.plan=null; msg('Blokeret!'); return; } } }
   }
   if(b.mode==='pass'&&b.passTo){ // præcision: bolden følger modtagerens løb
     const q=b.passTo, hs=Math.hypot(b.vx,b.vy), rd=Math.hypot(q.x-b.x,q.y-b.y);
@@ -1803,6 +1826,11 @@ function drawPlayer(p){
     if(run>0.25&&!gk){ const bz=0.12+Math.abs(Math.sin(p.phase*0.5))*0.62; bl=[0.36,-bz]; rh=[0.34,-bz-0.16]; }
     else { rh=[0.36,-1.05]; bl=[0.42,-1.1]; }
   }
+  if(p.shot&&p.shot.ctx){ const st=p.shot, sp=SHOT[st.type], w=Math.min(1,st.t/sp.rel);   // smarte skud: armens bane viser teknikken
+    if(st.ctx==='hip'&&st.type!=='under'){ rh=st.released?[0.78,-1.0]:[0.3-0.9*w,-1.2+0.1*w]; rot+=f*0.14; lh=[0.4,-1.35]; }   // hofteskud: armen ud i siden, slipper i hoftehøjde
+    else if(st.ctx==='over'){ rh=st.released?[0.45,-2.3]:[rh[0],Math.min(rh[1],-2.2)]; }                                     // over blokken: armen helt strakt
+    else if(st.ctx==='lob'&&st.released){ rh=[0.4,-2.05]; }                                                                 // lobning: blødt løft
+    else if(st.ctx==='bounce'&&st.released){ rh=[0.75,-1.15]; rot+=f*0.12; } }                                               // gulvskud: kastet nedad
   if(holding&&p.shot&&!p.shot.released) bl=[rh[0],rh[1]-0.06];
   if(gk&&holding&&p.catchT&&time-p.catchT<0.55){ const u=(time-p.catchT)/0.55; oy=0.12*(1-u); rot=-f*0.1*(1-u); lh=[0.18,-1.25]; rh=[0.26,-1.18]; bl=[0.3,-1.2]; } // griber bolden ind til brystet
   if(!holding&&ball.mode==='pass'&&ball.passTo===p&&!gk&&!p.shot){ const bd=Math.hypot(ball.x-p.x,ball.y-p.y); if(bd<4.5){ const u=1-bd/4.5, hz=-clamp(ball.z,0.4,2.0); lh=[0.3+0.25*u,(-1.25+hz)/2-0.1]; rh=[0.36+0.28*u,(-1.25+hz)/2-0.15]; } } // modtageren griber bolden med armene frem
@@ -2191,6 +2219,8 @@ function buildMenu(){
   }
   [...$('lenSeg').children].forEach(b=>{ b.setAttribute('aria-pressed',+b.dataset.len===matchLen);
     b.onclick=()=>{ matchLen=+b.dataset.len; try{localStorage.setItem('hb_len2',matchLen);}catch(e){} [...$('lenSeg').children].forEach(c=>c.setAttribute('aria-pressed',c===b)); }; });
+  [...$('ctxSeg').children].forEach(b=>{ b.setAttribute('aria-pressed',(b.dataset.c==='1')===ctxShots);
+    b.onclick=()=>{ ctxShots=b.dataset.c==='1'; try{localStorage.setItem('hb_ctx',ctxShots?'1':'0');}catch(e){} [...$('ctxSeg').children].forEach(c=>c.setAttribute('aria-pressed',c===b)); }; });
   [...$('diffSeg').children].forEach(b=>{ b.setAttribute('aria-pressed',+b.dataset.d===diff);
     b.onclick=()=>{ diff=+b.dataset.d; try{localStorage.setItem('hb_diff',diff);}catch(e){} [...$('diffSeg').children].forEach(c=>c.setAttribute('aria-pressed',c===b)); $('diffTag').textContent='Sværhedsgrad: '+DIFF_NAME[diff]; }; });
   $('diffTag').textContent='Sværhedsgrad: '+DIFF_NAME[diff];
