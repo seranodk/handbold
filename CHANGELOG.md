@@ -2,6 +2,10 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.26.6 – 2026-11-06 – Pause ved halvleg og slut, opstilling til 2. halvleg
+- Ved halvleg og når kampen er slut, stopper spillet: spillerne går i stå, der skydes og afleveres ikke, og resultatet vises
+- 2. halvleg starter med det angribende hold stillet op ved midterlinjen og forsvaret ved 9 m, ligesom ved en rigtig kampstart
+
 ## v0.26.5 – 2026-11-06 – Computeren går mod mål i kontra, Normal er standard
 - Har computerens boldholder fri eller rimelig fri bane (ingen forsvarer foran, eller én langt væk), løber han direkte mod mål og afslutter i stedet for at spille bolden tilbage. Han spiller kun frem til en medspiller, der er længere fremme og fri
 - Normal er nu standard-sværhedsgrad. Har du selv valgt en sværhedsgrad, huskes den stadig

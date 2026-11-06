@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1422">
-<title>Håndbold v0.26.5</title>
+<title>Håndbold v0.26.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -200,7 +200,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.26.5';
+const VERSION='0.26.6';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -1455,7 +1455,12 @@ function step(dt){
       const w=pushOut(1-h.team,h.x,h.y,0.1); restart('free',1-h.team,w.x,w.y,'Passivt spil – bolden til modstanderen'); } }
   if(phase==='goal'){ phaseT-=dt; if(phaseT<=0&&restartFn){ const f=restartFn; restartFn=null; f(); } }
   if(clock<=0&&phase==='play'&&ball.mode!=='shot'){ clock=0; if(half===1) halfTime(); else endMatch(); return; }
-  if(phase==='half'){ phaseT-=dt; if(phaseT<=0){ secondHalf(); } }
+  if(phase==='half'){ phaseT-=dt; if(phaseT<=0){ secondHalf(); return; } }
+  if(phase==='half'||phase==='over'){ // pause/slut: spillet står stille, spillerne går i stå
+    for(const p of players){ const k=Math.pow(0.02,dt); p.vx*=k; p.vy*=k; p.x+=p.vx*dt; p.y+=p.vy*dt; p.run*=k; p.shot=null; p.tack=null; p.feint=null; p.z=0; }
+    if(ball.holder){ ball.x=ball.holder.x; ball.y=ball.holder.y; } else { ball.vx=ball.vy=ball.vz=0; }
+    for(const m of msgs) m.t+=dt; msgs=msgs.filter(m=>m.t<m.life); updRefs(dt);
+    return; }
   const att=attTeam();
   if(trans){ trans.t+=dt; if(trans.early?trans.t>3:(trans.team!==att||trans.t>7)) trans=null; }
   updCtrl(att);
@@ -1914,6 +1919,10 @@ function secondHalf(){ koPend=null;
   flip=!flip; half=2; clock=matchLen; halftimeSubs();
   for(const p of players){ p.x=20-p.x; p.y=40-p.y; p.vx=-p.vx; p.vy=-p.vy; p.face=-p.face; p.plan=null; p.shot=null; p.tack=null; p.z=0; }
   ball.x=20-ball.x; ball.y=40-ball.y;
+  { const kt=1, LANE={LW:2.5,LB:6.2,CB:8.6,PV:10,RB:13.8,RW:17.5}, DLANE=[3.5,6.5,8.8,11.2,13.5,16.5]; let di=0; // 2. halvleg: angriberne stiller op ved midterlinjen, forsvaret ved 9 m
+    for(const p of players){ if(p.role==='GK') continue; let w;
+      if(p.team===kt) w=W(kt,LANE[p.role]??10,20.6); else w=W(kt,DLANE[di++%6],8.2);
+      p.x=w.x; p.y=w.y; p.vx=p.vy=0; p.run=0; p.down=0; p.fallT=null; p.grab=null; } }
   restart('kickoff',1,10,20,'2. halvleg');
   msg('Holdene har skiftet side');
   updateHud(true);
