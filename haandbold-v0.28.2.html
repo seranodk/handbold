@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1422">
-<title>Håndbold v0.28.1</title>
+<title>Håndbold v0.28.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -202,7 +202,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.28.1';
+const VERSION='0.28.2';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -685,12 +685,13 @@ function keeperToCenter(t){
   phase='dead'; phaseT=99;
 }
 function restart(kind,team,x,y,text,who){
-  const b=ball; let p;
+  const b=ball; let p, spot=null;
   if(kind==='goalthrow'){ p=gkOf(team); }
   else if(kind==='kickoff'){ p=players.find(q=>q.team===team&&q.role==='PV'); p.x=10; p.y=20; kickoffTeam=team; }
   else { p=who||nearest(team,x,y); const sx=clamp(x,0,20), sy=clamp(y,0.5,39.5);
-    if(kind==='free'&&Math.hypot(sx-p.x,sy-p.y)>0.4){ p.freeSpot={x:sx,y:sy}; } else { p.x=sx; p.y=sy; } }   // frikast: han går selv hen til stedet i stedet for at blive flyttet
-  for(const q of players){ q.tack=null; q.throwIn=false; q.offer=null; q.kick=false; q.gt=false; q.seven=false; q.freeSpot=null; }
+    if(kind==='free'&&Math.hypot(sx-p.x,sy-p.y)>0.4){ spot={x:sx,y:sy}; } else { p.x=sx; p.y=sy; } }   // frikast: han går selv hen til stedet i stedet for at blive flyttet
+  for(const q of players){ q.tack=null; q.throwIn=false; q.offer=null; q.kick=false; q.gt=false; q.seven=false; q.freeSpot=null; q.freeKick=false; }
+  p.freeSpot=spot; p.freeKick=kind==='free';
   p.vx=p.vy=0; p.shot=null; p.down=0; p.z=0;
   b.passer=null; if(kind!=='free'||p.team!==poss){ passive=null; atkT=0; } give(p); passCount=0; trans=kind==='goalthrow'?newTrans(team):null; celebTeam=-1; celebBy=null;
   if(kind==='throwin'){ // indkast: låst på sidelinjen, 2-3 medspillere tilbyder sig
@@ -998,13 +999,18 @@ function foul(c,fouler,text,onlySeven){
     return; }
   if(onlySeven) return false;                                              // ingen straffe her: spillet kører videre
   c.shot=null; c.z=0; c.vx=c.vy=0;
-  const w=pushOut(c.team,c.x,c.y,9); restart('free',c.team,w.x,w.y,text,c);
+  const lc=L(c.team,c.x,c.y), w=lc.d<12?onNine(c.team,c.x,c.y,9.05):{x:c.x,y:c.y}; restart('free',c.team,w.x,w.y,text,c); // frikast tæt på: tages ved den stiplede 9-meter-linje
 }
 function startTackle(p){
   const c=ball.holder;
   if(!c||c.throwIn||c.seven||c.team===p.team||p.tack||p.shot||p.down>0||p.z>0.05||p.role==='GK') return;
   const dx=c.x-p.x, dy=c.y-p.y, d=Math.hypot(dx,dy)||1;
   p.tack={t:0,hit:false,dx:dx/d,dy:dy/d}; p.face=dx>=0?1:-1;
+}
+function onNine(t,x,y,r){ // punktet på 9-meter-linjen (stiplet) ud for x,y
+  const l=L(t,x,y); let lx=l.lx, d;
+  if(lx>=8.5&&lx<=11.5) d=r; else { const cx=lx<8.5?8.5:11.5, vx=lx-cx, vy=Math.max(l.d,0.01), n=Math.hypot(vx,vy); lx=cx+vx/n*r; d=vy/n*r; }
+  return W(t,clamp(lx,0.3,19.7),Math.max(0.3,d));
 }
 function pushOut(t,x,y,r){ // flyt et punkt uden for t's 9-meter-linje
   const l=L(t,x,y); if(l.d>=sixLine(l.lx,r)) return {x,y};
@@ -1275,6 +1281,7 @@ function updPlayer(p,dt,att){
       let tg=targetFor(p,att);
       if(phase==='dead'&&ball.holder&&ball.holder.team!==p.team&&p.role!=='GK'&&!ball.holder.seven){ const h=ball.holder.freeSpot||ball.holder, dx=tg.x-h.x, dy=tg.y-h.y, d=Math.hypot(dx,dy); // frikast: 3 meters afstand
         if(d<3){ const n=d||1, ux=d>0.01?dx/n:(10-h.x>0?1:-1), uy=d>0.01?dy/n:0; tg={x:h.x+ux*3,y:h.y+uy*3}; } }
+      if(phase==='dead'&&ball.holder&&ball.holder.team===p.team&&ball.holder!==p&&p.role!=='GK'&&ball.holder.freeKick) tg=pushOut(p.team,tg.x,tg.y,9.4); // frikast: angriberne skal stå uden for 9 m
       if(p.role!=='GK'&&chaser[p.team]!==p&&ball.holder!==p&&!p.offer){ // hold afstand til holdkammerater, så de ikke klumper
         for(const o of players){ if(o===p||o.team!==p.team||o.role==='GK') continue; const ox=tg.x-o.x, oy=tg.y-o.y, od=Math.hypot(ox,oy);
           if(od<2.4&&od>0.01){ tg.x+=ox/od*(2.4-od)*0.6; tg.y+=oy/od*(2.4-od)*0.6; } }
@@ -1521,7 +1528,7 @@ function step(dt){
   for(const t of [0,1]){
     const f=focusFor(t); stepper[t]=null; helper[t]=null; pvGuard[t]=null;
     { const pv=players.find(q=>q.team!==t&&q.role==='PV'); if(pv&&dk(t)){ let bd=1e9; for(const q of players){ if(q.team!==t||q.role==='GK'||q===ctrl) continue; const d=dist(q,pv); if(d<bd){bd=d;pvGuard[t]=q;} } } }
-    if(f&&L(1-t,f.x,f.y).d<12.5){ let best=null,bd=1e9; for(const q of players){ if(q.team!==t||q.role==='GK'||q===ctrl) continue; const d=dist(q,f); if(d<bd){bd=d;best=q;} } stepper[t]=best;
+    if(f&&L(1-t,f.x,f.y).d<12.5){ let best=null,bd=1e9; const fwz=Math.abs(L(1-t,f.x,f.y).lx-10)>6.3; for(const q of players){ if(q.team!==t||q.role==='GK'||q===ctrl) continue; if(isWing(q)&&!fwz) continue; const d=dist(q,f); if(d<bd){bd=d;best=q;} } stepper[t]=best; // fløjen træder kun ud mod en angriber ude i hjørnet – ellers bliver han i kæden
       let hb=null,hd=1e9; for(const q of players){ if(q.team!==t||q.role==='GK'||q===ctrl||q===best) continue; const fl=L(1-t,f.x,f.y), ql=L(1-t,q.x,q.y); if(Math.abs(ql.lx-10)>Math.abs(fl.lx-10)+0.5) continue; const d=dist(q,f); if(d<hd){hd=d;hb=q;} } helper[t]=hd<5?hb:null; }
     chaser[t]=null;
     if(ball.mode==='loose'){ const k=gkOf(t); const own=L(1-t,ball.x,ball.y); if(own.d<sixLine(own.lx)+0.2&&own.d>-0.3) chaser[t]=k; else chaser[t]=nearest(t,ball.x,ball.y,true,ctrl&&ctrl.team===t?ctrl:null); }

@@ -2,6 +2,10 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.28.2 – 2026-11-07 – Frikast ved 9-meter-linjen, fløjen bliver i kæden
+- Frikast tæt på mål (inden for ca. 12 m) tages nu ved den stiplede 9-meter-linje: skytten går derud, angriberne går uden for 9 m, og forsvarerne går 3 m væk. Rettet en fejl fra v0.28.1, hvor skytten blev stående, hvor frikastet blev dømt
+- Fløjen i forsvaret træder ikke længere ud mod en bagspiller med bolden (så han løb frem uden grund) – kun mod en angriber ude i hjørnet. Ellers er det halvspilleren, der træder ud
+
 ## v0.28.1 – 2026-11-07 – Ingen spillere skubbet meters væk i tacklinger
 - Årsag 1: ved frikast inden for 9 m blev angriberen flyttet direkte ud til 9-meter-stregen (2-3 m) i samme øjeblik. Nu går han selv hen til stedet, og frikastet venter, til han er der
 - Årsag 2: under dødbold blev kropskontakten ved med at virke – forsvareren, der lige havde tacklet, gik ind i angriberen og skubbede ham 2-3 m hen ad gulvet. Under dødbold er der nu ingen skubben
