@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1422">
-<title>Håndbold v0.28.0</title>
+<title>Håndbold v0.28.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -202,7 +202,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.28.0';
+const VERSION='0.28.1';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -688,8 +688,9 @@ function restart(kind,team,x,y,text,who){
   const b=ball; let p;
   if(kind==='goalthrow'){ p=gkOf(team); }
   else if(kind==='kickoff'){ p=players.find(q=>q.team===team&&q.role==='PV'); p.x=10; p.y=20; kickoffTeam=team; }
-  else { p=who||nearest(team,x,y); p.x=clamp(x,0,20); p.y=clamp(y,0.5,39.5); }
-  for(const q of players){ q.tack=null; q.throwIn=false; q.offer=null; q.kick=false; q.gt=false; q.seven=false; }
+  else { p=who||nearest(team,x,y); const sx=clamp(x,0,20), sy=clamp(y,0.5,39.5);
+    if(kind==='free'&&Math.hypot(sx-p.x,sy-p.y)>0.4){ p.freeSpot={x:sx,y:sy}; } else { p.x=sx; p.y=sy; } }   // frikast: han går selv hen til stedet i stedet for at blive flyttet
+  for(const q of players){ q.tack=null; q.throwIn=false; q.offer=null; q.kick=false; q.gt=false; q.seven=false; q.freeSpot=null; }
   p.vx=p.vy=0; p.shot=null; p.down=0; p.z=0;
   b.passer=null; if(kind!=='free'||p.team!==poss){ passive=null; atkT=0; } give(p); passCount=0; trans=kind==='goalthrow'?newTrans(team):null; celebTeam=-1; celebBy=null;
   if(kind==='throwin'){ // indkast: låst på sidelinjen, 2-3 medspillere tilbyder sig
@@ -705,7 +706,7 @@ function restart(kind,team,x,y,text,who){
     for(const q of players){ if(q===p||q.role==='GK') continue; const o=pushOut(team,q.x,q.y,9.3); q.x=o.x; q.y=o.y; q.vx=q.vy=0; }
   }
   if(kind==='kickoff'){ p.throwIn=true; p.kick=true; p.aiT=team===0?0.3+rnd()*0.3:0.15+rnd()*0.2; } // hurtigt opgiverkast // står på midten, indtil han har kastet op
-  phase='dead'; phaseT=kind==='kickoff'?0.15:kind==='goalthrow'?0.25:0.9; // målkast går hurtigt i gang // ingen kunstig pause: hurtigt opgiverkast er muligt
+  phase='dead'; phaseT=kind==='kickoff'?0.15:kind==='goalthrow'?0.25:0.9; if(p.freeSpot) phaseT=Math.max(phaseT,Math.hypot(p.freeSpot.x-p.x,p.freeSpot.y-p.y)/4.2+0.35); // målkast går hurtigt i gang // ingen kunstig pause: hurtigt opgiverkast er muligt
   if(text) msg(text);
 }
 
@@ -1271,7 +1272,9 @@ function updPlayer(p,dt,att){
       p.vx=dvx; p.vy*=0.6;
     } else {
       if(ball.holder===p&&p!==ctrl) aiCarrier(p,dt);
-      const tg=targetFor(p,att);
+      let tg=targetFor(p,att);
+      if(phase==='dead'&&ball.holder&&ball.holder.team!==p.team&&p.role!=='GK'&&!ball.holder.seven){ const h=ball.holder.freeSpot||ball.holder, dx=tg.x-h.x, dy=tg.y-h.y, d=Math.hypot(dx,dy); // frikast: 3 meters afstand
+        if(d<3){ const n=d||1, ux=d>0.01?dx/n:(10-h.x>0?1:-1), uy=d>0.01?dy/n:0; tg={x:h.x+ux*3,y:h.y+uy*3}; } }
       if(p.role!=='GK'&&chaser[p.team]!==p&&ball.holder!==p&&!p.offer){ // hold afstand til holdkammerater, så de ikke klumper
         for(const o of players){ if(o===p||o.team!==p.team||o.role==='GK') continue; const ox=tg.x-o.x, oy=tg.y-o.y, od=Math.hypot(ox,oy);
           if(od<2.4&&od>0.01){ tg.x+=ox/od*(2.4-od)*0.6; tg.y+=oy/od*(2.4-od)*0.6; } }
@@ -1279,7 +1282,9 @@ function updPlayer(p,dt,att){
       const dx=tg.x-p.x, dy=tg.y-p.y, d=Math.hypot(dx,dy);
       if(d>0.05){ const sp=Math.min(vmax*(d>3?1:0.85),d*(d>3?3:2.6)); dvx=dx/d*sp; dvy=dy/d*sp; }
     }
-    if((phase==='dead'||p.throwIn||p.seven)&&ball.holder===p){ dvx=dvy=0; p.vx*=0.5; p.vy*=0.5; }
+    if(p.freeSpot&&ball.holder===p&&phase==='dead'){ const fx=p.freeSpot.x-p.x, fy=p.freeSpot.y-p.y, fd=Math.hypot(fx,fy);   // går hen til frikastet
+      if(fd<0.06){ p.x=p.freeSpot.x; p.y=p.freeSpot.y; p.freeSpot=null; dvx=dvy=0; p.vx=p.vy=0; } else { const v=Math.min(4.2,fd*5); dvx=fx/fd*v; dvy=fy/fd*v; } }
+    else if((phase==='dead'||p.throwIn||p.seven)&&ball.holder===p){ dvx=dvy=0; p.vx*=0.5; p.vy*=0.5; }
     let acc=p.role==='GK'?30:24; { const vs=Math.hypot(p.vx,p.vy), ds=Math.hypot(dvx,dvy), dot=vs>0.1&&ds>0.1?(p.vx*dvx+p.vy*dvy)/(vs*ds):1;
       if(p.role!=='GK'){ if(vs<2&&ds>3) acc=17; else if(ds<vs-1.5&&dot>0.5) acc=17; }          // vægt: tager et par skridt at komme op i fart og at bremse
       if(p.role!=='GK'&&vs>3.5&&ds>0.5&&dot<0.3) acc=dot<-0.3?6.5:9; if(p===ctrl&&!AUTO) acc*=1.1; } // din spiller er 10 % kvikkere // retningsskift i fart koster et øjeblik
@@ -1288,6 +1293,7 @@ function updPlayer(p,dt,att){
     if(ball.holder===p&&p.role!=='GK'){ let touch=null;                          // kropskontakt: forsvareren spærrer vejen, angriberen glider langs ham
       for(const o of players){ if(o.team===p.team||o.role==='GK'||o.down>0||o.fooled) continue; const dx=p.x-o.x, dy=p.y-o.y, d=Math.hypot(dx,dy);
         if(d<0.58&&d>0.001){ const nx=dx/d, ny=dy/d, ov=0.58-d, w=clamp(0.55+(rv(o,'styrke')-rv(p,'styrke'))*0.05+(rv(o,'forsvar')-5)*0.02,0.25,0.85);
+          if(phase!=='play') continue;                                              // dødbold: ingen skubben – forsvareren går selv 3 m væk
           p.x+=nx*ov*w; p.y+=ny*ov*w; o.x-=nx*ov*(1-w)*0.6; o.y-=ny*ov*(1-w)*0.6;
           const vn=p.vx*nx+p.vy*ny; if(vn<0){ p.vx-=vn*nx*0.85; p.vy-=vn*ny*0.85; } touch=o; } }
       if(touch){ p.contact={o:touch,t:time}; p.vx*=0.97; p.vy*=0.97; }

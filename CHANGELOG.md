@@ -2,6 +2,11 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.28.1 – 2026-11-07 – Ingen spillere skubbet meters væk i tacklinger
+- Årsag 1: ved frikast inden for 9 m blev angriberen flyttet direkte ud til 9-meter-stregen (2-3 m) i samme øjeblik. Nu går han selv hen til stedet, og frikastet venter, til han er der
+- Årsag 2: under dødbold blev kropskontakten ved med at virke – forsvareren, der lige havde tacklet, gik ind i angriberen og skubbede ham 2-3 m hen ad gulvet. Under dødbold er der nu ingen skubben
+- Forsvarerne går 3 m væk fra frikastskytten, som reglerne siger
+
 ## v0.28.0 – 2026-11-06 – Smarte skud og fløjene bliver i forsvarskæden
 - Smarte skud (kan slås fra under Indstillinger → Smarte skud): du vælger stadig skudtype med tryk og placering med joysticket, men skuddet får den teknik, situationen kræver
   - Lavt med en forsvarer foran: hofteskud forbi blokken (sjældnere blokeret)
