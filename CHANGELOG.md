@@ -2,6 +2,11 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.28.4 – 2026-11-07 – Frikast skal kastes
+- Skytten ved frikast må ikke løbe med bolden: han står stille, indtil han har spillet bolden eller skudt
+- Computeren spiller næsten altid frikastet til en medspiller og skyder kun direkte på mål, når der er under 5 sekunder tilbage af halvlegen (og han er inden for skudafstand)
+- Skud direkte fra frikast er stående skud (en fod i gulvet)
+
 ## v0.28.3 – 2026-11-07 – Kastehånd: landshold og Champions League gennemgået
 - Gennemgang af EM- og CL-trupperne: højre back og højre fløj er venstrehåndede, alle andre højrehåndede, med kendte undtagelser
 - Rettet til venstrehåndede: Nedim Remili (Veszprém, playmaker), Kent Robin Tønnesen (GOG, venstre back), Magnus Abelvik Rød (Szeged)

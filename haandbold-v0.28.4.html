@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1422">
-<title>Håndbold v0.28.3</title>
+<title>Håndbold v0.28.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -202,7 +202,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.28.3';
+const VERSION='0.28.4';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -750,7 +750,7 @@ function chooseShot(p){
 function startShot(p,ai,forceType){
   if(p.shot||p.z>0.02||ball.holder!==p||p.throwIn||(p.feint&&p.feint.type==='side'&&p.feint.t<0.3)) return;
   if(p.feint) p.feint=null;
-  const type=forceType||chooseShot(p);
+  const type=p.freeKick?'stand':(forceType||chooseShot(p));   // frikast: stående skud
   const tg=type==='wing'?W(p.team,10,1.4):W(p.team,10,0.6); let dx=tg.x-p.x, dy=tg.y-p.y; const n=Math.hypot(dx,dy)||1;
   p.shot={type,t:0,released:false,ai:!!ai,dx:dx/n,dy:dy/n,manual:forceType==='wing'&&!ai};
   p.inAreaOk=true; p.face=dx>=0?1:-1;
@@ -1087,6 +1087,10 @@ function aiCarrier(p,dt){
   if(phase!=='play'||p.shot) return;
   if(ctrl&&ctrl.hold&&ctrl.hold.c===p) return; // holdt fast: kan ikke spille bolden af
   const l=L(p.team,p.x,p.y);
+  if(p.freeKick){ // frikast: skytten må ikke løbe med bolden – han spiller til en medspiller, og kun når tiden er ved at løbe ud, skyder han direkte
+    p.fkT=(p.fkT||0)+dt; if(p.fkT<0.25+rnd()*0.02) return;
+    if(clock<5&&l.d<14){ startShot(p,true,'stand'); return; }
+    const q=bestTarget(p); if(q){ doPass(p,q); return; } if(p.fkT>1.2){ startShot(p,true,'stand'); } return; }
   if(p.seven){ p.aiT-=dt;
     if(p.sevenFake&&p.aiT<0.45&&!p.feint){ p.sevenFake=false; p.feint={type:'shot',t:0,dir:0,done:true,tired:1}; gkOf(1-p.team).faked=rnd()<0.45?time:0; } // skudfinte: målmanden kan bide på
     if(p.aiT<=0&&!p.feint) startShot(p,true,'stand'); return; }
@@ -1291,7 +1295,7 @@ function updPlayer(p,dt,att){
     }
     if(p.freeSpot&&ball.holder===p&&phase==='dead'){ const fx=p.freeSpot.x-p.x, fy=p.freeSpot.y-p.y, fd=Math.hypot(fx,fy);   // går hen til frikastet
       if(fd<0.06){ p.x=p.freeSpot.x; p.y=p.freeSpot.y; p.freeSpot=null; dvx=dvy=0; p.vx=p.vy=0; } else { const v=Math.min(4.2,fd*5); dvx=fx/fd*v; dvy=fy/fd*v; } }
-    else if((phase==='dead'||p.throwIn||p.seven)&&ball.holder===p){ dvx=dvy=0; p.vx*=0.5; p.vy*=0.5; }
+    else if((phase==='dead'||p.throwIn||p.seven||p.freeKick)&&ball.holder===p){ dvx=dvy=0; p.vx*=0.5; p.vy*=0.5; }
     let acc=p.role==='GK'?30:24; { const vs=Math.hypot(p.vx,p.vy), ds=Math.hypot(dvx,dvy), dot=vs>0.1&&ds>0.1?(p.vx*dvx+p.vy*dvy)/(vs*ds):1;
       if(p.role!=='GK'){ if(vs<2&&ds>3) acc=17; else if(ds<vs-1.5&&dot>0.5) acc=17; }          // vægt: tager et par skridt at komme op i fart og at bremse
       if(p.role!=='GK'&&vs>3.5&&ds>0.5&&dot<0.3) acc=dot<-0.3?6.5:9; if(p===ctrl&&!AUTO) acc*=1.1; } // din spiller er 10 % kvikkere // retningsskift i fart koster et øjeblik
@@ -1506,6 +1510,7 @@ function step(dt){
       const w=pushOut(1-h.team,h.x,h.y,0.1); restart('free',1-h.team,w.x,w.y,'Passivt spil – bolden til modstanderen'); } }
   if(phase==='goal'){ phaseT-=dt; if(phaseT<=0&&restartFn){ const f=restartFn; restartFn=null; f(); } }
   if(clock<=0&&phase==='play'&&ball.mode!=='shot'){ clock=0; if(half===1) halfTime(); else endMatch(); return; }
+  for(const q of players) if(q.freeKick&&(ball.holder!==q||q.shot&&q.shot.released)&&phase==='play'){ q.freeKick=false; q.fkT=0; }
   if(phase==='half'){ phaseT-=dt; if(phaseT<=0){ secondHalf(); return; } }
   if(phase==='half'||phase==='over'){ // pause/slut: spillet står stille, spillerne går i stå
     for(const p of players){ const k=Math.pow(0.02,dt); p.vx*=k; p.vy*=k; p.x+=p.vx*dt; p.y+=p.vy*dt; p.run*=k; p.shot=null; p.tack=null; p.feint=null; p.z=0; }
