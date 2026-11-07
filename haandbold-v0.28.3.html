@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b1422">
-<title>Håndbold v0.28.2</title>
+<title>Håndbold v0.28.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap">
 <style>
@@ -202,7 +202,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-size:13px;letter-spacin
 (()=>{
 'use strict';
 /* ================= VERSION ================= */
-const VERSION='0.28.2';
+const VERSION='0.28.3';
 // Releaselog: se CHANGELOG.md
 
 /* ================= KONSTANTER ================= */
@@ -319,7 +319,7 @@ const EM_TEAMS=[
    kendte spillere. Værdier (1-10) er skøn. Trøjer: [trøje, kant, shorts, nummer] i klubbens farver (tilnærmet). */
 const CL_TEAMS=[
  {c:'VES',n:'One Veszprém',tier:9,home:['#d6001c','#ffffff','#d6001c','#ffffff'],away:['#ffffff','#d6001c','#ffffff','#d6001c'],
-  p:'G 12 E. Nielsen*^|G 1 Appelgren|LW 9 Descat*^|LW 66 Gáncs-Pető|RW 91 Imre|RW 32 Y. Lenne^|LB 15 Hesham^|LB 39 Y. Elderaa|LB 2 Thiagus Petrus|CB 25 Cindrić*|CB 29 Remili*^|RB 5 I. Martinović*^|RB 13 Barna|P 42 L. Jørgensen|P 46 Pechmalbec^|P 80 Mesilhy'},
+  p:'G 12 E. Nielsen*^|G 1 Appelgren|LW 9 Descat*^|LW 66 Gáncs-Pető|RW 91 Imre|RW 32 Y. Lenne^|LB 15 Hesham^|LB 39 Y. Elderaa|LB 2 Thiagus Petrus|CB 25 Cindrić*|CB 29 Remili*^!|RB 5 I. Martinović*^|RB 13 Barna|P 42 L. Jørgensen|P 46 Pechmalbec^|P 80 Mesilhy'},
  {c:'FÜC',n:'Füchse Berlin',tier:9,home:['#1f8f3a','#ffffff','#1f8f3a','#ffffff'],away:['#ffffff','#1f8f3a','#ffffff','#1f8f3a'],
   p:'G 12 Palicka*^|G 1 L. Ludwig|LW 20 Freihöfer*^|LW 14 Ariño|RW 34 av Teigum*^|RW 6 Prantner|LB 25 Langhoff*^|LB 3 Wiede|LB 30 Zaepfel|CB 15 Grøndahl*^|CB 17 Lichtlein|RB 19 Gidsel*^@190|RB 9 Simak|P 93 Marsenić*^|P 5 Darj*'},
  {c:'POR',n:'FC Porto',tier:7,home:['#1c4fa0','#ffffff','#1c4fa0','#ffffff'],away:['#ffffff','#1c4fa0','#1c4fa0','#1c4fa0'],
@@ -345,9 +345,9 @@ const CL_TEAMS=[
  {c:'SCP',n:'Sporting CP',tier:8,home:['#00804a','#ffffff','#111111','#ffffff'],away:['#ffffff','#00804a','#ffffff','#00804a'],
   p:'G 92 Mohamed Aly*^|G 20 A. Kristensen|LW 17 Þorkelsson*^|LW 22 Branquinho|RW 5 C. Álvarez^|RW 19 Gassama|LB 13 Salvador*^|LB 8 Gurri|LB 7 Suárez|CB 79 Martim Costa*^|CB 26 F. Monteiro|RB 6 Francisco Costa*^|RB 23 Manojlović|P 44 Moga*^|P 93 Romero'},
  {c:'SZE',n:'OTP Bank-Pick Szeged',tier:8,home:['#0057a8','#ffffff','#0057a8','#ffffff'],away:['#ffffff','#0057a8','#ffffff','#0057a8'],
-  p:'G 80 Portner*^|G 16 Mikler|LW 18 Jelinić*^|LW 25 Frimmel|RW 24 Šoštarić*^|RW 93 Szilágyi|LB 51 Mačkovšek*|LB 77 M. Rød*^|LB 44 Horiha|CB 34 Kukić^|CB 7 Lukács|RB 11 Sandell*^|RB 97 Matić|P 27 Bánhidi|P 45 Rosta^|P 31 Toto'},
+  p:'G 80 Portner*^|G 16 Mikler|LW 18 Jelinić*^|LW 25 Frimmel|RW 24 Šoštarić*^|RW 93 Szilágyi|LB 51 Mačkovšek*|LB 77 M. Rød*^!|LB 44 Horiha|CB 34 Kukić^|CB 7 Lukács|RB 11 Sandell*^|RB 97 Matić|P 27 Bánhidi|P 45 Rosta^|P 31 Toto'},
  {c:'GOG',n:'GOG',tier:7,home:['#f5c400','#13294b','#13294b','#13294b'],away:['#13294b','#f5c400','#13294b','#f5c400'],
-  p:'G 1 K. Møller*^|G 12 F. Wolff|LW 17 Dalby|LW 21 Kildelund|RW 33 I. Persson*^|RW 34 Münster-Hansen|CB 78 Ó. Mittún*^|LB 8 M. Zehnder*^|LB 7 Vilhelmsen|RB 29 H. Lykke*^|CB 3 N. Pedersen|RB 2 E. K. Bak|RB 24 E. Sørensen|P 4 Magaard*^|P 13 L. Balstad|LB 79 Tonnesen'},
+  p:'G 1 K. Møller*^|G 12 F. Wolff|LW 17 Dalby|LW 21 Kildelund|RW 33 I. Persson*^|RW 34 Münster-Hansen|CB 78 Ó. Mittún*^|LB 8 M. Zehnder*^|LB 7 Vilhelmsen|RB 29 H. Lykke*^|CB 3 N. Pedersen|RB 2 E. K. Bak|RB 24 E. Sørensen|P 4 Magaard*^|P 13 L. Balstad|LB 79 Tonnesen!'},
  {c:'KRI',n:'IFK Kristianstad',tier:5,home:['#0a4ea2','#ffffff','#ffffff','#ffffff'],away:['#ffffff','#0a4ea2','#0a4ea2','#0a4ea2'],
   p:'G 1 Skoog^|G 12 Oredsson|LW 20 Frend Öfors*^|LW 18 L. Kjellman|RW 14 Leyman^|RW 51 Barnestam|LB 13 Ó. Guðmundsson*|LB 22 Aðalsteinsson^@192|LB 6 Henningsson|CB 9 A. Hallbäck^|CB 24 Bjarnason|RB 77 Erlingsson|RB 28 Ivarsson|P 17 Petrović|P 10 Höghielm^@186|RB 49 Biel Nielsen*^@185'},
  {c:'BAR',n:'Barça',tier:10,home:['#a50044','#004d98','#004d98','#f6c400'],away:['#f6c400','#a50044','#a50044','#a50044'],

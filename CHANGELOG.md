@@ -2,6 +2,11 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.28.3 – 2026-11-07 – Kastehånd: landshold og Champions League gennemgået
+- Gennemgang af EM- og CL-trupperne: højre back og højre fløj er venstrehåndede, alle andre højrehåndede, med kendte undtagelser
+- Rettet til venstrehåndede: Nedim Remili (Veszprém, playmaker), Kent Robin Tønnesen (GOG, venstre back), Magnus Abelvik Rød (Szeged)
+- Bekræftet: Gidsel, Hoxer, Kirkeløkke, Alex Dujshebaev, Richardson, Janc, Šoštarić m.fl. er venstrehåndede; Lasse Andersson er højrehåndet
+
 ## v0.28.2 – 2026-11-07 – Frikast ved 9-meter-linjen, fløjen bliver i kæden
 - Frikast tæt på mål (inden for ca. 12 m) tages nu ved den stiplede 9-meter-linje: skytten går derud, angriberne går uden for 9 m, og forsvarerne går 3 m væk. Rettet en fejl fra v0.28.1, hvor skytten blev stående, hvor frikastet blev dømt
 - Fløjen i forsvaret træder ikke længere ud mod en bagspiller med bolden (så han løb frem uden grund) – kun mod en angriber ude i hjørnet. Ellers er det halvspilleren, der træder ud
