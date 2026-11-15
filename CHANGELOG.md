@@ -2,6 +2,11 @@
 
 Releaseloggen findes kun her. Ved ny version: opdater `VERSION` i `index.html`, versionen i `<title>` og filnavnet (`haandbold-vX.Y.Z.html`).
 
+## v0.29.0 – 2026-11-15 – Rigtige lyde, synlig skudkraft og skærmede skud
+- Lyd (kan slås fra under Indstillinger → Lyd), kun rigtige optagelser: bolden mod gulvet ved hop, gulvskud og hopafleveringer, bolden mod målmanden ved redninger, metalklang ved stolpe og overligger, publikum der jubler ved mål (størst for dit hold), ved dine redninger, ved halvleg og ved sejr
+- Synlig skudkraft: hårde skud trækker en lys stribe efter sig – jo hårdere, jo længere og tydeligere. Forskellen mellem stærke og svage skytter er gjort lidt større
+- Skærmede skud: står der en spiller i skudlinjen (af begge hold, men ikke forsvareren lige foran skytten), ser målmanden bolden sent og redder sjældnere. Ca. 5 skud pr. kamp
+
 ## v0.28.4 – 2026-11-07 – Frikast skal kastes
 - Skytten ved frikast må ikke løbe med bolden: han står stille, indtil han har spillet bolden eller skudt
 - Computeren spiller næsten altid frikastet til en medspiller og skyder kun direkte på mål, når der er under 5 sekunder tilbage af halvlegen (og han er inden for skudafstand)

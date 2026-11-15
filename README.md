@@ -47,3 +47,8 @@ Mappen `demo/` indeholder testvideoer og demosider af idéer, før de blev indf�
 ## Udvikling
 Alt ligger i én fil uden build-trin. Ved ny version: opdater `VERSION` og `<title>` i `index.html`, gem en kopi som `haandbold-vX.Y.Z.html` og tilføj en sektion i `CHANGELOG.md`.
 Tilføj `#auto` til adressen for at se computer mod computer.
+
+## Lyde
+Kun rigtige optagelser, lagt som base64 MP3 direkte i siden.
+- Bold mod gulv/målmand og metalklang: Kenney Impact Sounds (CC0, kenney.nl)
+- Publikum: WebbFilmsUK, Freesound (CC BY 4.0)
